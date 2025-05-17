@@ -179,6 +179,8 @@ function App() {
     console.log(message, "message---");
 
     // 如果还没有对话，创建一个新对话
+    console.log(currentConversationId,'currentConversationId---');
+    
     if (!currentConversationId) {
       createNewConversation();
     }
@@ -190,12 +192,13 @@ function App() {
         sender: "ai",
         type: "html",
       };
+      console.log(messages,'messages---xxx');
       
       setMessages((prev) => [...prev, aiResponse]);
       
       // 方法3: 使用fetch API和ReadableStream处理流式响应（推荐）
       try {
-        const response = await fetch('http://172.16.4.127:5000/', {
+        const response = await fetch('http://172.16.4.127:5000/polyPost', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -618,7 +621,7 @@ function App() {
                   {isTyping && (
                     <div className="max-w-3xl mx-auto">
                       <div className="ai-message mb-6 rounded-tl-lg rounded-b-lg bg-gradient-to-br from-deep-black/90 to-bg-dark/90 backdrop-blur-sm p-4 mr-8">
-                        <div className="flex items-center mb-2">
+                        {/* <div className="flex items-center mb-2">
                           <div className="w-8 h-8 relative mr-4">
                             <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/40 to-night-purple/40 rounded-full opacity-70 animate-pulse"></div>
                             <div className="absolute inset-0.5 bg-deep-black rounded-full flex items-center justify-center">
@@ -630,7 +633,7 @@ function App() {
                           <p className="text-sm text-text-secondary">
                             PolyAgent
                           </p>
-                        </div>
+                        </div> */}
                         <div className="flex space-x-2">
                           <span
                             className="w-2 h-2 bg-neon-cyan/50 rounded-full animate-bounce"
