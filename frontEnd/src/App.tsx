@@ -195,7 +195,7 @@ function App() {
       
       // 方法3: 使用fetch API和ReadableStream处理流式响应（推荐）
       try {
-        const response = await fetch('https://your-api-endpoint/stream-chat', {
+        const response = await fetch('http://172.16.4.127:5000/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -241,32 +241,32 @@ function App() {
         console.error("流式响应处理错误:", streamError);
         
         // 如果流处理失败，尝试使用axios的方法
-        console.log("尝试使用axios备选方案...");
-        await axios({
-          method: 'post',
-          url: 'https://your-api-endpoint/chat',
-          data: {
-            message: message
-          },
-          responseType: 'text',
-          onDownloadProgress: (progressEvent) => {
-            if (progressEvent.event.target instanceof XMLHttpRequest) {
-              const xhr = progressEvent.event.target;
-              const responseText = xhr.responseText;
+        // console.log("尝试使用axios备选方案...");
+        // await axios({
+        //   method: 'post',
+        //   url: 'https://your-api-endpoint/chat',
+        //   data: {
+        //     message: message
+        //   },
+        //   responseType: 'text',
+        //   onDownloadProgress: (progressEvent) => {
+        //     if (progressEvent.event.target instanceof XMLHttpRequest) {
+        //       const xhr = progressEvent.event.target;
+        //       const responseText = xhr.responseText;
               
-              setMessages((prev) => {
-                const updatedMessages = [...prev];
-                const lastMessage = updatedMessages[updatedMessages.length - 1];
+        //       setMessages((prev) => {
+        //         const updatedMessages = [...prev];
+        //         const lastMessage = updatedMessages[updatedMessages.length - 1];
                 
-                if (lastMessage && lastMessage.sender === "ai") {
-                  lastMessage.text = responseText;
-                }
+        //         if (lastMessage && lastMessage.sender === "ai") {
+        //           lastMessage.text = responseText;
+        //         }
                 
-                return updatedMessages;
-              });
-            }
-          }
-        });
+        //         return updatedMessages;
+        //       });
+        //     }
+        //   }
+        // });
       }
       
       /* 方法2: 使用EventSource来处理SSE流
