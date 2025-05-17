@@ -374,7 +374,7 @@ function App() {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-          <div className="min-h-screen text-text-primary relative noise-bg">
+          <div className="app-container min-h-screen text-text-primary relative noise-bg">
             {/* 粒子背景 */}
             <div className="particles" id="particles"></div>
 
@@ -500,7 +500,7 @@ function App() {
               <main className="flex-1 flex flex-col relative">
                 {/* 聊天容器 */}
                 <div
-                  className="flex-1 overflow-y-auto px-4 py-6 space-y-6"
+                  className="agent-container flex-1 overflow-y-auto px-4 py-6 space-y-6"
                   ref={chatContainerRef}
                 >
                   {/* 示例消息 */}
@@ -651,7 +651,7 @@ function App() {
                 </div>
 
                 {/* 输入区域 */}
-                <div className="border-t border-night-purple/20 bg-deep-black/50 backdrop-blur-md p-4">
+                <div className="user-input-container border-t border-night-purple/20 bg-deep-black/50 backdrop-blur-md p-4">
                   <div className="mx-auto relative">
                     <div className="relative gradient-border">
                       <div className="flex items-center bg-deep-black rounded-md overflow-hidden input-active">
