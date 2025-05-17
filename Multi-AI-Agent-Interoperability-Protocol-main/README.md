@@ -1,6 +1,7 @@
 # Multi-AI-Agent-Interoperability-Protocol
 Multi AI Agent Interoperability Protocol for the Next-generation Internet of AI Agents
 
+
 ## ✨ Core functions
 | **function characteristics**        |           **technical realization**            |
 |-------------------------------------|------------------------------------------------|
@@ -21,16 +22,15 @@ This project can analyze market trends, calculate market sentiment by studying c
 
 
 ## 🎯 Quick start
-1 Start the local test network
-2 Start AI agent cluster
-3 Deploy intelligent trading strategies
+- 1 Start the local test network  
+- 2 Start AI agent cluster  
+- 3 Deploy intelligent trading strategies
 
 
 ##  🎯  Acknowledgement
-# ETH Beijing's strong support for project development
+ETH Beijing's strong support for project development
+# 🌍  Community Co construction
 
-
-🌍  Community Co construction
 We follow the Open Collective governance model and welcome participation through the following methods:
 
 🛠️  Develop new functional modules
