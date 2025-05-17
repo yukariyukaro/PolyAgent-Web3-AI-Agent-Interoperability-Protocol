@@ -180,7 +180,7 @@ function App() {
     // setTimeout(() => {
     //   setIsTyping(false);
     //   let response = "";
-
+    //
     //   if (
     //     message.toLowerCase().includes("hello") ||
     //     message.toLowerCase().includes("hi") ||
