@@ -12,7 +12,6 @@ model = ModelFactory.create(
     model_platform=ModelPlatformType.OPENAI,
     model_type=ModelType.GPT_4_1,
     url="https://api.openai.com/v1/",
-    api_key=""
 )
 
 agent = ChatAgent(
