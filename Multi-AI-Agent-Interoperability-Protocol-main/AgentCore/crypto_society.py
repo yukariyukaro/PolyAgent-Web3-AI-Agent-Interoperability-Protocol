@@ -14,7 +14,7 @@ model = ModelFactory.create(
     model_platform=ModelPlatformType.OPENAI,
     model_type=ModelType.GPT_4_1,
     url="https://api.openai.com/v1/",
-
+)
 
 workforce = Workforce(description="制定加密货币交易策略组",new_worker_agent_kwargs={'model':model},coordinator_agent_kwargs={'model':model},task_agent_kwargs={'model':model})
 
