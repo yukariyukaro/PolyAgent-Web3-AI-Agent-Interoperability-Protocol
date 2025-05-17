@@ -13,6 +13,10 @@ import {
 
 // RainbowKit 相关导入
 import "@rainbow-me/rainbowkit/styles.css";
+
+// 添加自定义样式
+import "./ai-response.css";
+
 import {
   getDefaultConfig,
   RainbowKitProvider,
@@ -68,6 +72,7 @@ function App() {
   const [currentConversationId, setCurrentConversationId] = useState<
     string | null
   >(null);
+  const [showAction, setShowAction] = useState(false);
 
   // 从本地存储加载对话
   useEffect(() => {
@@ -176,11 +181,12 @@ function App() {
   // 响应消息
   const respondToMessage = async (message: string) => {
     setIsTyping(true);
+    setShowAction(false);
     console.log(message, "message---");
 
     // 如果还没有对话，创建一个新对话
-    console.log(currentConversationId,'currentConversationId---');
-    
+    console.log(currentConversationId, "currentConversationId---");
+
     if (!currentConversationId) {
       createNewConversation();
     }
@@ -192,57 +198,62 @@ function App() {
         sender: "ai",
         type: "html",
       };
-      console.log(messages,'messages---xxx');
-      
+      console.log(messages, "messages---xxx");
+
       setMessages((prev) => [...prev, aiResponse]);
-      
+
       // 方法3: 使用fetch API和ReadableStream处理流式响应（推荐）
       try {
-        const response = await fetch('http://172.16.4.127:5000/polyPost', {
-          method: 'POST',
+        const response = await fetch("http://172.16.4.127:5000/polyPost", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ message }),
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        
+
         if (!response.body) {
-          throw new Error('ReadableStream not supported');
+          throw new Error("ReadableStream not supported");
         }
-        
+
         // 获取response的ReadableStream
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        let streamText = '';
-        
+        let streamText = "";
+
         // 读取流数据
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          
+
           // 解码二进制数据为文本
           const chunk = decoder.decode(value, { stream: !done });
           streamText += chunk;
-          
+
           // 更新UI上的消息
           setMessages((prev) => {
             const updatedMessages = [...prev];
             const lastMessage = updatedMessages[updatedMessages.length - 1];
-            
+
             if (lastMessage && lastMessage.sender === "ai") {
-              lastMessage.text = streamText;
+              // 确保HTML内容中的换行符被正确处理
+              const formattedText = streamText
+                .replace(/\n/g, "<br>") // 将\n替换为HTML的<br>标签
+                .replace(/\r/g, ""); // 移除可能存在的\r字符
+
+              lastMessage.text = formattedText;
             }
-            
+
             return updatedMessages;
           });
         }
       } catch (streamError) {
         console.error("流式响应处理错误:", streamError);
-        
+
         // 如果流处理失败，尝试使用axios的方法
         // console.log("尝试使用axios备选方案...");
         // await axios({
@@ -256,22 +267,22 @@ function App() {
         //     if (progressEvent.event.target instanceof XMLHttpRequest) {
         //       const xhr = progressEvent.event.target;
         //       const responseText = xhr.responseText;
-              
+
         //       setMessages((prev) => {
         //         const updatedMessages = [...prev];
         //         const lastMessage = updatedMessages[updatedMessages.length - 1];
-                
+
         //         if (lastMessage && lastMessage.sender === "ai") {
         //           lastMessage.text = responseText;
         //         }
-                
+
         //         return updatedMessages;
         //       });
         //     }
         //   }
         // });
       }
-      
+
       /* 方法2: 使用EventSource来处理SSE流
       const eventSource = new EventSource(`https://your-api-endpoint/sse-chat?message=${encodeURIComponent(message)}`);
       
@@ -303,19 +314,21 @@ function App() {
 
       // 请求完成后，确保设置isTyping为false
       setIsTyping(false);
+      setShowAction(true);
     } catch (error) {
       console.error("请求错误:", error);
       setIsTyping(false);
-      
+
       // 显示错误消息
       setMessages((prev) => {
         const updatedMessages = [...prev];
         const lastMessage = updatedMessages[updatedMessages.length - 1];
-        
+
         if (lastMessage && lastMessage.sender === "ai") {
-          lastMessage.text = "<p class='text-red-500'>抱歉，发生了一个错误，请重试。</p>";
+          lastMessage.text =
+            "<p class='text-red-500 whitespace-pre-wrap'>抱歉，发生了一个错误，请重试。</p>";
         }
-        
+
         return updatedMessages;
       });
     }
@@ -326,23 +339,24 @@ function App() {
     if (inputMessage.trim()) {
       const newMessage = { text: inputMessage, sender: "user" as const };
       setMessages((prev) => [...prev, newMessage]);
-      
+
       // 保存当前输入的消息内容
       const currentMessage = inputMessage;
-      
+
       // 清空输入框
       setInputMessage("");
-      
+
       // 滚动到底部
       setTimeout(() => {
         if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+          chatContainerRef.current.scrollTop =
+            chatContainerRef.current.scrollHeight;
         }
       }, 100);
-      
+
       // 发送消息到服务端并处理响应
       respondToMessage(currentMessage);
-      
+
       // 自动调整输入框高度
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
@@ -503,7 +517,7 @@ function App() {
               <main className="flex-1 flex flex-col relative">
                 {/* 聊天容器 */}
                 <div
-                  className="agent-container flex-1 overflow-y-auto px-4 py-6 space-y-6"
+                  className="agent-container flex-1 overflow-y-auto px-4 py-6 space-y-6 pb-0"
                   ref={chatContainerRef}
                 >
                   {/* 示例消息 */}
@@ -607,6 +621,7 @@ function App() {
                           </div>
                           {msg.type === "html" ? (
                             <div
+                              className="ai-response-content whitespace-pre-wrap"
                               dangerouslySetInnerHTML={{ __html: msg.text }}
                             ></div>
                           ) : (
@@ -649,6 +664,18 @@ function App() {
                           ></span>
                         </div>
                       </div>
+                    </div>
+                  )}
+                </div>
+                <div className="max-w-3xl mx-auto">
+                  {showAction && (
+                    <div className="backdrop-blur-sm p-2 mr-8 flex justify-between">
+                      <button className="px-4 py-2 rounded-md bg-gradient-to-r from-neon-cyan/20 to-night-purple/20 hover:from-neon-cyan/30 hover:to-night-purple/30 border border-neon-cyan/30 text-neon-cyan transition-all">
+                      确认执行
+                      </button>
+                      <button className="px-4 py-2 ml-4 rounded-md bg-deep-black hover:bg-deep-black/70 border border-night-purple/30 text-text-primary hover:text-text-secondary transition-all">
+                      取消执行
+                      </button>
                     </div>
                   )}
                 </div>
