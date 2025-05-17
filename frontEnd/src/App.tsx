@@ -22,6 +22,7 @@ import { WagmiProvider } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, base } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { http } from "wagmi";
+import axios from "axios";
 
 // 配置 RainbowKit
 const config = getDefaultConfig({
@@ -70,12 +71,12 @@ function App() {
 
   // 从本地存储加载对话
   useEffect(() => {
-    const storedConversations = localStorage.getItem("nova-ai-conversations");
+    const storedConversations = localStorage.getItem("poly-ai-conversations");
     if (storedConversations) {
       setConversations(JSON.parse(storedConversations));
     }
 
-    const currentId = localStorage.getItem("nova-ai-current-conversation");
+    const currentId = localStorage.getItem("poly-ai-current-conversation");
     if (currentId) {
       setCurrentConversationId(currentId);
       const currentConversation = JSON.parse(storedConversations || "[]").find(
@@ -91,14 +92,14 @@ function App() {
   useEffect(() => {
     if (conversations.length > 0) {
       localStorage.setItem(
-        "nova-ai-conversations",
+        "poly-ai-conversations",
         JSON.stringify(conversations)
       );
     }
 
     if (currentConversationId) {
       localStorage.setItem(
-        "nova-ai-current-conversation",
+        "poly-ai-current-conversation",
         currentConversationId
       );
 
@@ -109,7 +110,7 @@ function App() {
 
       setConversations(updatedConversations);
       localStorage.setItem(
-        "nova-ai-conversations",
+        "poly-ai-conversations",
         JSON.stringify(updatedConversations)
       );
     }
@@ -173,72 +174,148 @@ function App() {
   };
 
   // 响应消息
-  const respondToMessage = (message: string) => {
+  const respondToMessage = async (message: string) => {
     setIsTyping(true);
     console.log(message, "message---");
 
-    // setTimeout(() => {
-    //   setIsTyping(false);
-    //   let response = "";
-    //
-    //   if (
-    //     message.toLowerCase().includes("hello") ||
-    //     message.toLowerCase().includes("hi") ||
-    //     message.toLowerCase().includes("你好")
-    //   ) {
-    //     response = `<p>你好！很高兴与你交流。我是Nova.AI，一个设计用来提供帮助和回答问题的AI助手。你可以问我几乎任何问题，我会尽力提供有用的信息。有什么我能帮到你的吗？</p>`;
-    //   } else if (
-    //     message.toLowerCase().includes("功能") ||
-    //     message.toLowerCase().includes("能做什么")
-    //   ) {
-    //     response = `
-    //       <p>作为Nova.AI，我能够帮你完成很多任务：</p>
-    //       <ul class="list-disc pl-5 space-y-2 my-3">
-    //           <li>回答一般知识问题</li>
-    //           <li>提供创意写作和内容建议</li>
-    //           <li>解释复杂概念</li>
-    //           <li>帮助编程和代码相关问题</li>
-    //           <li>提供信息总结和分析</li>
-    //           <li>协助学习和研究</li>
-    //       </ul>
-    //       <p>有什么具体需要我帮忙的吗？</p>
-    //     `;
-    //   } else if (
-    //     message.toLowerCase().includes("未来") ||
-    //     message.toLowerCase().includes("ai发展")
-    //   ) {
-    //     response = `
-    //       <p>AI的未来发展可能会朝着这些方向前进：</p>
-    //       <p class="mb-2">🔹 <span class="text-neon-cyan font-medium">多模态融合</span> - AI系统将同时理解和生成文本、图像、声音、视频等多种形式的内容</p>
-    //       <p class="mb-2">🔹 <span class="text-neon-cyan font-medium">自主学习能力增强</span> - AI将能从更少的数据中学习，更接近人类的学习方式</p>
-    //       <p class="mb-2">🔹 <span class="text-neon-cyan font-medium">与现实世界更深度融合</span> - 通过机器人技术和IoT设备，AI将能更直接地与物理世界交互</p>
-    //       <p class="mb-2">🔹 <span class="text-neon-cyan font-medium">提高解释性和透明度</span> - 未来的AI系统将更容易解释其决策过程</p>
-    //       <p class="mb-2">🔹 <span class="text-neon-cyan font-medium">伦理AI设计</span> - 重点将放在构建公平、无偏见、尊重隐私的AI系统上</p>
-    //       <p>你对AI的哪个发展方向最感兴趣？</p>
-    //     `;
-    //   } else {
-    //     response = `
-    //       <p>感谢你的提问。这是一个很有趣的话题！</p>
-    //       <p class="my-2">根据我对"${message}"的理解，这涉及到几个关键点：</p>
-    //       <div class="p-3 my-3 bg-night-purple/10 border-l-2 border-night-purple rounded-r-md">
-    //           <p class="text-sm">每个复杂问题都有其独特的背景和前提条件需要考虑。如果你能提供更多具体信息，我可以给出更有针对性的回答。</p>
-    //       </div>
-    //       <p>我们可以从不同角度来探讨这个问题。你希望我从哪个方面深入分析呢？</p>
-    //     `;
-    //   }
+    // 如果还没有对话，创建一个新对话
+    if (!currentConversationId) {
+      createNewConversation();
+    }
 
-    //   const aiResponse: Message = {
-    //     text: response,
-    //     sender: "ai",
-    //     type: "html",
-    //   };
-    //   setMessages((prev) => [...prev, aiResponse]);
+    try {
+      // 创建新的AI消息但不填充内容
+      const aiResponse: Message = {
+        text: "",
+        sender: "ai",
+        type: "html",
+      };
+      
+      setMessages((prev) => [...prev, aiResponse]);
+      
+      // 方法3: 使用fetch API和ReadableStream处理流式响应（推荐）
+      try {
+        const response = await fetch('https://your-api-endpoint/stream-chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        if (!response.body) {
+          throw new Error('ReadableStream not supported');
+        }
+        
+        // 获取response的ReadableStream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let streamText = '';
+        
+        // 读取流数据
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          // 解码二进制数据为文本
+          const chunk = decoder.decode(value, { stream: !done });
+          streamText += chunk;
+          
+          // 更新UI上的消息
+          setMessages((prev) => {
+            const updatedMessages = [...prev];
+            const lastMessage = updatedMessages[updatedMessages.length - 1];
+            
+            if (lastMessage && lastMessage.sender === "ai") {
+              lastMessage.text = streamText;
+            }
+            
+            return updatedMessages;
+          });
+        }
+      } catch (streamError) {
+        console.error("流式响应处理错误:", streamError);
+        
+        // 如果流处理失败，尝试使用axios的方法
+        console.log("尝试使用axios备选方案...");
+        await axios({
+          method: 'post',
+          url: 'https://your-api-endpoint/chat',
+          data: {
+            message: message
+          },
+          responseType: 'text',
+          onDownloadProgress: (progressEvent) => {
+            if (progressEvent.event.target instanceof XMLHttpRequest) {
+              const xhr = progressEvent.event.target;
+              const responseText = xhr.responseText;
+              
+              setMessages((prev) => {
+                const updatedMessages = [...prev];
+                const lastMessage = updatedMessages[updatedMessages.length - 1];
+                
+                if (lastMessage && lastMessage.sender === "ai") {
+                  lastMessage.text = responseText;
+                }
+                
+                return updatedMessages;
+              });
+            }
+          }
+        });
+      }
+      
+      /* 方法2: 使用EventSource来处理SSE流
+      const eventSource = new EventSource(`https://your-api-endpoint/sse-chat?message=${encodeURIComponent(message)}`);
+      
+      eventSource.onmessage = (event) => {
+        const data = event.data;
+        
+        setMessages((prev) => {
+          const updatedMessages = [...prev];
+          const lastMessage = updatedMessages[updatedMessages.length - 1];
+          
+          if (lastMessage && lastMessage.sender === "ai") {
+            lastMessage.text = (lastMessage.text || "") + data;
+          }
+          
+          return updatedMessages;
+        });
+      };
+      
+      eventSource.addEventListener('done', () => {
+        eventSource.close();
+        setIsTyping(false);
+      });
+      
+      eventSource.onerror = () => {
+        eventSource.close();
+        setIsTyping(false);
+      };
+      */
 
-    //   // 如果还没有对话，创建一个新对话
-    //   if (!currentConversationId) {
-    //     createNewConversation();
-    //   }
-    // }, 2000);
+      // 请求完成后，确保设置isTyping为false
+      setIsTyping(false);
+    } catch (error) {
+      console.error("请求错误:", error);
+      setIsTyping(false);
+      
+      // 显示错误消息
+      setMessages((prev) => {
+        const updatedMessages = [...prev];
+        const lastMessage = updatedMessages[updatedMessages.length - 1];
+        
+        if (lastMessage && lastMessage.sender === "ai") {
+          lastMessage.text = "<p class='text-red-500'>抱歉，发生了一个错误，请重试。</p>";
+        }
+        
+        return updatedMessages;
+      });
+    }
   };
 
   // 发送消息
@@ -246,39 +323,27 @@ function App() {
     if (inputMessage.trim()) {
       const newMessage = { text: inputMessage, sender: "user" as const };
       setMessages((prev) => [...prev, newMessage]);
+      
+      // 保存当前输入的消息内容
+      const currentMessage = inputMessage;
+      
+      // 清空输入框
       setInputMessage("");
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "48px";
-      }
-      const messageTitle =
-        inputMessage.length > 20
-          ? `${inputMessage.substring(0, 20)}...`
-          : inputMessage;
-      // 如果还没有对话，创建一个新对话
-      if (!currentConversationId) {
-        const newId = `conv-${Date.now()}`;
-        // const messageTitle =
-        //   inputMessage.length > 20
-        //     ? `${inputMessage.substring(0, 20)}...`
-        //     : inputMessage;
-
-        const newConversation: Conversation = {
-          id: newId,
-          title: messageTitle,
-          messages: [newMessage],
-          createdAt: Date.now(),
-        };
-
-        setConversations((prev) => [newConversation, ...prev]);
-        setCurrentConversationId(newId);
-      }
-
-      conversations.map((conv) => {
-        if (conv.id === currentConversationId) {
-          conv.title = messageTitle;
+      
+      // 滚动到底部
+      setTimeout(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-      });
-      respondToMessage(inputMessage);
+      }, 100);
+      
+      // 发送消息到服务端并处理响应
+      respondToMessage(currentMessage);
+      
+      // 自动调整输入框高度
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
     }
   };
 
@@ -587,7 +652,7 @@ function App() {
 
                 {/* 输入区域 */}
                 <div className="border-t border-night-purple/20 bg-deep-black/50 backdrop-blur-md p-4">
-                  <div className="max-w-3xl mx-auto relative">
+                  <div className="mx-auto relative">
                     <div className="relative gradient-border">
                       <div className="flex items-center bg-deep-black rounded-md overflow-hidden input-active">
                         <textarea
