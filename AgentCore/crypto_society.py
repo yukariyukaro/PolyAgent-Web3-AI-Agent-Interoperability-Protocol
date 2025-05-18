@@ -20,8 +20,6 @@ import sys
 
 
 def get_crypto_agent_data(uq):
-    print("crypto_agent")
-    # yield "创建模型...\n"
 
     model = ModelFactory.create(
         model_platform=ModelPlatformType.OPENAI,
@@ -29,12 +27,10 @@ def get_crypto_agent_data(uq):
         url="https://api.openai.com/v1/",
         api_key=""
     )
-    # yield "模型创建完成。\n"
 
     workforce = Workforce(description="制定加密货币交易策略组", new_worker_agent_kwargs={'model': model},
                           coordinator_agent_kwargs={'model': model}, task_agent_kwargs={'model': model})
 
-    # yield "初始化 coin_price_agent...\n"
     coin_price_agent = ChatAgent(
         system_message="你是一个加密货币历史价格助手，帮助用户获取指定加密货币在某一特定日期的历史价格数据，并作一个简单的分析。",
         model=model,
@@ -42,7 +38,6 @@ def get_crypto_agent_data(uq):
         tools=[*CoinGeckoToolkit().get_tools()],
         output_language="zh"
     )
-    # yield "coin_news_agent 初始化完成。\n"
 
     coin_news_agent = ChatAgent(
         system_message="你是一个加密货币新闻助手，帮助用户获取指定加密货币相关的新闻数据。并做一个简单分析。",
@@ -99,15 +94,6 @@ def get_crypto_agent_data(uq):
         output_language="zh"
     )
 
-    # yaml_writer_agent = ChatAgent(
-    #     system_message="你的任务是将最终结果保存为一个 YAML 文件。",
-    #     model=model,
-    #     token_limit=32768,
-    #     tools=[*YamlWriterToolkit().get_tools()],
-    #     output_language="zh"
-    # )
-
-    # yield "组装 agent 任务组...\n"
     workforce.add_single_agent_worker(
         "负责搜索加密货币价格",
         worker=coin_price_agent
@@ -118,7 +104,6 @@ def get_crypto_agent_data(uq):
         "负责制定交易策略",
         worker=strategy_generator_agent
     )
-    # yield "任务组准备完成。\n"
 
     content = """
     根据用户的问题，制定相关的交易策略。要严格按照如下步骤：
@@ -137,17 +122,10 @@ def get_crypto_agent_data(uq):
     if uq:
         user_question = uq
 
-    # yield "开始执行任务...\n"
     task = Task(
         content=content.replace("{{user_question}}", user_question),
         id="0",  # id可以是任何标记字符串
     )
-
-
-    # for ch in task.result:
-    #     yield ch
-    #     time.sleep(0.01)
-    # yield "\n全部完成。\n"
 
     q = queue.Queue()
 
@@ -167,17 +145,6 @@ def get_crypto_agent_data(uq):
         if msg is None:
             break
         yield msg
-
-    # f = io.StringIO()
-    # with contextlib.redirect_stdout(f):
-    #     task = workforce.process_task(task)
-    # stdout_output = f.getvalue()
-    # task = workforce.process_task(task)
-    # print("task.result: " + task.result)
-    # yield task.result
-    # print("=====================================================")
-    #
-    # return {"msg": task.result}
 
 
 class StreamToQueue:
