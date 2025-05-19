@@ -671,10 +671,10 @@ function App() {
                   {showAction && (
                     <div className="backdrop-blur-sm p-2 mr-8 flex justify-between">
                       <button className="px-4 py-2 rounded-md bg-gradient-to-r from-neon-cyan/20 to-night-purple/20 hover:from-neon-cyan/30 hover:to-night-purple/30 border border-neon-cyan/30 text-neon-cyan transition-all">
-                      确认执行
+                        Confirm
                       </button>
                       <button className="px-4 py-2 ml-4 rounded-md bg-deep-black hover:bg-deep-black/70 border border-night-purple/30 text-text-primary hover:text-text-secondary transition-all">
-                      取消执行
+                        Cancel
                       </button>
                     </div>
                   )}
@@ -688,7 +688,7 @@ function App() {
                         <textarea
                           ref={textareaRef}
                           rows={1}
-                          placeholder="问点什么..."
+                          placeholder="What do you want to ask..."
                           className="flex-1 resize-none bg-transparent border-none outline-none p-3 pr-12 text-text-primary placeholder-text-secondary/50"
                           style={{ height: "48px", maxHeight: "200px" }}
                           value={inputMessage}
