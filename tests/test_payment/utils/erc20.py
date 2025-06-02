@@ -158,7 +158,6 @@ ERC20_ABI = [
     }
 ]
 
-
 def erc20_approve(
     private_key: str,
     token_contract_address: str,
@@ -257,7 +256,6 @@ def erc20_approve(
         return f"参数错误: {str(ve)}"
     except Exception as e:
         return f"Approve 操作失败: {str(e)}"
-
 
 def erc20_transfer_from(
     private_key: str,
