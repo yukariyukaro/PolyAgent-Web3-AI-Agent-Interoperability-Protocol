@@ -5,8 +5,7 @@ from eth_account import Account
 from web3 import Web3
 import time
 
-from utils.erc20 import erc20_balance, erc20_allowance, ERC20_ABI
-
+from utils.erc20 import erc20_balance, erc20_allowance, erc20_contract_info, erc20_approve, ERC20_ABI
 
  # IoTeX 测试网 RPC 端点
 testnet_rpc = "https://babel-api.testnet.iotex.io"
@@ -23,19 +22,43 @@ print(sender_address)
 print(spender_address)
 print("----------------------------------------------")
 
-balance_info = erc20_balance(
-    token_contract_address=polyagent_token_contract,
-    wallet_address=sender_address,
-    decimals=18
-)
+# allowance_info = erc20_allowance(
+#     token_contract_address=polyagent_token_contract,
+#     owner_address=sender_address,
+#     spender_address=spender_address,
+# )
+
+# contract_info = erc20_contract_info(token_contract_address=polyagent_token_contract)
+
+# approve_info = erc20_approve(
+#     private_key=sender_private_key,
+#     token_contract_address=polyagent_token_contract,
+#     spender_address=spender_address,
+#     amount=2,
+#     decimals=18
+# )
+
+# balance_info = erc20_balance(
+#     token_contract_address=polyagent_token_contract,
+#     wallet_address=sender_address,
+#     decimals=18
+# )
 
 allowance_info = erc20_allowance(
     token_contract_address=polyagent_token_contract,
     owner_address=sender_address,
     spender_address=spender_address,
+    decimals=18
 )
 
-print(json.dumps(balance_info, indent=4))
-print("----------------------------------------------")
+# print(json.dumps(balance_info, indent=4))
+# print("----------------------------------------------")
+# print(json.dumps(allowance_info,indent=4))
+# print("----------------------------------------------")
+# print(json.dumps(contract_info,indent=4))
+# print("----------------------------------------------")
+# print(json.dumps(approve_info,indent=4))
+# print("----------------------------------------------")
+# print(json.dumps(balance_info, indent=4))
+# print("----------------------------------------------")
 print(json.dumps(allowance_info,indent=4))
-print("----------------------------------------------")
