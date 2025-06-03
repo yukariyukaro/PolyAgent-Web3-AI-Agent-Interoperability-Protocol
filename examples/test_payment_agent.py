@@ -1,7 +1,6 @@
 from camel.agents import ChatAgent
 from camel.models import ModelFactory
 from camel.types import ModelPlatformType, ModelType
-from camel.toolkits import HumanToolkit
 from eth_account import Account
 
 import sys
@@ -9,7 +8,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from AgentCore.Tools.iotextoken_toolkit import IotexTokenToolkit
-from camel.toolkits import HumanToolkit
+from AgentCore.Tools.humanloop_toolkit import HumanToolkit
 from camel.societies import RolePlaying
 
 from camel.types import (
@@ -174,12 +173,12 @@ iotex_agent = ChatAgent(
 )
 # print(iotex_agent.tool_dict)
 # response = iotex_agent.step("帮我查询一下ERC20代币的余额。")
-# response = iotex_agent.step("帮我查询一下IOTX主币的余额。")
+response = iotex_agent.step("帮我查询一下IOTX主币的余额。")
 # response = iotex_agent.step("帮我查询一下ERC20代币的余额和IOTX主币的余额。")
 # response = iotex_agent.step("帮我查询一下我对于0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE地址的ERC20代币的授权额度。")
 # response = iotex_agent.step("帮我查询一下合约地址为0xD3286E20Ff71438D9f6969828F7218af4A375e2f的ERC20代币的合约信息。")
 # response = iotex_agent.step("我想给0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE地址授权2个代币，请帮我执行该操作。")
-response = iotex_agent.step("我想给0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE地址转账1个代币，请帮我执行该操作。")
+# response = iotex_agent.step("我想给0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE地址转账1个代币，请帮我执行该操作。")
 print(response.info['tool_calls'][0].result)
 print("----------------------------------------------")
 print(response.msgs[0].content)
