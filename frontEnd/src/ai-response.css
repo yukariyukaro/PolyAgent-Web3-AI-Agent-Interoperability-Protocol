@@ -1,59 +1,948 @@
 /* AI响应内容的样式 */
 .ai-response-content {
-  white-space: pre-wrap; /* 保留换行和空格 */
+	white-space: pre-wrap;
+	/* 保留换行和空格 */
 }
 
 .ai-response-content p {
-  white-space: pre-wrap; /* 确保段落内的文本也保留换行 */
-  margin-bottom: 0.75rem; /* 段落间距 */
+	white-space: pre-wrap;
+	/* 确保段落内的文本也保留换行 */
+	margin-bottom: 0.75rem;
+	/* 段落间距 */
 }
 
 .ai-response-content br {
-  display: block; /* 确保<br>标签正常工作 */
-  content: ""; /* 修复某些浏览器可能的问题 */
-  margin-top: 0.75rem; /* 为换行添加一些间距 */
+	display: block;
+	/* 确保<br>标签正常工作 */
+	content: "";
+	/* 修复某些浏览器可能的问题 */
+	margin-top: 0.75rem;
+	/* 为换行添加一些间距 */
 }
 
 /* 代码块样式 */
 .ai-response-content pre {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 0.375rem;
-  padding: 1rem;
-  overflow-x: auto;
-  margin: 1rem 0;
-  white-space: pre;
+	background-color: rgba(0, 0, 0, 0.3);
+	border-radius: 0.375rem;
+	padding: 1rem;
+	overflow-x: auto;
+	margin: 1rem 0;
+	white-space: pre;
 }
 
 .ai-response-content code {
-  font-family: monospace;
+	font-family: monospace;
 }
 
 /* 列表样式 */
 .ai-response-content ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin: 0.75rem 0;
+	list-style-type: disc;
+	padding-left: 1.5rem;
+	margin: 0.75rem 0;
 }
 
 .ai-response-content ol {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin: 0.75rem 0;
+	list-style-type: decimal;
+	padding-left: 1.5rem;
+	margin: 0.75rem 0;
 }
 
 /* 表格样式 */
 .ai-response-content table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 1rem 0;
+	border-collapse: collapse;
+	width: 100%;
+	margin: 1rem 0;
 }
 
 .ai-response-content th,
 .ai-response-content td {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.5rem;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	padding: 0.5rem;
 }
 
 .ai-response-content th {
-  background-color: rgba(0, 0, 0, 0.2);
-} 
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* === PaymentFlow 相关样式集成 === */
+
+/* 合约验证动画 */
+.ai-response-content .contract-verification {
+	background: linear-gradient(135deg, rgba(0, 255, 209, 0.1), rgba(0, 255, 209, 0.05));
+	border: 1px solid rgba(0, 255, 209, 0.3);
+	border-radius: 0.5rem;
+	padding: 1rem;
+	margin: 1rem 0;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.ai-response-content .contract-icon {
+	font-size: 1.5rem;
+	color: #00FFD1;
+	animation: contract-pulse 2s infinite;
+}
+
+@keyframes contract-pulse {
+
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	50% {
+		transform: scale(1.1);
+		opacity: 0.8;
+	}
+}
+
+.ai-response-content .contract-text {
+	color: #E6E6ED;
+	font-weight: 500;
+}
+
+/* 授权操作动画 */
+.ai-response-content .authorization-process {
+	background: linear-gradient(135deg, rgba(108, 64, 247, 0.1), rgba(108, 64, 247, 0.05));
+	border: 1px solid rgba(108, 64, 247, 0.3);
+	border-radius: 0.5rem;
+	padding: 1rem;
+	margin: 1rem 0;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.ai-response-content .authorization-icon {
+	font-size: 1.5rem;
+	color: #6C40F7;
+	animation: shield-glow 2s infinite;
+}
+
+@keyframes shield-glow {
+
+	0%,
+	100% {
+		color: #6C40F7;
+		filter: brightness(1);
+	}
+
+	50% {
+		color: #a084fa;
+		filter: brightness(1.5) drop-shadow(0 0 8px rgba(108, 64, 247, 0.5));
+	}
+}
+
+.ai-response-content .authorization-text {
+	color: #E6E6ED;
+	font-weight: 500;
+}
+
+/* 转账动画 */
+.ai-response-content .transfer-process {
+	background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(74, 222, 128, 0.05));
+	border: 1px solid rgba(74, 222, 128, 0.3);
+	border-radius: 0.5rem;
+	padding: 1rem;
+	margin: 1rem 0;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.ai-response-content .transfer-icon {
+	font-size: 1.5rem;
+	color: #4ade80;
+	animation: transfer-flow 1.5s infinite;
+}
+
+@keyframes transfer-flow {
+
+	0%,
+	100% {
+		transform: translateX(0) rotate(0deg);
+	}
+
+	25% {
+		transform: translateX(5px) rotate(90deg);
+	}
+
+	50% {
+		transform: translateX(0) rotate(180deg);
+	}
+
+	75% {
+		transform: translateX(-5px) rotate(270deg);
+	}
+}
+
+.ai-response-content .transfer-text {
+	color: #E6E6ED;
+	font-weight: 500;
+}
+
+/* 区块链地址和哈希值样式 */
+.ai-response-content .blockchain-address {
+	font-family: 'JetBrains Mono', monospace;
+	background: rgba(0, 255, 209, 0.1);
+	padding: 0.25rem 0.5rem;
+	border-radius: 0.25rem;
+	font-size: 0.8rem;
+	word-break: break-all;
+	border: 1px solid rgba(0, 255, 209, 0.2);
+	color: #00FFD1;
+}
+
+.ai-response-content .contract-address {
+	font-family: 'JetBrains Mono', monospace;
+	background: rgba(59, 130, 246, 0.1);
+	padding: 0.25rem 0.5rem;
+	border-radius: 0.25rem;
+	font-size: 0.8rem;
+	word-break: break-all;
+	border: 1px solid rgba(59, 130, 246, 0.2);
+	color: #3B82F6;
+}
+
+.ai-response-content .private-key {
+	font-family: 'JetBrains Mono', monospace;
+	background: rgba(245, 158, 11, 0.1);
+	padding: 0.25rem 0.5rem;
+	border-radius: 0.25rem;
+	font-size: 0.8rem;
+	word-break: break-all;
+	border: 1px solid rgba(245, 158, 11, 0.2);
+	color: #F59E0B;
+	filter: blur(2px);
+	transition: filter 0.3s ease;
+}
+
+.ai-response-content .private-key:hover {
+	filter: blur(0);
+}
+
+.ai-response-content .transaction-link {
+	color: #00FFD1;
+	text-decoration: underline;
+	font-family: 'JetBrains Mono', monospace;
+	font-size: 0.8rem;
+	word-break: break-all;
+	transition: all 0.3s ease;
+}
+
+.ai-response-content .transaction-link:hover {
+	color: #66e6d4;
+	text-shadow: 0 0 8px rgba(0, 255, 209, 0.5);
+}
+
+/* 成功消息样式 */
+.ai-response-content .success-message {
+	background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(74, 222, 128, 0.05));
+	border: 1px solid rgba(74, 222, 128, 0.3);
+	border-radius: 0.5rem;
+	padding: 1rem;
+	margin: 1rem 0;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.ai-response-content .success-icon {
+	font-size: 1.5rem;
+	color: #4ade80;
+}
+
+/* 加载动画点 */
+.ai-response-content .loading-dots {
+	display: flex;
+	gap: 0.25rem;
+	align-items: center;
+}
+
+.ai-response-content .loading-dot {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	animation: loading-bounce 1.4s ease-in-out infinite;
+}
+
+.ai-response-content .loading-dot:nth-child(1) {
+	background: #00FFD1;
+	animation-delay: 0ms;
+}
+
+.ai-response-content .loading-dot:nth-child(2) {
+	background: #6C40F7;
+	animation-delay: 300ms;
+}
+
+.ai-response-content .loading-dot:nth-child(3) {
+	background: #4ade80;
+	animation-delay: 600ms;
+}
+
+@keyframes loading-bounce {
+
+	0%,
+	60%,
+	100% {
+		transform: translateY(0);
+	}
+
+	30% {
+		transform: translateY(-10px);
+	}
+}
+
+/* 支付信息卡片 */
+.ai-response-content .payment-info-card {
+	background: linear-gradient(135deg, rgba(108, 64, 247, 0.1), rgba(108, 64, 247, 0.05));
+	border: 1px solid rgba(108, 64, 247, 0.3);
+	border-radius: 0.5rem;
+	padding: 1rem;
+	margin: 1rem 0;
+}
+
+.ai-response-content .payment-info-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem 0;
+	border-bottom: 1px solid rgba(108, 64, 247, 0.1);
+}
+
+.ai-response-content .payment-info-item:last-child {
+	border-bottom: none;
+}
+
+.ai-response-content .payment-info-label {
+	color: #A0A0B4;
+	font-size: 0.875rem;
+}
+
+.ai-response-content .payment-info-value {
+	color: #00FFD1;
+	font-weight: 500;
+}
+
+/* 确认按钮样式 */
+.ai-response-content .confirm-btn-purple {
+	background: linear-gradient(90deg, #6c40f7 0%, #a084fa 100%);
+	color: #fff;
+	border: 1px solid #a084fa;
+	box-shadow: 0 2px 12px rgba(108, 64, 247, 0.15);
+	padding: 0.5rem 1.5rem;
+	border-radius: 0.375rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	margin: 0 0.5rem;
+}
+
+.ai-response-content .confirm-btn-purple:hover {
+	background: linear-gradient(90deg, #a084fa 0%, #6c40f7 100%);
+	box-shadow: 0 0 24px 4px rgba(108, 64, 247, 0.25), 0 8px 25px rgba(108, 64, 247, 0.15);
+	border-color: #6c40f7;
+	transform: translateY(-2px) scale(1.05);
+}
+
+.ai-response-content .cancel-btn {
+	background: #0F0F12;
+	border: 1px solid rgba(108, 64, 247, 0.3);
+	color: #E6E6ED;
+	padding: 0.5rem 1.5rem;
+	border-radius: 0.375rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	margin: 0 0.5rem;
+}
+
+.ai-response-content .cancel-btn:hover {
+	background: rgba(15, 15, 18, 0.7);
+	border-color: rgba(108, 64, 247, 0.5);
+}
+
+/* === 转账表单相关样式 === */
+
+/* 淡入动画 */
+@keyframes fade-in {
+	from {
+		opacity: 0;
+		transform: scale(0.95) translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+.animate-fade-in {
+	animation: fade-in 0.3s ease-out;
+}
+
+/* 转账触发按钮特殊样式 */
+.transfer-trigger-btn {
+	position: relative;
+	overflow: hidden;
+}
+
+.transfer-trigger-btn:before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+	transition: left 0.6s ease;
+}
+
+.transfer-trigger-btn:hover:before {
+	left: 100%;
+}
+
+/* 表单输入框样式增强 */
+.transfer-form-input {
+	transition: all 0.3s ease;
+	position: relative;
+}
+
+.transfer-form-input:focus {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 255, 209, 0.15);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+
+	.ai-response-content .blockchain-address,
+	.ai-response-content .contract-address,
+	.ai-response-content .private-key,
+	.ai-response-content .transaction-link {
+		font-size: 0.7rem;
+	}
+
+	/* 移动端转账表单优化 */
+	.transfer-form-mobile {
+		margin: 1rem;
+		max-height: 90vh;
+		overflow-y: auto;
+	}
+}
+
+/* === AI助手切换按钮动画 === */
+
+/* 切换按钮容器 */
+.agent-switch-container {
+	position: relative;
+	overflow: hidden;
+}
+
+/* 激活状态的按钮动画 */
+.agent-switch-active {
+	position: relative;
+	overflow: hidden;
+}
+
+.agent-switch-active::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg,
+			transparent 0%,
+			rgba(0, 255, 209, 0.3) 50%,
+			transparent 100%);
+	animation: switch-shine 2s infinite;
+	z-index: 1;
+}
+
+@keyframes switch-shine {
+	0% {
+		left: -100%;
+	}
+
+	100% {
+		left: 100%;
+	}
+}
+
+/* 切换加载动画 */
+.agent-switching {
+	position: relative;
+	overflow: hidden;
+}
+
+.agent-switching::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg,
+			rgba(108, 64, 247, 0.1) 0%,
+			rgba(0, 255, 209, 0.2) 50%,
+			rgba(108, 64, 247, 0.1) 100%);
+	background-size: 200% 100%;
+	animation: switching-pulse 1s ease-in-out infinite;
+	z-index: 2;
+}
+
+@keyframes switching-pulse {
+	0% {
+		background-position: -200% 0;
+		opacity: 0;
+	}
+
+	50% {
+		background-position: 0% 0;
+		opacity: 1;
+	}
+
+	100% {
+		background-position: 200% 0;
+		opacity: 0;
+	}
+}
+
+/* 按钮图标动画 */
+.agent-switch-icon {
+	display: inline-block;
+	transition: transform 0.3s ease;
+}
+
+.agent-switch-active .agent-switch-icon {
+	animation: icon-bounce 2s infinite;
+}
+
+@keyframes icon-bounce {
+
+	0%,
+	20%,
+	50%,
+	80%,
+	100% {
+		transform: translateY(0) scale(1);
+	}
+
+	40% {
+		transform: translateY(-3px) scale(1.1);
+	}
+
+	60% {
+		transform: translateY(-1px) scale(1.05);
+	}
+}
+
+/* 按钮悬停效果增强 */
+.agent-switch-button {
+	position: relative;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.agent-switch-button:hover:not(:disabled) {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 25px rgba(108, 64, 247, 0.15);
+}
+
+.agent-switch-button:active:not(:disabled) {
+	transform: translateY(0);
+	transition: transform 0.1s;
+}
+
+/* 切换完成后的短暂高亮效果 */
+@keyframes switch-complete {
+	0% {
+		box-shadow: 0 0 0 0 rgba(0, 255, 209, 0.7);
+	}
+
+	70% {
+		box-shadow: 0 0 0 10px rgba(0, 255, 209, 0);
+	}
+
+	100% {
+		box-shadow: 0 0 0 0 rgba(0, 255, 209, 0);
+	}
+}
+
+.agent-switch-complete {
+	animation: switch-complete 0.6s ease-out;
+}
+
+/* === 对话删除按钮样式 === */
+
+/* 对话项悬浮效果 */
+.conversation-item {
+	position: relative;
+	transition: all 0.3s ease;
+}
+
+.conversation-item:hover {
+	background: rgba(255, 255, 255, 0.08);
+	transform: translateX(2px);
+}
+
+/* 删除按钮动画 */
+.delete-conversation-btn {
+	position: relative;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	overflow: hidden;
+}
+
+.delete-conversation-btn::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg,
+			transparent 0%,
+			rgba(239, 68, 68, 0.2) 50%,
+			transparent 100%);
+	transition: left 0.3s ease;
+}
+
+.delete-conversation-btn:hover::before {
+	left: 100%;
+}
+
+.delete-conversation-btn:hover {
+	background: rgba(239, 68, 68, 0.2);
+	border-color: rgba(239, 68, 68, 0.5);
+	transform: scale(1.1);
+	box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+}
+
+.delete-conversation-btn:active {
+	transform: scale(0.95);
+	transition: transform 0.1s;
+}
+
+/* 删除按钮图标动画 */
+.delete-conversation-icon {
+	transition: all 0.2s ease;
+}
+
+.delete-conversation-btn:hover .delete-conversation-icon {
+	color: #fca5a5;
+	transform: rotate(90deg);
+}
+
+/* 删除确认动画 */
+@keyframes delete-shake {
+
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+
+	25% {
+		transform: translateX(-3px);
+	}
+
+	75% {
+		transform: translateX(3px);
+	}
+}
+
+.delete-conversation-confirm {
+	animation: delete-shake 0.3s ease-in-out;
+}
+
+/* 对话项滑出动画 */
+@keyframes slide-out {
+	0% {
+		opacity: 1;
+		transform: translateX(0);
+		max-height: 48px;
+	}
+
+	50% {
+		opacity: 0.5;
+		transform: translateX(-20px);
+	}
+
+	100% {
+		opacity: 0;
+		transform: translateX(-100%);
+		max-height: 0;
+		padding: 0;
+		margin: 0;
+	}
+}
+
+.conversation-item-deleting {
+	animation: slide-out 0.3s ease-in-out forwards;
+}
+
+/* === 支付宝转代币按钮样式 === */
+
+/* 支付宝转代币专用按钮 */
+.alipay-transfer-btn {
+	position: relative;
+	overflow: hidden;
+	background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%);
+	border: 1px solid #40a9ff;
+	transition: all 0.3s ease;
+}
+
+.alipay-transfer-btn:hover {
+	background: linear-gradient(90deg, #40a9ff 0%, #1890ff 100%);
+	box-shadow:
+		0 0 20px rgba(24, 144, 255, 0.3),
+		0 4px 15px rgba(24, 144, 255, 0.2);
+	transform: translateY(-2px) scale(1.02);
+	border-color: #1890ff;
+}
+
+.alipay-transfer-btn::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg,
+			transparent 0%,
+			rgba(255, 255, 255, 0.3) 50%,
+			transparent 100%);
+	transition: left 0.5s ease;
+}
+
+.alipay-transfer-btn:hover::before {
+	left: 100%;
+}
+
+/* 支付宝转代币操作卡片增强 */
+.alipay-info-card {
+	background: linear-gradient(135deg,
+			rgba(24, 144, 255, 0.1) 0%,
+			rgba(64, 169, 255, 0.05) 100%);
+	border: 1px solid rgba(24, 144, 255, 0.3);
+	border-radius: 0.75rem;
+	backdrop-filter: blur(10px);
+	position: relative;
+	overflow: hidden;
+}
+
+.alipay-info-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: linear-gradient(90deg,
+			#1890ff 0%,
+			#40a9ff 50%,
+			#1890ff 100%);
+	background-size: 200% 100%;
+	animation: alipay-gradient 3s ease infinite;
+}
+
+@keyframes alipay-gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+
+	50% {
+		background-position: 100% 50%;
+	}
+
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+/* 支付宝转代币按钮组布局 */
+.alipay-button-group {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	margin-top: 1.5rem;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+	.alipay-button-group {
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.alipay-transfer-btn,
+	.alipay-button-group .cancel-btn {
+		width: 100%;
+		max-width: 280px;
+		justify-content: center;
+	}
+}
+
+/* 支付宝转代币成功状态 */
+.alipay-success-animation {
+	position: relative;
+}
+
+.alipay-success-animation::after {
+	content: '✨';
+	position: absolute;
+	top: -10px;
+	right: -10px;
+	font-size: 1.2rem;
+	animation: alipay-sparkle 2s infinite;
+}
+
+@keyframes alipay-sparkle {
+
+	0%,
+	100% {
+		opacity: 0;
+		transform: scale(0.8) rotate(0deg);
+	}
+
+	50% {
+		opacity: 1;
+		transform: scale(1.2) rotate(180deg);
+	}
+}
+
+/* === Agent Tooltip 样式 === */
+.agent-tooltip {
+	animation: tooltip-fade-in 0.2s ease-out;
+}
+
+@keyframes tooltip-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(-8px) scale(0.95);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+/* Tooltip 容器样式 */
+.agent-tooltip .bg-gradient-to-br {
+	position: relative;
+	border-image: linear-gradient(135deg, rgba(0, 255, 209, 0.3), rgba(108, 64, 247, 0.3)) 1;
+}
+
+/* Material UI 风格的阴影 */
+.agent-tooltip .shadow-2xl {
+	box-shadow:
+		0 25px 50px -12px rgba(0, 0, 0, 0.7),
+		0 8px 16px -4px rgba(108, 64, 247, 0.4),
+		0 0 0 1px rgba(255, 255, 255, 0.05),
+		inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Tooltip 内容动画 */
+.agent-tooltip .space-y-3>* {
+	animation: tooltip-content-slide 0.3s ease-out;
+	animation-fill-mode: both;
+}
+
+.agent-tooltip .space-y-3>*:nth-child(1) {
+	animation-delay: 0.05s;
+}
+
+.agent-tooltip .space-y-3>*:nth-child(2) {
+	animation-delay: 0.1s;
+}
+
+.agent-tooltip .space-y-3>*:nth-child(3) {
+	animation-delay: 0.15s;
+}
+
+.agent-tooltip .space-y-3>*:nth-child(4) {
+	animation-delay: 0.2s;
+}
+
+@keyframes tooltip-content-slide {
+	from {
+		opacity: 0;
+		transform: translateX(-8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* 特性列表项的悬浮效果 */
+.agent-tooltip .flex.items-start {
+	transition: all 0.2s ease;
+	border-radius: 0.25rem;
+	padding: 0.25rem;
+	margin: -0.25rem;
+}
+
+.agent-tooltip .flex.items-start:hover {
+	background: rgba(0, 255, 209, 0.05);
+	border-left: 2px solid rgba(0, 255, 209, 0.3);
+	padding-left: 0.5rem;
+	margin-left: -0.5rem;
+}
+
+/* 圆点指示器动画 */
+.agent-tooltip .w-1\.5.h-1\.5 {
+	animation: tooltip-dot-pulse 2s infinite;
+}
+
+@keyframes tooltip-dot-pulse {
+
+	0%,
+	100% {
+		opacity: 0.7;
+		transform: scale(1);
+	}
+
+	50% {
+		opacity: 1;
+		transform: scale(1.2);
+		box-shadow: 0 0 8px rgba(0, 255, 209, 0.5);
+	}
+}
+
+/* 箭头样式优化 */
+.agent-tooltip .absolute.-top-2 {
+	filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Tooltip 响应式设计 */
+@media (max-width: 768px) {
+	.agent-tooltip {
+		transform: scale(0.9);
+	}
+
+	.agent-tooltip .min-w-\[280px\] {
+		min-width: 260px;
+	}
+
+	.agent-tooltip .max-w-\[320px\] {
+		max-width: 280px;
+	}
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+	.agent-tooltip .bg-gradient-to-br {
+		background: #000000;
+		border: 2px solid #ffffff;
+	}
+
+	.agent-tooltip .text-text-secondary {
+		color: #ffffff;
+	}
+}
