@@ -9,6 +9,8 @@ import {
   faCog,
   faMicrophone,
   faPaperPlane,
+  faSignature,
+  faPen,
 } from "@fortawesome/free-solid-svg-icons";
 
 // RainbowKit 相关导入
@@ -22,11 +24,42 @@ import {
   RainbowKitProvider,
   ConnectButton,
 } from "@rainbow-me/rainbowkit";
-import { WagmiProvider } from "wagmi";
+import {
+  WagmiProvider,
+  useAccount,
+  useSignMessage,
+  useBalance,
+  useSendTransaction,
+} from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, base } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { http } from "wagmi";
-import axios from "axios";
+import { parseEther } from "viem";
+import type { Chain } from "wagmi/chains";
+
+// 定义 IoTeX 测试网络
+const iotexTestnet: Chain = {
+  id: 4690,
+  name: "IoTeX Testnet",
+  nativeCurrency: {
+    name: "IoTeX",
+    symbol: "IOTX",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://babel-api.testnet.iotex.one"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "IoTeX Testnet Explorer",
+      url: "https://testnet.iotexscan.io",
+    },
+  },
+  contracts: {},
+  testnet: true,
+};
 
 // 配置 RainbowKit
 const config = getDefaultConfig({
@@ -35,14 +68,16 @@ const config = getDefaultConfig({
   // 1. 注册/登录 WalletConnect Cloud
   // 2. 创建一个新项目并输入应用名称和URL
   // 3. 复制生成的项目ID到这里
-  projectId: "YOUR_PROJECT_ID",
-  chains: [mainnet, polygon, optimism, arbitrum, base],
+  // projectId: "d56e1374c9d4380694fc205749b5eec2",
+  projectId: atob("ZDU2ZTEzNzRjOWQ0MzgwNjk0ZmMyMDU3NDliNWVlYzI="),
+  chains: [mainnet, polygon, optimism, arbitrum, base, iotexTestnet],
   transports: {
-    [mainnet.id]: http("https://eth-mainnet.g.alchemy.com/v2/demo"),
-    [polygon.id]: http("https://polygon-mainnet.g.alchemy.com/v2/demo"),
-    [optimism.id]: http("https://opt-mainnet.g.alchemy.com/v2/demo"),
-    [arbitrum.id]: http("https://arb-mainnet.g.alchemy.com/v2/demo"),
-    [base.id]: http("https://base-mainnet.g.alchemy.com/v2/demo"),
+    // [mainnet.id]: http("https://eth-mainnet.g.alchemy.com/v2/demo"),
+    // [polygon.id]: http("https://polygon-mainnet.g.alchemy.com/v2/demo"),
+    // [optimism.id]: http("https://opt-mainnet.g.alchemy.com/v2/demo"),
+    // [arbitrum.id]: http("https://arb-mainnet.g.alchemy.com/v2/demo"),
+    // [base.id]: http("https://base-mainnet.g.alchemy.com/v2/demo"),
+    [iotexTestnet.id]: http("https://babel-api.testnet.iotex.one"),
   },
   ssr: true,
 });
@@ -62,6 +97,169 @@ interface Conversation {
   createdAt: number;
 }
 
+// 签名功能组件
+function WalletSignature() {
+  const { address, isConnected, chain } = useAccount();
+  const { data: balance } = useBalance({ address });
+  const [messageToSign, setMessageToSign] = useState("");
+  const [signatureResult, setSignatureResult] = useState("");
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
+
+  const { signMessage, isPending: isSignPending } = useSignMessage({
+    mutation: {
+      onSuccess: (signature) => {
+        setSignatureResult(signature);
+        console.log("签名成功:", signature);
+      },
+      onError: (error) => {
+        console.error("签名失败:", error);
+        setSignatureResult(`签名失败: ${error.message}`);
+      },
+    },
+  });
+
+  const { sendTransaction, isPending: isSendPending } = useSendTransaction({
+    mutation: {
+      onSuccess: (hash) => {
+        console.log("交易发送成功:", hash);
+        alert(`交易发送成功! 哈希: ${hash}`);
+      },
+      onError: (error) => {
+        console.error("交易发送失败:", error);
+        alert(`交易发送失败: ${error.message}`);
+      },
+    },
+  });
+
+  const handleSignMessage = () => {
+    if (!messageToSign.trim()) {
+      alert("请输入要签名的消息");
+      return;
+    }
+    signMessage({ message: messageToSign });
+  };
+
+  const handleSendTransaction = () => {
+    if (!recipientAddress.trim() || !sendAmount.trim()) {
+      alert("请填写接收地址和金额");
+      return;
+    }
+
+    try {
+      sendTransaction({
+        to: recipientAddress as `0x${string}`,
+        value: parseEther(sendAmount),
+      });
+    } catch (error) {
+      console.error("交易参数错误:", error);
+      alert("交易参数错误，请检查地址和金额格式");
+    }
+  };
+
+  if (!isConnected) {
+    return (
+      <div className="wallet-signature-panel p-4 bg-deep-black/50 backdrop-blur-sm rounded-lg border border-night-purple/20">
+        <p className="text-text-secondary text-center">
+          请先连接钱包以使用签名功能
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="wallet-signature-panel p-4 bg-deep-black/50 backdrop-blur-sm rounded-lg border border-night-purple/20 space-y-4">
+      {/* 钱包信息 */}
+      <div className="wallet-info border-b border-night-purple/20 pb-4">
+        <h3 className="text-neon-cyan font-bold mb-2 flex items-center">
+          <FontAwesomeIcon icon={faSignature} className="mr-2" />
+          钱包签名工具
+        </h3>
+        <div className="text-sm space-y-1">
+          {/* <p><span className="text-text-secondary">地址:</span> <span className="text-neon-cyan font-mono">{address}</span></p> */}
+          <p>
+            <span className="text-text-secondary">网络:</span>{" "}
+            <span className="text-neon-cyan">{chain?.name}</span>
+          </p>
+          <p>
+            <span className="text-text-secondary">余额:</span>{" "}
+            <span className="text-neon-cyan">
+              {balance
+                ? `${parseFloat(balance.formatted).toFixed(4)} ${
+                    balance.symbol
+                  }`
+                : "加载中..."}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      {/* 消息签名 */}
+      <div className="message-signing">
+        <h4 className="text-text-primary font-semibold mb-2 flex items-center">
+          <FontAwesomeIcon icon={faPen} className="mr-2 text-xs" />
+          消息签名
+        </h4>
+        <div className="space-y-2">
+          <textarea
+            placeholder="输入要签名的消息..."
+            className="w-full p-2 bg-deep-black border border-night-purple/30 rounded text-text-primary placeholder-text-secondary resize-none"
+            rows={2}
+            value={messageToSign}
+            onChange={(e) => setMessageToSign(e.target.value)}
+          />
+          <button
+            onClick={handleSignMessage}
+            disabled={isSignPending}
+            className="w-full px-4 py-2 bg-gradient-to-r from-neon-cyan/20 to-night-purple/20 hover:from-neon-cyan/30 hover:to-night-purple/30 border border-neon-cyan/30 text-neon-cyan rounded transition-all disabled:opacity-50"
+          >
+            {isSignPending ? "签名中..." : "签名消息"}
+          </button>
+          {signatureResult && (
+            <div className="signature-result p-2 bg-deep-black/80 border border-neon-cyan/20 rounded">
+              <p className="text-xs text-text-secondary mb-1">签名结果:</p>
+              <p className="text-xs text-neon-cyan font-mono break-all">
+                {signatureResult}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 发送交易 */}
+      <div className="send-transaction">
+        <h4 className="text-text-primary font-semibold mb-2">发送交易</h4>
+        <div className="space-y-2">
+          <input
+            type="text"
+            placeholder="接收地址 (0x...)"
+            className="w-full p-2 bg-deep-black border border-night-purple/30 rounded text-text-primary placeholder-text-secondary"
+            value={recipientAddress}
+            onChange={(e) => setRecipientAddress(e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="金额"
+            step="0.001"
+            className="w-full p-2 bg-deep-black border border-night-purple/30 rounded text-text-primary placeholder-text-secondary"
+            value={sendAmount}
+            onChange={(e) => setSendAmount(e.target.value)}
+          />
+          <button
+            onClick={handleSendTransaction}
+            disabled={isSendPending}
+            className="w-full px-4 py-2 bg-gradient-to-r from-night-purple/20 to-neon-cyan/20 hover:from-night-purple/30 hover:to-neon-cyan/30 border border-night-purple/30 text-text-primary rounded transition-all disabled:opacity-50"
+          >
+            {isSendPending
+              ? "发送中..."
+              : `发送 ${chain?.nativeCurrency.symbol || "Token"}`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -73,6 +271,7 @@ function App() {
     string | null
   >(null);
   const [showAction, setShowAction] = useState(false);
+  const [showSignaturePanel, setShowSignaturePanel] = useState(false);
 
   // 从本地存储加载对话
   useEffect(() => {
@@ -487,14 +686,25 @@ function App() {
                     workspace
                   </h3>
 
-                  <button className="w-full text-left px-3 py-2 rounded-md hover:bg-white/5 transition-all flex items-center space-x-3">
+                  {/* <button className="w-full text-left px-3 py-2 rounded-md hover:bg-white/5 transition-all flex items-center space-x-3">
                     <FontAwesomeIcon
                       icon={faBolt}
                       className="text-text-secondary text-xs"
                     />
                     <span className="text-sm truncate">My Collection</span>
-                  </button>
+                  </button> */}
 
+                  <button
+                    onClick={() => setShowSignaturePanel(!showSignaturePanel)}
+                    className="w-full text-left px-3 py-2 rounded-md hover:bg-white/5 transition-all flex items-center space-x-3"
+                  >
+                    <FontAwesomeIcon
+                      icon={faSignature}
+                      className="text-text-secondary text-xs"
+                    />
+                    <span className="text-sm truncate">Wallet Signature</span>
+                  </button>
+                  {/* 
                   <button className="w-full text-left px-3 py-2 rounded-md hover:bg-white/5 transition-all flex items-center space-x-3">
                     <FontAwesomeIcon
                       icon={faHistory}
@@ -509,8 +719,15 @@ function App() {
                       className="text-text-secondary text-xs"
                     />
                     <span className="text-sm truncate">set up</span>
-                  </button>
+                  </button> */}
                 </div>
+
+                {/* 签名工具面板 */}
+                {showSignaturePanel && (
+                  <div className="mt-4">
+                    <WalletSignature />
+                  </div>
+                )}
               </aside>
 
               {/* 主要内容 */}
