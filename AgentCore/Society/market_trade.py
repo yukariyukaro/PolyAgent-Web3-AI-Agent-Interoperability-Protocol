@@ -230,6 +230,29 @@ class AgentManager:
             response = await alipay_agent.astep(query)
             print("Agent 回复：\n", response.msgs[0].content)
 
+    async def run_paypal_query(self, query: str):
+        config_path = "E:\\EnjoyAI\\Web3-Agent-Protocal\\workspace_new\\AgentCore\\Mcp\\paypal_server.json"
+
+        async with MCPToolkit(config_path=config_path) as mcp_toolkit:
+            paypal_agent = ChatAgent(
+                system_message="""
+                你是一个经验丰富的 Paypal 交易代理，负责协助用户完成以下操作：
+
+                1. 创建发票（create_invoice）
+                2. 查询订单状态（query_order）
+                3. 处理退款请求（process_refund）
+
+                请根据用户的具体需求使用合适的工具进行操作，确保金额、税费、折扣等计算准确，语言清晰专业。
+                """,
+                model=self.model,
+                token_limit=32768,
+                tools=[*mcp_toolkit.get_tools()],
+                output_language="zh"
+            )
+
+            response = await paypal_agent.astep(query)
+            print("Agent 回复：\n", response.msgs[0].content)
+
     async def run_all(self):
         await self.run_alipay_query("支付")
         await self.run_alipay_query("查询订单")
@@ -237,6 +260,9 @@ class AgentManager:
         self.iotex_agent.step("帮我查询一下ERC20代币的授权额度。")
         self.iotex_agent.step("我想给0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE地址授权200个代币，请帮我执行该操作")
         self.iotex_agent.step("我想给0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE地址转账5个代币，请帮我执行该操作")
+
+        await self.run_paypal_query("支付订单购买个故事创造的费用，单价为 $9.99")
+        await self.run_paypal_query("创建一张金额为 $9.99 的故事创作发票，添加 8% 的税费，并应用 5% 的折扣。")
 
         self.story_agent.step("我希望写一个勇士拯救公主的故事")
 
