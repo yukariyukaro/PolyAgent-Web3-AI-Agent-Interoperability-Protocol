@@ -148,7 +148,7 @@ class AgentManager:
             model=self.model,
             token_limit=32768,
             tools=[*IotexTokenToolkit(self.estnet_rpc, self.ERC20_ABI, self.chain_id).get_tools()],
-            output_language="zh"
+            output_language="en"
         )
 
         self.story_agent = ChatAgent(
@@ -171,7 +171,7 @@ class AgentManager:
             请开始生成故事。""",
             model=self.model,
             token_limit=32768,
-            output_language="zh"
+            output_language="en"
         )
 
     async def run_alipay_query(self, query: str):
@@ -224,11 +224,11 @@ class AgentManager:
                 model=self.model,
                 token_limit=32768,
                 tools=[*mcp_toolkit.get_tools()],
-                output_language="zh"
+                output_language="en"
             )
 
             response = await alipay_agent.astep(query)
-            print("Agent 回复：\n", response.msgs[0].content)
+            print("Agent response：\n", response.msgs[0].content)
 
     async def run_paypal_query(self, query: str):
         config_path = "E:\\EnjoyAI\\Web3-Agent-Protocal\\workspace_new\\AgentCore\\Mcp\\paypal_server.json"
@@ -247,11 +247,11 @@ class AgentManager:
                 model=self.model,
                 token_limit=32768,
                 tools=[*mcp_toolkit.get_tools()],
-                output_language="zh"
+                output_language="en"
             )
 
             response = await paypal_agent.astep(query)
-            print("Agent 回复：\n", response.msgs[0].content)
+            print("Agent response：\n", response.msgs[0].content)
 
     async def run_amap_query(self, query: str):
         config_path = "E:\\EnjoyAI\\Web3-Agent-Protocal\\workspace_new\\AgentCore\\Mcp\\amap_server.json"
@@ -273,11 +273,11 @@ class AgentManager:
                 model=self.model,
                 token_limit=32768,
                 tools=[*mcp_toolkit.get_tools()],
-                output_language="zh"
+                output_language="en"
             )
 
             response = await amap_agent.astep(query)
-            print("Agent 回复：\n", response.msgs[0].content)
+            print("Agent response：\n", response.msgs[0].content)
 
     async def run_all(self):
         await self.run_alipay_query("支付")
