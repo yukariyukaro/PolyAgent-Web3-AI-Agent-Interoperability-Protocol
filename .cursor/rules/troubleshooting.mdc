@@ -1,0 +1,212 @@
+# 故障排除指南
+
+## 服务器启动问题
+
+### 1. 端口占用错误
+**症状**: `Address already in use: Port 5000`
+
+**诊断步骤**:
+```bash
+# Windows
+netstat -ano | findstr :5000
+tasklist /fi "PID eq [进程ID]"
+
+# 解决方案
+taskkill /F /PID [进程ID]
+```
+
+**预防措施**:
+- 启动前检查端口状态
+- 使用不同端口或正确关闭之前的服务
+
+### 2. 重复路由定义
+**症状**: `AssertionError: View function mapping is overwriting an existing endpoint function`
+
+**诊断**:
+```bash
+grep -n "@app.route" app.py
+# 查找重复的路由定义
+```
+
+**解决方案**:
+- 检查 **[app.py](mdc:app.py)** 中是否有重复的 `@app.route` 装饰器
+- 删除重复的端点定义
+- 确保每个端点只定义一次
+
+### 3. AI模型初始化失败
+**症状**: `❌ AI模型初始化失败`
+
+**检查清单**:
+```python
+# 验证配置
+print(config.OPENAI_API_KEY)  # 应该以 "sk-" 开头
+print(config.OPENAI_API_URL)  # API 端点 URL
+```
+
+**解决方案**:
+- 检查 **[AgentCore/config.py](mdc:AgentCore/config.py)** 中的 API 密钥
+- 验证网络连接和 API 端点可达性
+- 确认 OpenAI API 配额和权限
+
+## API 端点问题
+
+### 1. 404 错误：端点不存在
+**症状**: 前端调用返回 404 Not Found
+
+**诊断步骤**:
+```python
+# 创建测试脚本
+import requests
+response = requests.post('http://localhost:5000/market-trade', 
+                        json={'message': '测试'})
+print(f"Status: {response.status_code}")
+```
+
+**常见原因**:
+- 服务器重启后路由未正确加载
+- 旧版本服务器仍在运行
+- Flask 路由定义错误
+
+**解决方案**:
+1. 停止所有 Python 进程：`taskkill /F /IM python.exe`
+2. 重新启动服务器：`python app.py`
+3. 验证路由定义正确
+
+### 2. 流式响应超时
+**症状**: `HTTPConnectionPool: Read timed out`
+
+**解决方案**:
+```typescript
+// 前端增加超时时间
+const response = await fetch(url, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+    // 不设置 timeout 或增加超时时间
+});
+```
+
+**后端优化**:
+- 检查 Agent 处理性能
+- 添加更多日志记录点
+- 优化 AI 模型调用
+
+## MCP 工具包问题
+
+### 1. 支付宝 MCP 超时
+**症状**: `Timed out while waiting for response to ClientRequest`
+
+**解决方案**:
+```json
+// AgentCore/Mcp/alipay_server.json
+{
+  "mcpServers": {
+    "alipay": {
+      "command": "node",
+      "args": ["node_modules/@alipay/mcp-server-alipay/build/index.js"],
+      "clientRequestTimeout": 30000  // 增加到30秒
+    }
+  }
+}
+```
+
+**依赖安装**:
+```bash
+npm install @alipay/mcp-server-alipay
+# 确保本地依赖正确安装
+```
+
+### 2. MCP 配置路径错误
+**检查配置文件路径**:
+```python
+# 在 AgentManager 中验证
+config_path = os.path.join(os.path.dirname(__file__), "..", "Mcp", "alipay_server.json")
+print(f"MCP配置路径: {os.path.abspath(config_path)}")
+print(f"文件存在: {os.path.exists(config_path)}")
+```
+
+## 前端连接问题
+
+### 1. CORS 错误
+**症状**: `Access to fetch blocked by CORS policy`
+
+**解决方案**:
+```python
+# 在 app.py 中确认 CORS 配置
+from flask_cors import CORS
+CORS(app)  # 允许所有来源
+```
+
+### 2. 前端无响应或加载问题
+**诊断步骤**:
+1. 检查浏览器控制台错误
+2. 验证后端服务器运行状态
+3. 测试 API 端点直接访问
+
+**解决方案**:
+```bash
+# 重启前端服务
+cd frontEnd
+npm install  # 重新安装依赖
+npm start    # 启动开发服务器
+```
+
+## 区块链集成问题
+
+### 1. IoTeX 网络连接失败
+**检查 RPC 端点**:
+```python
+# 测试 RPC 连接
+import requests
+response = requests.post('https://babel-api.testnet.iotex.one', 
+                        json={"method": "eth_blockNumber", "params": [], "id": 1})
+print(response.json())
+```
+
+### 2. 代币合约交互错误
+**验证合约地址和 ABI**:
+- 确认 **PolyAgent Token 合约**: `0xD3286E20Ff71438D9f6969828F7218af4A375e2f`
+- 检查私钥和地址格式
+- 验证网络 ID (4690 for IoTeX Testnet)
+
+## 日志调试技巧
+
+### 1. 添加调试输出
+```python
+# 在关键位置添加日志
+print(f"🔍 Debug: {variable_name} = {variable_value}")
+print(f"📍 Checkpoint: Function {function_name} called")
+```
+
+### 2. Flask 调试模式
+```python
+# 在 app.py 中启用详细错误信息
+app.run(host=config.FLASK_HOST, port=config.FLASK_PORT, debug=True)
+```
+
+### 3. 错误追踪
+```python
+import traceback
+try:
+    # 代码执行
+except Exception as e:
+    print(f"❌ 错误详情: {e}")
+    print(f"📋 调用栈: {traceback.format_exc()}")
+```
+
+## 性能优化建议
+
+### 1. AI Agent 响应优化
+- 减少系统消息长度
+- 优化工具包调用频率
+- 使用异步处理避免阻塞
+
+### 2. 前端性能优化
+- 实现虚拟滚动（长对话历史）
+- 优化流式响应处理
+- 添加加载状态指示器
+
+### 3. 内存管理
+- 定期清理对话历史
+- 限制并发 Agent 实例数量
+- 监控系统资源使用情况

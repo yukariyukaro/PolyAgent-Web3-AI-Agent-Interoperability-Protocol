@@ -8,7 +8,9 @@ import {
 	// faUser,
 	faPlus,
 	faTimes,
-	faWallet
+	faWallet,
+	faSignature,
+	faPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
@@ -19,14 +21,86 @@ import "@rainbow-me/rainbowkit/styles.css";
 // 添加自定义样式
 import "./ai-response.css";
 
+// Stagewise dev-tool integration (development only)
+declare const process: any; // Suppress TypeScript errors for process
+
+if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+  // Initialize stagewise toolbar asynchronously to avoid blocking the main app
+  const initStagewise = async () => {
+    try {
+      // Dynamic import to handle optional dependency
+      const stagewiseModule = await eval('import("@stagewise/toolbar")') as any;
+      const { initToolbar } = stagewiseModule;
+      
+      const stagewiseConfig = {
+        plugins: []
+      };
+      
+      // Ensure toolbar container exists
+      let toolbarContainer = document.getElementById('stagewise-toolbar-container');
+      if (!toolbarContainer) {
+        toolbarContainer = document.createElement('div');
+        toolbarContainer.id = 'stagewise-toolbar-container';
+        toolbarContainer.style.zIndex = '999999';
+        document.body.appendChild(toolbarContainer);
+      }
+      
+      initToolbar(stagewiseConfig);
+      console.log('✅ Stagewise toolbar initialized');
+    } catch (error) {
+      console.warn('🔧 Stagewise toolbar not available (install with: npm install @stagewise/toolbar --save-dev)');
+    }
+  };
+  
+  // Initialize after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStagewise);
+  } else {
+    initStagewise();
+  }
+}
+
 import {
 	ConnectButton,
 	getDefaultConfig,
 	RainbowKitProvider,
 } from "@rainbow-me/rainbowkit";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { http, WagmiProvider } from "wagmi";
-import { arbitrum, base, mainnet, optimism, polygon } from "wagmi/chains";
+import {
+	WagmiProvider,
+	useAccount,
+	useSignMessage,
+	useBalance,
+	useSendTransaction,
+} from "wagmi";
+import { mainnet, polygon, optimism, arbitrum, base } from "wagmi/chains";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { http } from "wagmi";
+import { parseEther } from "viem";
+import type { Chain } from "wagmi/chains";
+
+// 定义 IoTeX 测试网络
+const iotexTestnet: Chain = {
+  id: 4690,
+  name: "IoTeX Testnet",
+  nativeCurrency: {
+    name: "IoTeX",
+    symbol: "IOTX",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://babel-api.testnet.iotex.one"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "IoTeX Testnet Explorer",
+      url: "https://testnet.iotexscan.io",
+    },
+  },
+  contracts: {},
+  testnet: true,
+};
 
 
 // 配置 RainbowKit
@@ -36,14 +110,16 @@ const config = getDefaultConfig({
 	// 1. 注册/登录 WalletConnect Cloud
 	// 2. 创建一个新项目并输入应用名称和URL
 	// 3. 复制生成的项目ID到这里
-	projectId: "YOUR_PROJECT_ID",
-	chains: [mainnet, polygon, optimism, arbitrum, base],
+  // projectId: "d56e1374c9d4380694fc205749b5eec2",
+	projectId: atob("ZDU2ZTEzNzRjOWQ0MzgwNjk0ZmMyMDU3NDliNWVlYzI="),
+	chains: [mainnet, polygon, optimism, arbitrum, base, iotexTestnet],
 	transports: {
-		[mainnet.id]: http("https://eth-mainnet.g.alchemy.com/v2/demo"),
-		[polygon.id]: http("https://polygon-mainnet.g.alchemy.com/v2/demo"),
-		[optimism.id]: http("https://opt-mainnet.g.alchemy.com/v2/demo"),
-		[arbitrum.id]: http("https://arb-mainnet.g.alchemy.com/v2/demo"),
-		[base.id]: http("https://base-mainnet.g.alchemy.com/v2/demo"),
+		// [mainnet.id]: http("https://eth-mainnet.g.alchemy.com/v2/demo"),
+		// [polygon.id]: http("https://polygon-mainnet.g.alchemy.com/v2/demo"),
+		// [optimism.id]: http("https://opt-mainnet.g.alchemy.com/v2/demo"),
+		// [arbitrum.id]: http("https://arb-mainnet.g.alchemy.com/v2/demo"),
+		// [base.id]: http("https://base-mainnet.g.alchemy.com/v2/demo"),
+    [iotexTestnet.id]: http("https://babel-api.testnet.iotex.one"),
 	},
 	ssr: true,
 });
@@ -79,6 +155,169 @@ interface TransferFormData {
 
 // 添加AI助手类型枚举
 type AIAgentType = "monitor" | "trade";
+
+// 签名功能组件
+function WalletSignature() {
+  const { address, isConnected, chain } = useAccount();
+  const { data: balance } = useBalance({ address });
+  const [messageToSign, setMessageToSign] = useState("");
+  const [signatureResult, setSignatureResult] = useState("");
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
+  const [showSignaturePanel, setShowSignaturePanel] = useState(false);
+  const { signMessage, isPending: isSignPending } = useSignMessage({
+    mutation: {
+      onSuccess: (signature) => {
+        setSignatureResult(signature);
+        console.log("签名成功:", signature);
+      },
+      onError: (error) => {
+        console.error("签名失败:", error);
+        setSignatureResult(`签名失败: ${error.message}`);
+      },
+    },
+  });
+
+  const { sendTransaction, isPending: isSendPending } = useSendTransaction({
+    mutation: {
+      onSuccess: (hash) => {
+        console.log("交易发送成功:", hash);
+        alert(`交易发送成功! 哈希: ${hash}`);
+      },
+      onError: (error) => {
+        console.error("交易发送失败:", error);
+        alert(`交易发送失败: ${error.message}`);
+      },
+    },
+  });
+
+  const handleSignMessage = () => {
+    if (!messageToSign.trim()) {
+      alert("Please enter a message to sign");
+      return;
+    }
+    signMessage({ message: messageToSign });
+  };
+
+  const handleSendTransaction = () => {
+    if (!recipientAddress.trim() || !sendAmount.trim()) {
+      alert("Please fill in recipient address and amount");
+      return;
+    }
+
+    try {
+      sendTransaction({
+        to: recipientAddress as `0x${string}`,
+        value: parseEther(sendAmount),
+      });
+    } catch (error) {
+      console.error("交易参数错误:", error);
+      alert("Transaction parameter error, please check address and amount format");
+    }
+  };
+
+  if (!isConnected) {
+    return (
+      <div className="wallet-signature-panel p-4 bg-deep-black/50 backdrop-blur-sm rounded-lg border border-night-purple/20">
+        <p className="text-text-secondary text-center">
+          Please connect your wallet to use signature features
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="wallet-signature-panel p-4 bg-deep-black/50 backdrop-blur-sm rounded-lg border border-night-purple/20 space-y-4">
+      {/* 钱包信息 */}
+      <div className="wallet-info border-b border-night-purple/20 pb-4">
+        <h3 className="text-neon-cyan font-bold mb-2 flex items-center">
+          <FontAwesomeIcon icon={faSignature} className="mr-2" />
+          Wallet Signature Tools
+        </h3>
+        <div className="text-sm space-y-1">
+          {/* <p><span className="text-text-secondary">地址:</span> <span className="text-neon-cyan font-mono">{address}</span></p> */}
+          <p>
+            <span className="text-text-secondary">Network:</span>{" "}
+            <span className="text-neon-cyan">{chain?.name}</span>
+          </p>
+          <p>
+            <span className="text-text-secondary">Balance:</span>{" "}
+            <span className="text-neon-cyan">
+              {balance
+                ? `${parseFloat(balance.formatted).toFixed(4)} ${
+                    balance.symbol
+                  }`
+                : "Loading..."}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      {/* 消息签名 */}
+      <div className="message-signing">
+        <h4 className="text-text-primary font-semibold mb-2 flex items-center">
+          <FontAwesomeIcon icon={faPen} className="mr-2 text-xs" />
+          Message Signing
+        </h4>
+        <div className="space-y-2">
+          <textarea
+            placeholder="Enter message to sign..."
+            className="w-full p-2 bg-deep-black border border-night-purple/30 rounded text-text-primary placeholder-text-secondary resize-none"
+            rows={2}
+            value={messageToSign}
+            onChange={(e) => setMessageToSign(e.target.value)}
+          />
+          <button
+            onClick={handleSignMessage}
+            disabled={isSignPending}
+            className="w-full px-4 py-2 bg-gradient-to-r from-neon-cyan/20 to-night-purple/20 hover:from-neon-cyan/30 hover:to-night-purple/30 border border-neon-cyan/30 text-neon-cyan rounded transition-all disabled:opacity-50"
+          >
+            {isSignPending ? "Signing..." : "Sign Message"}
+          </button>
+          {signatureResult && (
+            <div className="signature-result p-2 bg-deep-black/80 border border-neon-cyan/20 rounded">
+              <p className="text-xs text-text-secondary mb-1">Signature Result:</p>
+              <p className="text-xs text-neon-cyan font-mono break-all">
+                {signatureResult}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 发送交易 */}
+      <div className="send-transaction">
+        <h4 className="text-text-primary font-semibold mb-2">Send Transaction</h4>
+        <div className="space-y-2">
+                      <input
+              type="text"
+              placeholder="Recipient Address (0x...)"
+              className="w-full p-2 bg-deep-black border border-night-purple/30 rounded text-text-primary placeholder-text-secondary"
+              value={recipientAddress}
+              onChange={(e) => setRecipientAddress(e.target.value)}
+            />
+            <input
+              type="number"
+              placeholder="Amount"
+              step="0.001"
+              className="w-full p-2 bg-deep-black border border-night-purple/30 rounded text-text-primary placeholder-text-secondary"
+              value={sendAmount}
+              onChange={(e) => setSendAmount(e.target.value)}
+            />
+          <button
+            onClick={handleSendTransaction}
+            disabled={isSendPending}
+            className="w-full px-4 py-2 bg-gradient-to-r from-night-purple/20 to-neon-cyan/20 hover:from-night-purple/30 hover:to-neon-cyan/30 border border-night-purple/30 text-text-primary rounded transition-all disabled:opacity-50"
+          >
+            {isSendPending
+              ? "Sending..."
+              : `Send ${chain?.nativeCurrency.symbol || "Token"}`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function App() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -172,8 +411,8 @@ function App() {
 	const getAgentDescription = (agent: AIAgentType) => {
 		if (agent === "monitor") {
 			return {
-				title: "🚀 加密货币市场助手",
-				description: "获取价格数据、分析市场趋势并制定交易策略",
+				title: "🚀 Cryptocurrency Market Assistant",
+				description: "Get price data, analyze market trends and develop trading strategies",
 				features: [
 
 
@@ -181,8 +420,8 @@ function App() {
 			};
 		} else {
 			return {
-				title: "💰 支付宝转代币助手",
-				description: "协助完成代币转账和支付宝相关操作",
+				title: "💰 Payment Bridge Assistant",
+				description: "Assist with token transfers and cross-border payment operations",
 				features: [
 
 
@@ -190,6 +429,7 @@ function App() {
 			};
 		}
 	};
+  const [showSignaturePanel, setShowSignaturePanel] = useState(false);
 
 	// 从本地存储加载对话
 	useEffect(() => {
@@ -416,12 +656,14 @@ function App() {
 								.replace(/\n/g, "<br>") // 将\n替换为HTML的<br>标签
 								.replace(/\r/g, ""); // 移除可能存在的\r字符
 
-							// 调试：输出接收到的HTML内容
-							console.log("接收到的AI响应内容:", formattedText);
-
-							// 检查是否包含按钮HTML
-							if (formattedText.includes('confirm-btn-purple')) {
-								console.log("检测到确认按钮HTML");
+							// 调试：输出接收到的HTML内容（仅在开发模式下）
+							if (process.env.NODE_ENV === 'development') {
+								console.log("接收到的AI响应内容:", formattedText);
+								
+								// 检查是否包含按钮HTML
+								if (formattedText.includes('confirm-btn-purple')) {
+									console.log("检测到确认按钮HTML");
+								}
 							}
 
 							lastMessage.text = formattedText;
@@ -447,7 +689,7 @@ function App() {
 
 				if (lastMessage && lastMessage.sender === "ai") {
 					lastMessage.text =
-						"<p class='text-red-500 whitespace-pre-wrap'>抱歉，发生了一个错误，请重试。</p>";
+						"<p class='text-red-500 whitespace-pre-wrap'>Sorry, an error occurred. Please try again.</p>";
 				}
 
 				return updatedMessages;
@@ -458,7 +700,7 @@ function App() {
 	// 处理转账表单提交 - 调用市场交易API
 	const handleTransferSubmit = async () => {
 		if (!transferFormData.toAddress || !transferFormData.amount) {
-			alert("请填写完整的转账信息");
+			alert("Please fill in complete transfer information");
 			return;
 		}
 
@@ -543,7 +785,7 @@ function App() {
 				text: `
 					<div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05)); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; display: flex; align-items: center; gap: 1rem;">
 						<div style="font-size: 1.5rem; color: #ef4444;">❌</div>
-						<div style="color: #E6E6ED; font-weight: 500;">转账提交失败，请重试</div>
+						<div style="color: #E6E6ED; font-weight: 500;">Transfer submission failed, please try again</div>
 					</div>
 				`,
 				sender: "ai",
@@ -573,15 +815,33 @@ function App() {
 		setShowTransferForm(true);
 	};
 
+	// 添加按钮点击状态管理
+	const [buttonClickedMap, setButtonClickedMap] = useState<Record<string, boolean>>({});
+
 	// 全局函数，供HTML按钮调用
 	useEffect(() => {
-		(window as any).showTransferForm = () => {
-			console.log("确认按钮被点击");
+		(window as any).showTransferForm = (buttonId?: string) => {
+			console.log("确认按钮被点击, buttonId:", buttonId);
 			console.log("当前对话ID:", currentConversationId);
 			console.log("选中的Agent:", selectedAgent);
 
+			// 生成唯一的按钮ID（如果没有提供）
+			const uniqueButtonId = buttonId || `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+			// 检查按钮是否已经被点击过
+			if (buttonClickedMap[uniqueButtonId]) {
+				console.log("按钮已被点击过，忽略重复点击");
+				return;
+			}
+
+			// 标记按钮为已点击
+			setButtonClickedMap(prev => ({
+				...prev,
+				[uniqueButtonId]: true
+			}));
+
 			// 直接向AI发送确认执行的消息，而不是打开表单
-			const confirmMessage = "确认执行上述转账操作";
+			const confirmMessage = "确认执行支付订单";
 
 			// 添加用户确认消息
 			const userConfirmMessage: Message = {
@@ -597,7 +857,7 @@ function App() {
 		return () => {
 			delete (window as any).showTransferForm;
 		};
-	}, [currentConversationId, selectedAgent, setMessages, respondToMessage]);
+	}, [currentConversationId, selectedAgent, setMessages, respondToMessage, buttonClickedMap]);
 
 	// 发送消息
 	const handleSendMessage = () => {
@@ -683,45 +943,45 @@ function App() {
 
 								{/* AI助手切换按钮组 */}
 								<div className="flex items-center space-x-1 bg-deep-black/50 backdrop-blur-md border border-night-purple/20 rounded-lg p-1 agent-switch-container">
-									<button
-										onClick={() => handleAgentSwitch("monitor")}
-										onMouseEnter={(e) => handleMouseEnter("monitor", e)}
-										onMouseLeave={handleMouseLeave}
-										disabled={isAgentSwitching}
-										className={`agent-switch-button relative px-4 py-2 rounded-md font-medium text-sm transition-all duration-300 ${selectedAgent === "monitor"
-											? "bg-gradient-to-r from-neon-cyan/20 to-night-purple/20 text-neon-cyan border border-neon-cyan/30 shadow-lg agent-switch-active"
-											: "text-text-secondary hover:text-text-primary hover:bg-white/5"
-											} ${isAgentSwitching ? "opacity-50 cursor-not-allowed agent-switching" : ""}`}
-									>
-										{isAgentSwitching && selectedAgent === "monitor" && (
-											<div className="absolute inset-0 rounded-md bg-gradient-to-r from-neon-cyan/10 to-night-purple/10 animate-pulse"></div>
-										)}
-										<span className="relative flex items-center space-x-2">
-											<span className="agent-switch-icon">📈</span>
-											<span className="hidden sm:inline">加密货币监控</span>
-											<span className="sm:hidden">监控</span>
-										</span>
-									</button>
+														<button
+						onClick={() => handleAgentSwitch("monitor")}
+						onMouseEnter={(e) => handleMouseEnter("monitor", e)}
+						onMouseLeave={handleMouseLeave}
+						disabled={isAgentSwitching}
+						className={`agent-switch-button relative px-4 py-2 rounded-md font-medium text-sm transition-all duration-300 ${selectedAgent === "monitor"
+							? "bg-gradient-to-r from-neon-cyan/20 to-night-purple/20 text-neon-cyan border border-neon-cyan/30 shadow-lg agent-switch-active"
+							: "text-text-secondary hover:text-text-primary hover:bg-white/5"
+							} ${isAgentSwitching ? "opacity-50 cursor-not-allowed agent-switching" : ""}`}
+					>
+						{isAgentSwitching && selectedAgent === "monitor" && (
+							<div className="absolute inset-0 rounded-md bg-gradient-to-r from-neon-cyan/10 to-night-purple/10 animate-pulse"></div>
+						)}
+						<span className="relative flex items-center space-x-2">
+							<span className="agent-switch-icon">📈</span>
+							<span className="hidden sm:inline">Crypto Monitor</span>
+							<span className="sm:hidden">Monitor</span>
+						</span>
+					</button>
 
-									<button
-										onClick={() => handleAgentSwitch("trade")}
-										onMouseEnter={(e) => handleMouseEnter("trade", e)}
-										onMouseLeave={handleMouseLeave}
-										disabled={isAgentSwitching}
-										className={`agent-switch-button relative px-4 py-2 rounded-md font-medium text-sm transition-all duration-300 ${selectedAgent === "trade"
-											? "bg-gradient-to-r from-neon-cyan/20 to-night-purple/20 text-neon-cyan border border-neon-cyan/30 shadow-lg agent-switch-active"
-											: "text-text-secondary hover:text-text-primary hover:bg-white/5"
-											} ${isAgentSwitching ? "opacity-50 cursor-not-allowed agent-switching" : ""}`}
-									>
-										{isAgentSwitching && selectedAgent === "trade" && (
-											<div className="absolute inset-0 rounded-md bg-gradient-to-r from-neon-cyan/10 to-night-purple/10 animate-pulse"></div>
-										)}
-										<span className="relative flex items-center space-x-2">
-											<span className="agent-switch-icon">💰</span>
-											<span className="hidden sm:inline">支付宝转代币</span>
-											<span className="sm:hidden">支付</span>
-										</span>
-									</button>
+														<button
+						onClick={() => handleAgentSwitch("trade")}
+						onMouseEnter={(e) => handleMouseEnter("trade", e)}
+						onMouseLeave={handleMouseLeave}
+						disabled={isAgentSwitching}
+						className={`agent-switch-button relative px-4 py-2 rounded-md font-medium text-sm transition-all duration-300 ${selectedAgent === "trade"
+							? "bg-gradient-to-r from-neon-cyan/20 to-night-purple/20 text-neon-cyan border border-neon-cyan/30 shadow-lg agent-switch-active"
+							: "text-text-secondary hover:text-text-primary hover:bg-white/5"
+							} ${isAgentSwitching ? "opacity-50 cursor-not-allowed agent-switching" : ""}`}
+					>
+						{isAgentSwitching && selectedAgent === "trade" && (
+							<div className="absolute inset-0 rounded-md bg-gradient-to-r from-neon-cyan/10 to-night-purple/10 animate-pulse"></div>
+						)}
+						<span className="relative flex items-center space-x-2">
+							<span className="agent-switch-icon">💰</span>
+							<span className="hidden sm:inline">Payment Bridge</span>
+							<span className="sm:hidden">Payment</span>
+						</span>
+					</button>
 								</div>
 
 								<div className="flex items-center space-x-4">
@@ -745,7 +1005,7 @@ function App() {
 								</button>
 								<div className="space-y-1 mb-6">
 									<h3 className="text-text-secondary text-xs uppercase tracking-wider mb-2 px-2">
-										Recent conversations
+										Recent Conversations
 									</h3>
 
 									{conversations.length > 0 ? (
@@ -786,25 +1046,36 @@ function App() {
 											</div>
 										))
 									) : (
-										<div className="text-text-secondary text-sm px-3 py-2">
-											No conversation records available at the moment
-										</div>
+																			<div className="text-text-secondary text-sm px-3 py-2">
+										No conversations yet
+									</div>
 									)}
 								</div>
 
 								<div className="space-y-1">
 									<h3 className="text-text-secondary text-xs uppercase tracking-wider mb-2 px-2">
-										workspace
+										Workspace
 									</h3>
 
-									<button className="w-full text-left px-3 py-2 rounded-md hover:bg-white/5 transition-all flex items-center space-x-3">
+									{/* <button className="w-full text-left px-3 py-2 rounded-md hover:bg-white/5 transition-all flex items-center space-x-3">
 										<FontAwesomeIcon
 											icon={faBolt}
 											className="text-text-secondary text-xs"
 										/>
 										<span className="text-sm truncate">My Collection</span>
-									</button>
+                  </button> */}
 
+                  <button
+                    onClick={() => setShowSignaturePanel(!showSignaturePanel)}
+                    className="w-full text-left px-3 py-2 rounded-md hover:bg-white/5 transition-all flex items-center space-x-3"
+                  >
+                    <FontAwesomeIcon
+                      icon={faSignature}
+                      className="text-text-secondary text-xs"
+                    />
+                    <span className="text-sm truncate">Wallet Signature</span>
+									</button>
+                  {/* 
 									<button className="w-full text-left px-3 py-2 rounded-md hover:bg-white/5 transition-all flex items-center space-x-3">
 										<FontAwesomeIcon
 											icon={faHistory}
@@ -819,8 +1090,15 @@ function App() {
 											className="text-text-secondary text-xs"
 										/>
 										<span className="text-sm truncate">set up</span>
-									</button>
+									</button> */}
 								</div>
+
+                {/* 签名工具面板 */}
+                {showSignaturePanel && (
+                  <div className="mt-4">
+                    <WalletSignature />
+                  </div>
+                )}
 							</aside>
 
 							{/* 主要内容 */}
@@ -897,16 +1175,16 @@ function App() {
 									<div className="mx-auto relative">
 										<div className="relative gradient-border">
 											<div className="flex items-center bg-deep-black rounded-md overflow-hidden input-active">
-												<textarea
-													ref={textareaRef}
-													rows={1}
-													placeholder="What do you want to ask..."
-													className="flex-1 resize-none bg-transparent border-none outline-none p-3 pr-12 text-text-primary placeholder-text-secondary/50"
-													style={{ height: "48px", maxHeight: "200px" }}
-													value={inputMessage}
-													onChange={handleTextareaChange}
-													onKeyDown={handleKeyDown}
-												></textarea>
+																				<textarea
+									ref={textareaRef}
+									rows={1}
+									placeholder="Ask me anything about crypto or payments..."
+									className="flex-1 resize-none bg-transparent border-none outline-none p-3 pr-12 text-text-primary placeholder-text-secondary/50"
+									style={{ height: "48px", maxHeight: "200px" }}
+									value={inputMessage}
+									onChange={handleTextareaChange}
+									onKeyDown={handleKeyDown}
+								></textarea>
 
 												<div className="absolute right-2 bottom-2 flex items-center">
 													<button className="w-8 h-8 rounded-md text-text-secondary hover:text-neon-cyan flex items-center justify-center transition-colors">
@@ -942,7 +1220,7 @@ function App() {
 											<div className="w-10 h-10 bg-gradient-to-br from-neon-cyan/20 to-night-purple/20 rounded-lg flex items-center justify-center">
 												<FontAwesomeIcon icon={faWallet} className="text-neon-cyan" />
 											</div>
-											<h2 className="text-xl font-bold text-text-primary">发起转账</h2>
+											<h2 className="text-xl font-bold text-text-primary">Transfer Tokens</h2>
 										</div>
 										<button
 											className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all"
@@ -957,72 +1235,72 @@ function App() {
 										{/* 合约地址 */}
 										<div>
 											<label className="block text-sm font-medium text-text-secondary mb-2">
-												合约地址 *
+												Contract Address *
 											</label>
 											<input
 												type="text"
 												value={transferFormData.contractAddress}
-												onChange={(e) => setTransferFormData(prev => ({
+												onChange={(e) => setTransferFormData((prev: TransferFormData) => ({
 													...prev,
 													contractAddress: e.target.value
 												}))}
 												className="w-full bg-deep-black/50 border border-night-purple/30 rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary/50 focus:border-neon-cyan/50 focus:outline-none transition-colors"
-												placeholder="输入ERC20合约地址"
+												placeholder="Enter ERC20 contract address"
 											/>
 										</div>
 
 										{/* 接收地址 */}
 										<div>
 											<label className="block text-sm font-medium text-text-secondary mb-2">
-												接收地址 *
+												Recipient Address *
 											</label>
 											<input
 												type="text"
 												value={transferFormData.toAddress}
-												onChange={(e) => setTransferFormData(prev => ({
+												onChange={(e) => setTransferFormData((prev: TransferFormData) => ({
 													...prev,
 													toAddress: e.target.value
 												}))}
 												className="w-full bg-deep-black/50 border border-night-purple/30 rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary/50 focus:border-neon-cyan/50 focus:outline-none transition-colors"
-												placeholder="输入接收方钱包地址"
+												placeholder="Enter recipient wallet address"
 											/>
 										</div>
 
 										{/* 转账金额 */}
 										<div>
 											<label className="block text-sm font-medium text-text-secondary mb-2">
-												转账金额 *
+												Transfer Amount *
 											</label>
 											<input
 												type="number"
 												step="0.000001"
 												value={transferFormData.amount}
-												onChange={(e) => setTransferFormData(prev => ({
+												onChange={(e) => setTransferFormData((prev: TransferFormData) => ({
 													...prev,
 													amount: e.target.value
 												}))}
 												className="w-full bg-deep-black/50 border border-night-purple/30 rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary/50 focus:border-neon-cyan/50 focus:outline-none transition-colors"
-												placeholder="输入转账数量"
+												placeholder="Enter transfer amount"
 											/>
 										</div>
 
 										{/* 代币精度 */}
 										<div>
 											<label className="block text-sm font-medium text-text-secondary mb-2">
-												代币精度
+												Token Decimals
 											</label>
 											<select
 												value={transferFormData.decimals}
-												onChange={(e) => setTransferFormData(prev => ({
+												onChange={(e) => setTransferFormData((prev: TransferFormData) => ({
 													...prev,
 													decimals: e.target.value
 												}))}
 												className="w-full bg-deep-black/50 border border-night-purple/30 rounded-lg px-4 py-3 text-text-primary focus:border-neon-cyan/50 focus:outline-none transition-colors"
 											>
-												<option value="18">18 (标准ERC20)</option>
+												<option value="18">18 (Standard ERC20)</option>
 												<option value="6">6 (USDC/USDT)</option>
 												<option value="8">8 (WBTC)</option>
-												<option value="9">9 (自定义)</option>
+												<option value="9">9 (Custom)</option>
 											</select>
 										</div>
 									</div>
@@ -1033,7 +1311,7 @@ function App() {
 											onClick={() => setShowTransferForm(false)}
 											className="flex-1 px-4 py-3 bg-deep-black/50 border border-night-purple/30 rounded-lg text-text-secondary hover:text-text-primary hover:border-night-purple/50 transition-all"
 										>
-											取消
+											Cancel
 										</button>
 										<button
 											onClick={handleTransferSubmit}
@@ -1043,10 +1321,10 @@ function App() {
 											{isSubmittingTransfer ? (
 												<div className="flex items-center justify-center space-x-2">
 													<div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-													<span>提交中...</span>
+													<span>Submitting...</span>
 												</div>
 											) : (
-												"确认转账"
+												"Confirm Transfer"
 											)}
 										</button>
 									</div>
@@ -1054,7 +1332,7 @@ function App() {
 									{/* 安全提示 */}
 									<div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
 										<p className="text-xs text-yellow-400/80">
-											⚠️ 请仔细核对转账信息，区块链交易不可逆转
+											⚠️ Please verify transfer details carefully. Blockchain transactions are irreversible.
 										</p>
 									</div>
 								</div>
@@ -1145,7 +1423,7 @@ function App() {
 											{/* 提示 */}
 											<div className="mt-3 pt-3 border-t border-night-purple/20">
 												<p className="text-xs text-text-secondary/80 italic">
-													点击切换到此助手
+													Click to switch to this assistant
 												</p>
 											</div>
 										</div>
