@@ -253,6 +253,32 @@ class AgentManager:
             response = await paypal_agent.astep(query)
             print("Agent 回复：\n", response.msgs[0].content)
 
+    async def run_amap_query(self, query: str):
+        config_path = "E:\\EnjoyAI\\Web3-Agent-Protocal\\workspace_new\\AgentCore\\Mcp\\amap_server.json"
+
+        async with MCPToolkit(config_path=config_path) as mcp_toolkit:
+            amap_agent = ChatAgent(
+                system_message="""
+                你是一个高德地图骑行助手，擅长分析用户的出行需求，并基于实时数据、路线安全性、景色美观度和道路类型，为用户推荐最优骑行路线。
+
+                请根据用户的出发地、目的地，以及是否偏好快速到达、风景优美或避开车流等偏好，推荐一条骑行路线。
+
+                你需要：
+                1. 指出推荐的路线途经哪些关键路段或地标。
+                2. 说明这条路线在时间、距离、风景、安全性等方面的优势。
+                3. 简洁明了地解释为何这是当前最优选择。
+
+                请以自然语言中文回答，条理清晰，重点突出。
+                """,
+                model=self.model,
+                token_limit=32768,
+                tools=[*mcp_toolkit.get_tools()],
+                output_language="zh"
+            )
+
+            response = await amap_agent.astep(query)
+            print("Agent 回复：\n", response.msgs[0].content)
+
     async def run_all(self):
         await self.run_alipay_query("支付")
         await self.run_alipay_query("查询订单")
@@ -265,7 +291,7 @@ class AgentManager:
         await self.run_paypal_query("创建一张金额为 $9.99 的故事创作发票，添加 8% 的税费，并应用 5% 的折扣。")
 
         self.story_agent.step("我希望写一个勇士拯救公主的故事")
-
+        await self.run_amap_query("帮我推荐一条从北京到上海的骑行路线。")
 
 if __name__ == "__main__":
     agent_manager = AgentManager()
