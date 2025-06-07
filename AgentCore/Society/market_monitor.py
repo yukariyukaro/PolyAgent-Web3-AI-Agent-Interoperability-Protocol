@@ -19,56 +19,57 @@ from camel.types import (
     TaskType,
 )
 
-def run_crypto_insight_agent(user_question: str) -> str:
-    # 初始化模型
-    model = ModelFactory.create(
-        model_platform=ModelPlatformType.OPENAI,
-        model_type=ModelType.GPT_4_1,
-        url="https://api.openai.com/v1/",
-    )
+class MarketMonitorAgent:
+    def __init__(self, model):
+        self.model = ModelFactory.create(
+            model_platform=ModelPlatformType.MODELSCOPE,
+            model_type='Qwen/Qwen2.5-72B-Instruct',
+            model_config_dict={'temperature': 0.2},
+            api_key='9d3aed4d-eca1-4e0c-9805-cb923ccbbf21',
+        )
+        
+        # 初始化 agent
+        self.coin_price_agent = ChatAgent(
+            system_message="你是一个加密货币历史价格助手，帮助用户获取指定加密货币在某一特定日期的历史价格数据，并作一个简单的分析。",
+            model=self.model,
+            token_limit=32768,
+            tools=[*CoinGeckoToolkit().get_tools()],
+            output_language="zh"
+        )
 
-    # 初始化 agent
-    coin_price_agent = ChatAgent(
-        system_message="你是一个加密货币历史价格助手，帮助用户获取指定加密货币在某一特定日期的历史价格数据，并作一个简单的分析。",
-        model=model,
-        token_limit=32768,
-        tools=[*CoinGeckoToolkit().get_tools()],
-        output_language="en"
-    )
+        self.coin_news_agent = ChatAgent(
+            system_message="你是一个加密货币新闻助手，帮助用户获取指定加密货币相关的新闻数据。并做一个简单分析。",
+            model=self.model,
+            token_limit=32768,
+            tools=[*ChainGPTToolkit().get_tools()],
+            output_language="en"
+        )
 
-    coin_news_agent = ChatAgent(
-        system_message="你是一个加密货币新闻助手，帮助用户获取指定加密货币相关的新闻数据。并做一个简单分析。",
-        model=model,
-        token_limit=32768,
-        tools=[*ChainGPTToolkit().get_tools()],
-        output_language="en"
-    )
+        # 初始化 workforce
+        self.workforce = Workforce(
+            description="这是一个由两个智能体组成的协作系统，用来实时获取加密货币的市场信息。由价格信息代理和新闻信息代理组成，分别负责历史价格查询与相关新闻提取与分析。系统整合两类关键数据，为用户提供更全面的市场洞察，可作为交易策略制定、行情监测和市场研究的基础组件",
+            new_worker_agent_kwargs={'model': self.model},
+            coordinator_agent_kwargs={'model': self.model},
+            task_agent_kwargs={'model': self.model}
+        )
 
-    # 初始化 workforce
-    workforce = Workforce(
-        description="这是一个由两个智能体组成的协作系统，用来实时获取加密货币的市场信息。由价格信息代理和新闻信息代理组成，分别负责历史价格查询与相关新闻提取与分析。系统整合两类关键数据，为用户提供更全面的市场洞察，可作为交易策略制定、行情监测和市场研究的基础组件",
-        new_worker_agent_kwargs={'model': model},
-        coordinator_agent_kwargs={'model': model},
-        task_agent_kwargs={'model': model}
-    )
+        # 添加 agent 到 workforce
+        self.workforce.add_single_agent_worker(
+            "负责搜索加密货币价格",
+            worker=self.coin_price_agent
+        ).add_single_agent_worker(
+            "负责获取加密货币数据新闻",
+            worker=self.coin_news_agent
+        )
 
-    # 添加 agent 到 workforce
-    workforce.add_single_agent_worker(
-        "负责搜索加密货币价格",
-        worker=coin_price_agent
-    ).add_single_agent_worker(
-        "负责获取加密货币数据新闻",
-        worker=coin_news_agent
-    )
-
-    # 创建并处理任务
-    task = Task(
-        content=user_question,
-        id="task-crypto-info"
-    )
-    task = workforce.process_task(task)
-
-    return task.result
+    def run(self, user_question: str) -> str:
+        # 创建并处理任务
+        task = Task(
+            content=user_question,
+            id="task-crypto-info"
+        )
+        task = self.workforce.process_task(task)
+        return task.result
 
 def main():
     user_question = ["现在人民币兑 USDT 汇率是多少",
