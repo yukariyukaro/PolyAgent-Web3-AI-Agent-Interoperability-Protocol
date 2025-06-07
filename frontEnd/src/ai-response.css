@@ -296,73 +296,443 @@
 	}
 }
 
-/* 支付信息卡片 */
+/* === Material Design 支付信息卡片 === */
 .ai-response-content .payment-info-card {
-	background: linear-gradient(135deg, rgba(108, 64, 247, 0.1), rgba(108, 64, 247, 0.05));
-	border: 1px solid rgba(108, 64, 247, 0.3);
-	border-radius: 0.5rem;
-	padding: 1rem;
-	margin: 1rem 0;
+	background: linear-gradient(145deg, rgba(31, 31, 42, 0.95), rgba(24, 24, 32, 0.98));
+	border: 1px solid rgba(0, 255, 209, 0.15);
+	border-radius: 16px;
+	padding: 28px 24px;
+	margin: 24px 0;
+	position: relative;
+	overflow: hidden;
+	box-shadow: 
+		0 8px 32px rgba(0, 0, 0, 0.4),
+		0 2px 8px rgba(0, 255, 209, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(12px);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.ai-response-content .payment-info-item {
+/* Material Design 卡片阴影和动画 */
+.ai-response-content .payment-info-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 
+		0 16px 48px rgba(0, 0, 0, 0.5),
+		0 4px 16px rgba(0, 255, 209, 0.2),
+		inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* 卡片顶部装饰条 */
+.ai-response-content .payment-info-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: linear-gradient(90deg, #00FFD1 0%, #6C40F7 50%, #00FFD1 100%);
+	background-size: 200% 100%;
+	animation: payment-card-gradient 4s ease-in-out infinite;
+}
+
+/* 卡片背景光效 */
+.ai-response-content .payment-info-card::after {
+	content: '';
+	position: absolute;
+	top: -50%;
+	left: -50%;
+	width: 200%;
+	height: 200%;
+	background: radial-gradient(circle, rgba(0, 255, 209, 0.03) 0%, transparent 70%);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	pointer-events: none;
+}
+
+.ai-response-content .payment-info-card:hover::after {
+	opacity: 1;
+}
+
+@keyframes payment-card-gradient {
+	0%, 100% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+}
+
+/* 卡片标题区域 */
+.ai-response-content .payment-card-header {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
-	padding: 0.5rem 0;
-	border-bottom: 1px solid rgba(108, 64, 247, 0.1);
+	margin-bottom: 24px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid rgba(0, 255, 209, 0.1);
 }
 
-.ai-response-content .payment-info-item:last-child {
-	border-bottom: none;
+.ai-response-content .payment-card-icon {
+	width: 48px;
+	height: 48px;
+	background: linear-gradient(135deg, rgba(0, 255, 209, 0.2), rgba(108, 64, 247, 0.2));
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 16px;
+	font-size: 20px;
+	border: 1px solid rgba(0, 255, 209, 0.3);
 }
 
+.ai-response-content .payment-card-title {
+	color: #E6E6ED;
+	font-size: 20px;
+	font-weight: 600;
+	margin: 0;
+	letter-spacing: -0.025em;
+}
+
+.ai-response-content .payment-card-subtitle {
+	color: #A0A0B4;
+	font-size: 14px;
+	font-weight: 500;
+	margin: 4px 0 0 0;
+	opacity: 0.8;
+}
+
+/* Material Design 信息项目 */
+.ai-response-content .payment-info-item {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	align-content: center !important;
+	padding: 12px 16px;
+	margin: 0 -16px;
+	border-radius: 12px;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	min-height: 48px;
+	width: 100% !important;
+	box-sizing: border-box !important;
+}
+
+.ai-response-content .payment-info-item:hover {
+	background: rgba(0, 255, 209, 0.05);
+	transform: translateX(4px);
+	box-shadow: 
+		0 2px 8px rgba(0, 255, 209, 0.1),
+		inset 2px 0 0 rgba(0, 255, 209, 0.3);
+}
+
+.ai-response-content .payment-info-item::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 4px;
+	height: 0;
+	background: linear-gradient(180deg, #00FFD1, #6C40F7);
+	border-radius: 2px;
+	transition: height 0.2s ease;
+}
+
+.ai-response-content .payment-info-item:hover::before {
+	height: 24px;
+}
+
+/* 标签样式 - Material Design Typography */
 .ai-response-content .payment-info-label {
 	color: #A0A0B4;
-	font-size: 0.875rem;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1.4 !important;
+	letter-spacing: 0.005em;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
+	flex-basis: auto !important;
+	gap: 8px;
+	text-align: left !important;
+	min-width: 100px !important;
+	max-width: 150px !important;
+	width: auto !important;
+	height: 24px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	vertical-align: middle !important;
+	align-self: center !important;
 }
 
+/* 已删除：标签前的圆点图标 */
+
+/* 值样式 - 加大字体 */
 .ai-response-content .payment-info-value {
 	color: #00FFD1;
-	font-weight: 500;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 1.4 !important;
+	letter-spacing: -0.025em;
+	text-align: right !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	flex-shrink: 1 !important;
+	flex-grow: 1 !important;
+	flex-basis: auto !important;
+	max-width: 60%;
+	min-height: 24px !important;
+	height: 24px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	word-break: break-all;
+	vertical-align: middle !important;
+	align-self: center !important;
+	font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 
-/* 确认按钮样式 */
+/* 特殊值的强调样式 */
+.ai-response-content .payment-info-value.amount {
+	font-size: 24px;
+	font-weight: 700;
+	color: #00FFD1;
+	line-height: 1.4 !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-end !important;
+	height: 24px !important;
+	min-height: 24px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	vertical-align: middle !important;
+	align-self: center !important;
+	text-shadow: 0 0 8px rgba(0, 255, 209, 0.3);
+}
+
+/* 已删除：订单状态气泡样式 */
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+	.ai-response-content .payment-info-card {
+		padding: 20px 16px;
+		margin: 16px 0;
+		border-radius: 12px;
+	}
+	
+	.ai-response-content .payment-card-title {
+		font-size: 18px;
+	}
+	
+	.ai-response-content .payment-info-label {
+	font-size: 15px;
+}
+
+	.ai-response-content .payment-info-value {
+		font-size: 16px;
+		max-width: 50%;
+	}
+	
+	.ai-response-content .payment-info-value.amount {
+		font-size: 20px;
+	}
+}
+
+/* === Material Design 确认按钮样式 === */
 .ai-response-content .confirm-btn-purple {
-	background: linear-gradient(90deg, #6c40f7 0%, #a084fa 100%);
-	color: #fff;
-	border: 1px solid #a084fa;
-	box-shadow: 0 2px 12px rgba(108, 64, 247, 0.15);
-	padding: 0.5rem 1.5rem;
-	border-radius: 0.375rem;
-	font-weight: 500;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 100px !important;
+	height: 40px !important;
+	margin: 16px auto;
+	background: linear-gradient(135deg, #22543d 0%, #2d7447 50%, #22543d 100%) !important;
+	background-size: 200% 100%;
+	color: #fff !important;
+	border: 1px solid rgba(34, 84, 61, 0.6) !important;
+	box-shadow: 
+		0 4px 12px rgba(34, 84, 61, 0.3),
+		0 1px 4px rgba(0, 0, 0, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	padding: 0 !important;
+	border-radius: 8px;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	letter-spacing: 0.025em;
 	cursor: pointer;
-	transition: all 0.3s ease;
-	margin: 0 0.5rem;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	text-align: center !important;
+	position: relative;
+	overflow: hidden;
+	line-height: 1 !important;
+	min-height: 40px !important;
+	max-width: 100px !important;
+	pointer-events: auto !important;
+	z-index: 10;
+	transform: translateY(0);
+	backdrop-filter: blur(8px);
+	text-decoration: none !important;
 }
 
+/* 确保按钮文字始终可见和居中 */
+.ai-response-content .confirm-btn-purple {
+	color: #fff !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	text-align: center !important;
+	vertical-align: middle !important;
+	position: relative !important;
+	z-index: 5 !important;
+	width: 100px !important;
+	height: 40px !important;
+	max-width: 100px !important;
+	max-height: 40px !important;
+	min-width: 100px !important;
+	min-height: 40px !important;
+	line-height: 1 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	box-sizing: border-box !important;
+}
+
+/* 为空的确认按钮添加默认文本 */
+.ai-response-content .confirm-btn-purple:empty::before {
+	content: "确认" !important;
+	color: #fff !important;
+	font-weight: 600 !important;
+	position: relative !important;
+	z-index: 10 !important;
+}
+
+/* 确保按钮文字始终为加粗白色 */
+.ai-response-content .confirm-btn-purple,
+.ai-response-content .confirm-btn-purple * {
+	color: #fff !important;
+	font-weight: 700 !important;
+	position: relative !important;
+	z-index: 5 !important;
+}
+
+/* Material Design 按钮悬停效果 */
 .ai-response-content .confirm-btn-purple:hover {
-	background: linear-gradient(90deg, #a084fa 0%, #6c40f7 100%);
-	box-shadow: 0 0 24px 4px rgba(108, 64, 247, 0.25), 0 8px 25px rgba(108, 64, 247, 0.15);
-	border-color: #6c40f7;
+	background-position: 100% 0;
+	background: linear-gradient(135deg, #2d7447 0%, #38a169 50%, #2d7447 100%) !important;
+	box-shadow: 
+		0 6px 16px rgba(34, 84, 61, 0.4),
+		0 2px 8px rgba(0, 0, 0, 0.15),
+		inset 0 1px 0 rgba(255, 255, 255, 0.2),
+		0 0 0 1px rgba(34, 84, 61, 0.3);
+	border-color: rgba(34, 84, 61, 0.8) !important;
 	transform: translateY(-2px) scale(1.05);
+	filter: brightness(1.1);
+}
+
+/* Material Design 按钮激活效果 */
+.ai-response-content .confirm-btn-purple:active {
+	transform: translateY(0) scale(0.98);
+	box-shadow: 
+		0 2px 8px rgba(34, 84, 61, 0.25),
+		0 1px 4px rgba(0, 0, 0, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	background-position: 0% 0;
+	background: linear-gradient(135deg, #1a365d 0%, #22543d 50%, #1a365d 100%) !important;
+}
+
+/* Material Design 按钮聚焦效果 */
+.ai-response-content .confirm-btn-purple:focus {
+	outline: none;
+	box-shadow: 
+		0 8px 24px rgba(0, 255, 209, 0.25),
+		0 2px 8px rgba(0, 0, 0, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.2),
+		0 0 0 3px rgba(0, 255, 209, 0.3);
+}
+
+/* Material Design 涟漪效果 - 避免遮挡文字 */
+.ai-response-content .confirm-btn-purple:active::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 300px;
+	height: 300px;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	animation: ripple-effect 0.6s ease-out;
+	z-index: -1 !important;
+	pointer-events: none;
+}
+
+@keyframes ripple-effect {
+	0% {
+		width: 0;
+		height: 0;
+		opacity: 1;
+	}
+	100% {
+		width: 300px;
+		height: 300px;
+		opacity: 0;
+	}
+}
+
+/* Material Design 光泽扫过效果 - 确保不遮挡文字 */
+.ai-response-content .confirm-btn-purple:not(:empty):hover::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(
+		90deg, 
+		transparent 0%, 
+		rgba(255, 255, 255, 0.1) 30%, 
+		rgba(255, 255, 255, 0.2) 50%, 
+		rgba(255, 255, 255, 0.1) 70%, 
+		transparent 100%
+	);
+	transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+	z-index: -1 !important;
+	pointer-events: none;
+}
+
+.ai-response-content .confirm-btn-purple:not(:empty):hover::after {
+	left: 100%;
+	animation: button-shine 2s ease-in-out infinite;
+}
+
+/* 按钮光泽动画 */
+@keyframes button-shine {
+	0% { left: -100%; }
+	50% { left: 100%; }
+	100% { left: 100%; }
 }
 
 .ai-response-content .cancel-btn {
-	background: #0F0F12;
+	display: block;
+	width: 100%;
+	max-width: 320px;
+	margin: 12px auto;
+	background: rgba(15, 15, 18, 0.8);
 	border: 1px solid rgba(108, 64, 247, 0.3);
 	color: #E6E6ED;
-	padding: 0.5rem 1.5rem;
-	border-radius: 0.375rem;
+	padding: 14px 24px;
+	border-radius: 8px;
 	font-weight: 500;
+	font-size: 15px;
 	cursor: pointer;
 	transition: all 0.3s ease;
-	margin: 0 0.5rem;
+	text-align: center;
 }
 
 .ai-response-content .cancel-btn:hover {
-	background: rgba(15, 15, 18, 0.7);
+	background: rgba(15, 15, 18, 0.9);
 	border-color: rgba(108, 64, 247, 0.5);
+	color: #F1F1F4;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* === 转账表单相关样式 === */
@@ -683,134 +1053,30 @@
 	animation: slide-out 0.3s ease-in-out forwards;
 }
 
-/* === 支付宝转代币按钮样式 === */
 
-/* 支付宝转代币专用按钮 */
-.alipay-transfer-btn {
-	position: relative;
-	overflow: hidden;
-	background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%);
-	border: 1px solid #40a9ff;
-	transition: all 0.3s ease;
+
+/* 订单确认区域样式 */
+.ai-response-content .order-confirmation-area {
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid rgba(108, 64, 247, 0.2);
 }
 
-.alipay-transfer-btn:hover {
-	background: linear-gradient(90deg, #40a9ff 0%, #1890ff 100%);
-	box-shadow:
-		0 0 20px rgba(24, 144, 255, 0.3),
-		0 4px 15px rgba(24, 144, 255, 0.2);
-	transform: translateY(-2px) scale(1.02);
-	border-color: #1890ff;
-}
-
-.alipay-transfer-btn::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: -100%;
-	width: 100%;
-	height: 100%;
-	background: linear-gradient(90deg,
-			transparent 0%,
-			rgba(255, 255, 255, 0.3) 50%,
-			transparent 100%);
-	transition: left 0.5s ease;
-}
-
-.alipay-transfer-btn:hover::before {
-	left: 100%;
-}
-
-/* 支付宝转代币操作卡片增强 */
-.alipay-info-card {
-	background: linear-gradient(135deg,
-			rgba(24, 144, 255, 0.1) 0%,
-			rgba(64, 169, 255, 0.05) 100%);
-	border: 1px solid rgba(24, 144, 255, 0.3);
-	border-radius: 0.75rem;
-	backdrop-filter: blur(10px);
-	position: relative;
-	overflow: hidden;
-}
-
-.alipay-info-card::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 2px;
-	background: linear-gradient(90deg,
-			#1890ff 0%,
-			#40a9ff 50%,
-			#1890ff 100%);
-	background-size: 200% 100%;
-	animation: alipay-gradient 3s ease infinite;
-}
-
-@keyframes alipay-gradient {
-	0% {
-		background-position: 0% 50%;
-	}
-
-	50% {
-		background-position: 100% 50%;
-	}
-
-	100% {
-		background-position: 0% 50%;
-	}
-}
-
-/* 支付宝转代币按钮组布局 */
-.alipay-button-group {
+/* 按钮容器通用样式 */
+.ai-response-content .button-container {
 	display: flex;
-	gap: 1rem;
-	justify-content: center;
-	margin-top: 1.5rem;
-	flex-wrap: wrap;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	margin: 20px 0;
+	width: 100%;
 }
 
 @media (max-width: 768px) {
-	.alipay-button-group {
-		flex-direction: column;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.alipay-transfer-btn,
-	.alipay-button-group .cancel-btn {
+	.ai-response-content .confirm-btn-purple,
+	.ai-response-content .cancel-btn {
+		max-width: 100%;
 		width: 100%;
-		max-width: 280px;
-		justify-content: center;
-	}
-}
-
-/* 支付宝转代币成功状态 */
-.alipay-success-animation {
-	position: relative;
-}
-
-.alipay-success-animation::after {
-	content: '✨';
-	position: absolute;
-	top: -10px;
-	right: -10px;
-	font-size: 1.2rem;
-	animation: alipay-sparkle 2s infinite;
-}
-
-@keyframes alipay-sparkle {
-
-	0%,
-	100% {
-		opacity: 0;
-		transform: scale(0.8) rotate(0deg);
-	}
-
-	50% {
-		opacity: 1;
-		transform: scale(1.2) rotate(180deg);
 	}
 }
 
@@ -944,5 +1210,286 @@
 
 	.agent-tooltip .text-text-secondary {
 		color: #ffffff;
+	}
+}
+
+/* 支付宝支付按钮样式 - 小尺寸按钮，降低颜色亮度 */
+.ai-response-content a[href*="alipay"],
+.ai-response-content a[href*="payment"],
+.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"],
+.ai-response-content a[href*="gateway.do"],
+.ai-response-content .alipay-payment-button {
+	display: inline-block !important;
+	width: 120px !important;
+	height: 40px !important;
+	max-width: none !important;
+	margin: 12px auto !important;
+	background: linear-gradient(90deg, #4A90E2 0%, #357ABD 100%) !important;
+	color: white !important;
+	padding: 0 !important;
+	border-radius: 6px !important;
+	text-decoration: none !important;
+	font-weight: 700 !important;
+	font-size: 14px !important;
+	box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2) !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	border: 1px solid #357ABD !important;
+	text-align: center !important;
+	cursor: pointer !important;
+	position: relative !important;
+	overflow: hidden !important;
+	box-sizing: border-box !important;
+	z-index: 10 !important;
+	pointer-events: auto !important;
+	line-height: 40px !important;
+	vertical-align: middle !important;
+	/* 确保链接文字可见 */
+	white-space: nowrap !important;
+	text-overflow: ellipsis !important;
+}
+
+/* 为空的支付宝链接添加默认文本 */
+.ai-response-content a[href*="alipay"]:empty::before,
+.ai-response-content a[href*="payment"]:empty::before,
+.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]:empty::before,
+.ai-response-content a[href*="gateway.do"]:empty::before {
+	content: "支付订单" !important;
+	color: white !important;
+	font-weight: 700 !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 100% !important;
+	height: 100% !important;
+	position: absolute !important;
+	top: 0 !important;
+	left: 0 !important;
+	z-index: 10 !important;
+	pointer-events: none !important;
+}
+
+/* 确保支付宝链接文字始终为加粗白色 */
+.ai-response-content a[href*="alipay"],
+.ai-response-content a[href*="payment"],
+.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"],
+.ai-response-content a[href*="gateway.do"] {
+	color: white !important;
+	font-weight: 700 !important;
+	position: relative;
+	z-index: 2 !important;
+}
+
+.ai-response-content a[href*="alipay"]:hover,
+.ai-response-content a[href*="payment"]:hover,
+.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]:hover,
+.ai-response-content a[href*="gateway.do"]:hover,
+.ai-response-content .alipay-payment-button:hover {
+	background: linear-gradient(90deg, #357ABD 0%, #4A90E2 100%) !important;
+	box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3) !important;
+	border-color: #4A90E2 !important;
+	transform: translateY(-1px) !important;
+}
+
+.ai-response-content a[href*="alipay"]:active,
+.ai-response-content a[href*="payment"]:active,
+.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]:active,
+.ai-response-content a[href*="gateway.do"]:active {
+	transform: translateY(0) !important;
+	box-shadow: 0 2px 6px rgba(74, 144, 226, 0.2) !important;
+}
+
+/* 支付按钮光泽效果 */
+.ai-response-content a[href*="alipay"]::after,
+.ai-response-content a[href*="payment"]::after,
+.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]::after,
+.ai-response-content a[href*="gateway.do"]::after {
+	content: '' !important;
+	position: absolute !important;
+	top: 0 !important;
+	left: -100% !important;
+	width: 100% !important;
+	height: 100% !important;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+	transition: left 0.4s ease !important;
+	z-index: 1 !important;
+}
+
+.ai-response-content a[href*="alipay"]:hover::after,
+.ai-response-content a[href*="payment"]:hover::after,
+.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]:hover::after,
+.ai-response-content a[href*="gateway.do"]:hover::after {
+	left: 100% !important;
+}
+
+/* 支付提示信息卡片样式 */
+.ai-response-content div[style*="rgba(22, 119, 255, 0.1)"] {
+	background: rgba(74, 144, 226, 0.1) !important;
+	border: 1px solid rgba(74, 144, 226, 0.3) !important;
+	border-radius: 6px !important;
+	padding: 12px !important;
+	margin: 1rem 0 !important;
+	font-size: 0.9em !important;
+	color: #94A3B8 !important;
+}
+
+/* 支付宝订单信息卡片样式 - 修复紫色透明背景 */
+.ai-response-content .alipay-info-card,
+.ai-response-content div[class*="alipay-info-card"] {
+	background: linear-gradient(135deg, rgba(108, 64, 247, 0.15), rgba(108, 64, 247, 0.08)) !important;
+	border: 1px solid rgba(108, 64, 247, 0.4) !important;
+	border-radius: 8px !important;
+	padding: 16px !important;
+	margin: 16px 0 !important;
+	position: relative !important;
+	overflow: hidden !important;
+	backdrop-filter: blur(8px) !important;
+}
+
+.ai-response-content .alipay-info-card::before,
+.ai-response-content div[class*="alipay-info-card"]::before {
+	content: '' !important;
+	position: absolute !important;
+	top: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	height: 2px !important;
+	background: linear-gradient(90deg, #6c40f7, #a084fa, #6c40f7) !important;
+	background-size: 200% 100% !important;
+	animation: payment-card-gradient 3s ease infinite !important;
+}
+
+/* 确保支付按钮在所有情况下都可点击 */
+.ai-response-content a[href] {
+	pointer-events: auto !important;
+	position: relative !important;
+	z-index: 10 !important;
+	display: inline-block !important;
+}
+
+/* 修复可能的遮挡问题 */
+.ai-response-content .ai-response-content {
+	position: relative !important;
+}
+
+/* 确保父元素不会阻止点击事件 */
+.ai-response-content > * {
+	position: relative !important;
+}
+
+/* === Material Design 详情展开样式 === */
+.ai-response-content details {
+	margin: 24px 0 !important;
+	border-radius: 12px !important;
+	overflow: hidden !important;
+	transition: all 0.3s ease !important;
+	background: rgba(75, 85, 99, 0.05) !important;
+	border: 1px solid rgba(75, 85, 99, 0.15) !important;
+}
+
+.ai-response-content details summary {
+	cursor: pointer !important;
+	padding: 16px 20px !important;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	position: relative !important;
+	font-weight: 500 !important;
+	font-size: 16px !important;
+	color: #9CA3AF !important;
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	user-select: none !important;
+	background: transparent !important;
+}
+
+.ai-response-content details summary:hover {
+	background: rgba(75, 85, 99, 0.08) !important;
+	color: #E6E6ED !important;
+	transform: translateY(-1px) !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ai-response-content details[open] summary {
+	border-bottom: 1px solid rgba(75, 85, 99, 0.2) !important;
+	background: rgba(75, 85, 99, 0.1) !important;
+	color: #E6E6ED !important;
+	margin-bottom: 0 !important;
+}
+
+/* 技术详情卡片特定样式 */
+.ai-response-content .technical-details summary:hover {
+	background: rgba(108, 64, 247, 0.05) !important;
+	border-color: rgba(108, 64, 247, 0.2) !important;
+}
+
+.ai-response-content .technical-details[open] summary {
+	background: rgba(108, 64, 247, 0.08) !important;
+	border-color: rgba(108, 64, 247, 0.3) !important;
+}
+
+.ai-response-content details div[style*="monospace"] {
+	background: rgba(31, 31, 42, 0.8) !important;
+	border: none !important;
+	border-top: 1px solid rgba(75, 85, 99, 0.2) !important;
+	border-radius: 0 !important;
+	padding: 20px !important;
+	font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+	font-size: 14px !important;
+	line-height: 1.6 !important;
+	word-break: break-word !important;
+	white-space: pre-wrap !important;
+	color: #9CA3AF !important;
+	overflow-x: auto !important;
+	margin: 0 !important;
+}
+
+/* 流程说明卡片悬停效果 */
+.ai-response-content .payment-process-card:hover {
+	transform: translateY(-2px) !important;
+	box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15) !important;
+	border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* 确保支付链接文本不会以纯文本形式显示 */
+.ai-response-content {
+	word-wrap: break-word !important;
+	overflow-wrap: break-word !important;
+}
+
+/* 隐藏纯文本形式的长链接，只显示按钮 */
+.ai-response-content p:has(a[href*="openapi-sandbox.dl.alipaydev.com"]) {
+	display: flex !important;
+	flex-direction: column !important;
+	align-items: center !important;
+}
+
+/* gateway.do 链接已经集成到主要的支付宝按钮样式中 */
+
+/* 订单信息列表样式优化 */
+.ai-response-content ul {
+	list-style: none !important;
+	padding-left: 0 !important;
+}
+
+.ai-response-content li {
+	padding: 4px 0 !important;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ai-response-content li:last-child {
+	border-bottom: none !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+	.ai-response-content a[href*="alipay"],
+	.ai-response-content a[href*="payment"] {
+		width: 100% !important;
+		text-align: center !important;
+		padding: 16px 20px !important;
+	}
+	
+	.ai-response-content div[style*="text-align: center"] {
+		text-align: center !important;
+		margin: 1rem 0 !important;
 	}
 }
