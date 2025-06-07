@@ -42,7 +42,7 @@ class MarketMonitorAgent:
             model=self.model,
             token_limit=32768,
             tools=[*ChainGPTToolkit().get_tools()],
-            output_language="zh"
+            output_language="en"
         )
 
         # 初始化 workforce
