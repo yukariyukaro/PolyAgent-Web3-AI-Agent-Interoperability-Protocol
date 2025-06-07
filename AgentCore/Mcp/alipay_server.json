@@ -1,9 +1,12 @@
 {
   "mcpServers": {
     "mcp-server-alipay": {
-      "command": "node",
+      "command": "cmd",
       "args": [
-        "D:\\J\\nodejs\\node_global\\node_modules\\@alipay\\mcp-server-alipay\\dist\\index.js"
+        "/c",
+        "npx",
+        "-y",
+        "@alipay/mcp-server-alipay"
       ],
       "env": {
         "AP_APP_ID": "9021000149642688",
