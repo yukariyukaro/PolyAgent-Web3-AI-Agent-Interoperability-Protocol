@@ -6,14 +6,11 @@ class Config:
     """
     # OpenAI API 配置
     # 强烈建议使用环境变量来设置 API 密钥，避免硬编码
-    OPENAI_API_KEY = os.getenv(
-        'OPENAI_API_KEY', 
-        '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'
-    )
+   
     OPENAI_API_URL = os.getenv('OPENAI_API_URL', 'https://api.openai.com/v1/')
     
     # ModelScope API 配置  
-    MODELSCOPE_API_KEY = os.getenv('MODELSCOPE_API_KEY', '9d3aed4d-eca1-4e0c-9805-cb923ccbbf21')
+    MODELSCOPE_API_KEY = os.getenv('MODELSCOPE_API_KEY', 'your-modelscope-api-key-here')
 
     # 服务器配置
     FLASK_HOST = os.getenv('FLASK_HOST', '127.0.0.1')
