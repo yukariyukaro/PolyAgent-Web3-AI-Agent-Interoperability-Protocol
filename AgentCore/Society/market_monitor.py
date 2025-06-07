@@ -33,7 +33,7 @@ def run_crypto_insight_agent(user_question: str) -> str:
         model=model,
         token_limit=32768,
         tools=[*CoinGeckoToolkit().get_tools()],
-        output_language="zh"
+        output_language="en"
     )
 
     coin_news_agent = ChatAgent(
@@ -41,7 +41,7 @@ def run_crypto_insight_agent(user_question: str) -> str:
         model=model,
         token_limit=32768,
         tools=[*ChainGPTToolkit().get_tools()],
-        output_language="zh"
+        output_language="en"
     )
 
     # 初始化 workforce
