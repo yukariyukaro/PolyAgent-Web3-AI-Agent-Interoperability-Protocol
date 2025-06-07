@@ -314,8 +314,11 @@ class IotexTokenToolkit(BaseToolkit):
             # Sign the transaction
             signed_txn = self.web3.eth.account.sign_transaction(approve_txn, private_key)
 
-            # Broadcast the transaction to the network
-            tx_hash = self.web3.eth.send_raw_transaction(signed_txn.raw_transaction)
+            # Broadcast the transaction to the network - Compatible with both old and new web3.py versions
+            raw_transaction = getattr(signed_txn, 'rawTransaction', getattr(signed_txn, 'raw_transaction', None))
+            if raw_transaction is None:
+                return {"success": False, "error": "Failed to get raw transaction data"}
+            tx_hash = self.web3.eth.send_raw_transaction(raw_transaction)
             tx_hash_hex = tx_hash.hex()
 
             # Wait for the transaction to be mined
@@ -426,7 +429,11 @@ class IotexTokenToolkit(BaseToolkit):
             print(f"Gas Limit: {transfer_txn['gas']}")
 
             signed_txn = self.web3.eth.account.sign_transaction(transfer_txn, private_key)
-            tx_hash = self.web3.eth.send_raw_transaction(signed_txn.raw_transaction)
+            # Compatible with both old and new web3.py versions
+            raw_transaction = getattr(signed_txn, 'rawTransaction', getattr(signed_txn, 'raw_transaction', None))
+            if raw_transaction is None:
+                return {"success": False, "error": "Failed to get raw transaction data for transfer"}
+            tx_hash = self.web3.eth.send_raw_transaction(raw_transaction)
             tx_hash_hex = tx_hash.hex()
 
             print(f"TransferFrom transaction sent. Hash: {tx_hash_hex}")
