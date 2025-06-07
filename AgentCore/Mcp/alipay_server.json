@@ -1,12 +1,9 @@
 {
   "mcpServers": {
     "mcp-server-alipay": {
-      "command": "cmd",
+      "command": "node",
       "args": [
-        "/c",
-        "npx",
-        "-y",
-        "@alipay/mcp-server-alipay"
+        "D:\\J\\nodejs\\node_global\\node_modules\\@alipay\\mcp-server-alipay\\dist\\index.js"
       ],
       "env": {
         "AP_APP_ID": "9021000149642688",
@@ -15,7 +12,8 @@
         "AP_CURRENT_ENV": "sandbox"
       },
       "disabled": false,
-      "autoApprove": []
+      "autoApprove": [],
+      "clientRequestTimeout": 60000
     }
   }
 }

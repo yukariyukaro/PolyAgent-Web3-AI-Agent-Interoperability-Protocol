@@ -67,121 +67,7 @@
 /* === PaymentFlow 相关样式集成 === */
 
 /* 合约验证动画 */
-.ai-response-content .contract-verification {
-	background: linear-gradient(135deg, rgba(0, 255, 209, 0.1), rgba(0, 255, 209, 0.05));
-	border: 1px solid rgba(0, 255, 209, 0.3);
-	border-radius: 0.5rem;
-	padding: 1rem;
-	margin: 1rem 0;
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-}
 
-.ai-response-content .contract-icon {
-	font-size: 1.5rem;
-	color: #00FFD1;
-	animation: contract-pulse 2s infinite;
-}
-
-@keyframes contract-pulse {
-
-	0%,
-	100% {
-		transform: scale(1);
-		opacity: 1;
-	}
-
-	50% {
-		transform: scale(1.1);
-		opacity: 0.8;
-	}
-}
-
-.ai-response-content .contract-text {
-	color: #E6E6ED;
-	font-weight: 500;
-}
-
-/* 授权操作动画 */
-.ai-response-content .authorization-process {
-	background: linear-gradient(135deg, rgba(108, 64, 247, 0.1), rgba(108, 64, 247, 0.05));
-	border: 1px solid rgba(108, 64, 247, 0.3);
-	border-radius: 0.5rem;
-	padding: 1rem;
-	margin: 1rem 0;
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-}
-
-.ai-response-content .authorization-icon {
-	font-size: 1.5rem;
-	color: #6C40F7;
-	animation: shield-glow 2s infinite;
-}
-
-@keyframes shield-glow {
-
-	0%,
-	100% {
-		color: #6C40F7;
-		filter: brightness(1);
-	}
-
-	50% {
-		color: #a084fa;
-		filter: brightness(1.5) drop-shadow(0 0 8px rgba(108, 64, 247, 0.5));
-	}
-}
-
-.ai-response-content .authorization-text {
-	color: #E6E6ED;
-	font-weight: 500;
-}
-
-/* 转账动画 */
-.ai-response-content .transfer-process {
-	background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(74, 222, 128, 0.05));
-	border: 1px solid rgba(74, 222, 128, 0.3);
-	border-radius: 0.5rem;
-	padding: 1rem;
-	margin: 1rem 0;
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-}
-
-.ai-response-content .transfer-icon {
-	font-size: 1.5rem;
-	color: #4ade80;
-	animation: transfer-flow 1.5s infinite;
-}
-
-@keyframes transfer-flow {
-
-	0%,
-	100% {
-		transform: translateX(0) rotate(0deg);
-	}
-
-	25% {
-		transform: translateX(5px) rotate(90deg);
-	}
-
-	50% {
-		transform: translateX(0) rotate(180deg);
-	}
-
-	75% {
-		transform: translateX(-5px) rotate(270deg);
-	}
-}
-
-.ai-response-content .transfer-text {
-	color: #E6E6ED;
-	font-weight: 500;
-}
 
 /* 区块链地址和哈希值样式 */
 .ai-response-content .blockchain-address {
@@ -565,7 +451,7 @@
 	min-height: 40px !important;
 	max-width: 100px !important;
 	pointer-events: auto !important;
-	z-index: 10;
+	z-index: 20;
 	transform: translateY(0);
 	backdrop-filter: blur(8px);
 	text-decoration: none !important;
@@ -582,7 +468,7 @@
 	text-align: center !important;
 	vertical-align: middle !important;
 	position: relative !important;
-	z-index: 5 !important;
+	z-index: 20 !important;
 	width: 100px !important;
 	height: 40px !important;
 	max-width: 100px !important;
@@ -601,7 +487,7 @@
 	color: #fff !important;
 	font-weight: 600 !important;
 	position: relative !important;
-	z-index: 10 !important;
+	z-index: 15 !important;
 }
 
 /* 确保按钮文字始终为加粗白色 */
@@ -610,7 +496,7 @@
 	color: #fff !important;
 	font-weight: 700 !important;
 	position: relative !important;
-	z-index: 5 !important;
+	z-index: 15 !important;
 }
 
 /* Material Design 按钮悬停效果 */
@@ -625,6 +511,7 @@
 	border-color: rgba(34, 84, 61, 0.8) !important;
 	transform: translateY(-2px) scale(1.05);
 	filter: brightness(1.1);
+	z-index: 25 !important;
 }
 
 /* Material Design 按钮激活效果 */
@@ -636,6 +523,7 @@
 		inset 0 1px 0 rgba(255, 255, 255, 0.1);
 	background-position: 0% 0;
 	background: linear-gradient(135deg, #1a365d 0%, #22543d 50%, #1a365d 100%) !important;
+	z-index: 30 !important;
 }
 
 /* Material Design 按钮聚焦效果 */
@@ -646,6 +534,7 @@
 		0 2px 8px rgba(0, 0, 0, 0.1),
 		inset 0 1px 0 rgba(255, 255, 255, 0.2),
 		0 0 0 3px rgba(0, 255, 209, 0.3);
+	z-index: 25 !important;
 }
 
 /* Material Design 涟漪效果 - 避免遮挡文字 */
@@ -660,7 +549,7 @@
 	border-radius: 50%;
 	transform: translate(-50%, -50%);
 	animation: ripple-effect 0.6s ease-out;
-	z-index: -1 !important;
+	z-index: 3 !important;
 	pointer-events: none;
 }
 
@@ -688,14 +577,15 @@
 	background: linear-gradient(
 		90deg, 
 		transparent 0%, 
-		rgba(255, 255, 255, 0.1) 30%, 
-		rgba(255, 255, 255, 0.2) 50%, 
-		rgba(255, 255, 255, 0.1) 70%, 
+		rgba(255, 255, 255, 0.3) 30%, 
+		rgba(255, 255, 255, 0.4) 50%, 
+		rgba(255, 255, 255, 0.3) 70%, 
 		transparent 100%
 	);
 	transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-	z-index: -1 !important;
+	z-index: 4 !important;
 	pointer-events: none;
+	border-radius: 8px;
 }
 
 .ai-response-content .confirm-btn-purple:not(:empty):hover::after {
@@ -754,38 +644,6 @@
 	animation: fade-in 0.3s ease-out;
 }
 
-/* 转账触发按钮特殊样式 */
-.transfer-trigger-btn {
-	position: relative;
-	overflow: hidden;
-}
-
-.transfer-trigger-btn:before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: -100%;
-	width: 100%;
-	height: 100%;
-	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-	transition: left 0.6s ease;
-}
-
-.transfer-trigger-btn:hover:before {
-	left: 100%;
-}
-
-/* 表单输入框样式增强 */
-.transfer-form-input {
-	transition: all 0.3s ease;
-	position: relative;
-}
-
-.transfer-form-input:focus {
-	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(0, 255, 209, 0.15);
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
 
@@ -794,13 +652,6 @@
 	.ai-response-content .private-key,
 	.ai-response-content .transaction-link {
 		font-size: 0.7rem;
-	}
-
-	/* 移动端转账表单优化 */
-	.transfer-form-mobile {
-		margin: 1rem;
-		max-height: 90vh;
-		overflow-y: auto;
 	}
 }
 
@@ -1213,49 +1064,52 @@
 	}
 }
 
-/* 支付宝支付按钮样式 - 小尺寸按钮，降低颜色亮度 */
+/* 支付宝支付按钮样式 - 暗绿色设计 */
 .ai-response-content a[href*="alipay"],
 .ai-response-content a[href*="payment"],
 .ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"],
 .ai-response-content a[href*="gateway.do"],
 .ai-response-content .alipay-payment-button {
-	display: inline-block !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
 	width: 120px !important;
-	height: 40px !important;
+	height: 50px !important;
 	max-width: none !important;
 	margin: 12px auto !important;
-	background: linear-gradient(90deg, #4A90E2 0%, #357ABD 100%) !important;
+	background: #2d5a27 !important; /* 暗绿色背景 */
 	color: white !important;
 	padding: 0 !important;
 	border-radius: 6px !important;
 	text-decoration: none !important;
-	font-weight: 700 !important;
+	font-weight: 600 !important;
 	font-size: 14px !important;
-	box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2) !important;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	border: 1px solid #357ABD !important;
+	box-shadow: none !important;
+	transition: all 0.3s ease !important;
+	border: none !important;
 	text-align: center !important;
 	cursor: pointer !important;
 	position: relative !important;
 	overflow: hidden !important;
 	box-sizing: border-box !important;
-	z-index: 10 !important;
+	z-index: 20 !important;
 	pointer-events: auto !important;
-	line-height: 40px !important;
+	line-height: 50px !important; /* 垂直居中 */
 	vertical-align: middle !important;
-	/* 确保链接文字可见 */
 	white-space: nowrap !important;
 	text-overflow: ellipsis !important;
+	word-wrap: normal !important;
 }
 
 /* 为空的支付宝链接添加默认文本 */
 .ai-response-content a[href*="alipay"]:empty::before,
 .ai-response-content a[href*="payment"]:empty::before,
 .ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]:empty::before,
-.ai-response-content a[href*="gateway.do"]:empty::before {
-	content: "支付订单" !important;
+.ai-response-content a[href*="gateway.do"]:empty::before,
+.ai-response-content .alipay-payment-button:empty::before {
+	content: "Confirm" !important;
 	color: white !important;
-	font-weight: 700 !important;
+	font-weight: 600 !important;
 	display: flex !important;
 	align-items: center !important;
 	justify-content: center !important;
@@ -1264,8 +1118,25 @@
 	position: absolute !important;
 	top: 0 !important;
 	left: 0 !important;
-	z-index: 10 !important;
+	z-index: 22 !important;
 	pointer-events: none !important;
+	font-size: 14px !important;
+	line-height: 1 !important;
+}
+
+/* 确保所有支付宝按钮都有文字显示 */
+.ai-response-content .alipay-payment-button {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+	letter-spacing: 0.5px !important;
+}
+
+/* 强制显示按钮文字 */
+.ai-response-content .alipay-payment-button::after {
+	content: attr(data-text) !important;
+	color: white !important;
+	font-weight: 700 !important;
+	z-index: 15 !important;
+	position: relative !important;
 }
 
 /* 确保支付宝链接文字始终为加粗白色 */
@@ -1275,8 +1146,8 @@
 .ai-response-content a[href*="gateway.do"] {
 	color: white !important;
 	font-weight: 700 !important;
-	position: relative;
-	z-index: 2 !important;
+	position: relative !important;
+	z-index: 23 !important;
 }
 
 .ai-response-content a[href*="alipay"]:hover,
@@ -1284,42 +1155,21 @@
 .ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]:hover,
 .ai-response-content a[href*="gateway.do"]:hover,
 .ai-response-content .alipay-payment-button:hover {
-	background: linear-gradient(90deg, #357ABD 0%, #4A90E2 100%) !important;
-	box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3) !important;
-	border-color: #4A90E2 !important;
+	background: #3a7233 !important; /* 悬停时稍微亮一点的绿色 */
 	transform: translateY(-1px) !important;
+	z-index: 25 !important;
 }
 
 .ai-response-content a[href*="alipay"]:active,
 .ai-response-content a[href*="payment"]:active,
 .ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]:active,
 .ai-response-content a[href*="gateway.do"]:active {
-	transform: translateY(0) !important;
-	box-shadow: 0 2px 6px rgba(74, 144, 226, 0.2) !important;
+	background: #1f3e1c !important; /* 点击时更深的绿色 */
+	transform: translateY(0px) !important;
+	z-index: 30 !important;
 }
 
-/* 支付按钮光泽效果 */
-.ai-response-content a[href*="alipay"]::after,
-.ai-response-content a[href*="payment"]::after,
-.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]::after,
-.ai-response-content a[href*="gateway.do"]::after {
-	content: '' !important;
-	position: absolute !important;
-	top: 0 !important;
-	left: -100% !important;
-	width: 100% !important;
-	height: 100% !important;
-	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
-	transition: left 0.4s ease !important;
-	z-index: 1 !important;
-}
-
-.ai-response-content a[href*="alipay"]:hover::after,
-.ai-response-content a[href*="payment"]:hover::after,
-.ai-response-content a[href*="openapi-sandbox.dl.alipaydev.com"]:hover::after,
-.ai-response-content a[href*="gateway.do"]:hover::after {
-	left: 100% !important;
-}
+/* 移除支付按钮光泽效果 - 保持简洁设计 */
 
 /* 支付提示信息卡片样式 */
 .ai-response-content div[style*="rgba(22, 119, 255, 0.1)"] {
@@ -1483,13 +1333,265 @@
 @media (max-width: 768px) {
 	.ai-response-content a[href*="alipay"],
 	.ai-response-content a[href*="payment"] {
-		width: 100% !important;
+		width: 120px !important;
+		height: 50px !important;
 		text-align: center !important;
-		padding: 16px 20px !important;
+		padding: 0 !important;
+		line-height: 50px !important;
 	}
 	
 	.ai-response-content div[style*="text-align: center"] {
 		text-align: center !important;
 		margin: 1rem 0 !important;
 	}
+}
+
+/* PayPal动画效果 */
+@keyframes paypalPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 16px rgba(0, 112, 186, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 112, 186, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 16px rgba(0, 112, 186, 0.3);
+  }
+}
+
+.ai-response-content .paypal-animation {
+  animation: paypalPulse 2s ease-in-out infinite;
+}
+
+/* 演示步骤指示器 */
+.ai-response-content .demo-step-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(0, 255, 209, 0.1), rgba(108, 64, 247, 0.1));
+  border: 1px solid rgba(0, 255, 209, 0.3);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00FFD1;
+  margin-bottom: 16px;
+}
+
+.ai-response-content .demo-step-indicator .step-number {
+  background: linear-gradient(135deg, #00FFD1, #6C40F7);
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* 流程状态指示 */
+.ai-response-content .process-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(31, 31, 42, 0.6);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.ai-response-content .process-status.success {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.ai-response-content .process-status.processing {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.ai-response-content .process-status.pending {
+  border-color: rgba(156, 163, 175, 0.3);
+  background: rgba(156, 163, 175, 0.1);
+}
+
+/* ==============================================
+   PREMIUM DOWNLOAD BUTTON STYLES
+   ============================================== */
+
+/* 下载容器样式 */
+.ai-response-content .premium-download-container {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+    border-radius: 12px;
+    margin: 20px 0;
+    border: 1px solid #404040;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-response-content .premium-download-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(74, 144, 226, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.ai-response-content .premium-download-container:hover::before {
+    left: 100%;
+}
+
+/* 标题样式 */
+.ai-response-content .download-title {
+    color: #EAEAEA;
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.ai-response-content .download-subtitle {
+    color: #BDBDBD;
+    font-size: 1em;
+    margin-bottom: 25px;
+    opacity: 0.9;
+}
+
+/* 下载按钮样式 */
+.ai-response-content .premium-download-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 50%, #2E6DA4 100%);
+    color: white;
+    padding: 16px 32px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1em;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 4px 15px rgba(74, 144, 226, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-response-content .premium-download-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s;
+}
+
+.ai-response-content .premium-download-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 25px rgba(74, 144, 226, 0.4),
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #5BA0F2 0%, #4A90E2 50%, #357ABD 100%);
+}
+
+.ai-response-content .premium-download-button:active {
+    transform: translateY(0);
+    box-shadow: 
+        0 2px 8px rgba(74, 144, 226, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 图标样式 */
+.ai-response-content .download-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    transition: transform 0.3s ease;
+}
+
+.ai-response-content .premium-download-button:hover .download-icon {
+    transform: translateY(-1px);
+}
+
+/* 信息卡片样式 */
+.ai-response-content .download-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(74, 144, 226, 0.08);
+    border: 1px solid rgba(74, 144, 226, 0.2);
+    border-radius: 8px;
+    font-size: 0.9em;
+    color: #94A3B8;
+}
+
+/* 统计信息样式 */
+.ai-response-content .download-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    font-size: 0.85em;
+    color: #888;
+}
+
+.ai-response-content .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 成功标记样式 */
+.ai-response-content .success-checkmark {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00D084 0%, #00B874 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 4px 15px rgba(0, 208, 132, 0.3);
+    animation: successPulse 2s infinite;
+}
+
+@keyframes successPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .ai-response-content .premium-download-container {
+        padding: 20px 15px;
+        margin: 15px 0;
+    }
+    
+    .ai-response-content .download-title {
+        font-size: 1.3em;
+    }
+    
+    .ai-response-content .premium-download-button {
+        padding: 14px 24px;
+        font-size: 1em;
+    }
+    
+    .ai-response-content .download-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
 }

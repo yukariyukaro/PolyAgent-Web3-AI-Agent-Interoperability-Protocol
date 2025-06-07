@@ -139,19 +139,7 @@ interface Conversation {
 	createdAt: number;
 }
 
-// 转账表单数据接口
-interface TransferFormData {
-	contractAddress: string;
-	toAddress: string;
-	amount: string;
-	decimals: string;
-	// 支付宝转代币专用字段
-	senderAddress?: string;
-	senderPrivateKey?: string;
-	spenderPrivateKey?: string;
-	rpcUrl?: string;
-	chainId?: string;
-}
+
 
 // 添加AI助手类型枚举
 type AIAgentType = "monitor" | "trade";
@@ -332,27 +320,7 @@ function App() {
 
 	const [showLogoOverlay, setShowLogoOverlay] = useState(false);
 
-	// 转账表单相关状态
-	const [showTransferForm, setShowTransferForm] = useState(false);
-	const [transferFormData, setTransferFormData] = useState<TransferFormData>({
-		contractAddress: "0xD3286E20Ff71438D9f6969828F7218af4A375e2f", // 默认PAT合约地址
-		toAddress: "",
-		amount: "",
-		decimals: "18"
-	});
-	const [isSubmittingTransfer, setIsSubmittingTransfer] = useState(false);
 
-	// 支付宝转代币的默认参数
-	const alipayTransferDefaults = {
-		testnet_rpc: "https://babel-api.testnet.iotex.io",
-		chain_id: 4690,
-		polyagent_token_contract: "0xD3286E20Ff71438D9f6969828F7218af4A375e2f",
-		sender_address: "0xE4949a0339320cE9ec93c9d0836c260F23DFE8Ca",
-		sender_private_key: "e4ad52fbc8c6fe3f4069af70363b24ca4453dbf472d92f83a8adf38e8010991f",
-		spender_address: "0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE",
-		spender_private_key: "3efe78303dcf8ea3355ef363f04eb442e000081fe66ebcebf5d9cf19f3ace8b8",
-		decimals: "18"
-	};
 
 
 
@@ -697,129 +665,51 @@ function App() {
 		}
 	};
 
-	// 处理转账表单提交 - 调用市场交易API
-	const handleTransferSubmit = async () => {
-		if (!transferFormData.toAddress || !transferFormData.amount) {
-			alert("Please fill in complete transfer information");
-			return;
-		}
 
-		setIsSubmittingTransfer(true);
-
-		try {
-			// 创建新的AI消息用于显示流式响应
-			const aiResponse: Message = {
-				text: "",
-				sender: "ai",
-				type: "html",
-			};
-
-			setMessages((prev) => [...prev, aiResponse]);
-
-			// 调用market-trade API接口
-			const response = await fetch("http://localhost:5000/market-trade", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					message: `执行转账操作：从 ${transferFormData.senderAddress || '发送方'} 转账 ${transferFormData.amount} PAT 代币到 ${transferFormData.toAddress}`
-				}),
-			});
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! Status: ${response.status}`);
-			}
-
-			if (!response.body) {
-				throw new Error("ReadableStream not supported");
-			}
-
-			// 获取response的ReadableStream
-			const reader = response.body.getReader();
-			const decoder = new TextDecoder();
-			let streamText = "";
-
-			// 读取流数据
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-
-				// 解码二进制数据为文本
-				const chunk = decoder.decode(value, { stream: !done });
-				streamText += chunk;
-
-				// 更新UI上的消息
-				setMessages((prev) => {
-					const updatedMessages = [...prev];
-					const lastMessage = updatedMessages[updatedMessages.length - 1];
-
-					if (lastMessage && lastMessage.sender === "ai") {
-						// 确保HTML内容中的换行符被正确处理
-						let formattedText = streamText
-							.replace(/\n/g, "<br>") // 将\n替换为HTML的<br>标签
-							.replace(/\r/g, ""); // 移除可能存在的\r字符
-
-						lastMessage.text = formattedText;
-					}
-
-					return updatedMessages;
-				});
-			}
-
-			// 关闭转账表单
-			setShowTransferForm(false);
-
-			// 重置表单
-			setTransferFormData({
-				contractAddress: "0xD3286E20Ff71438D9f6969828F7218af4A375e2f",
-				toAddress: "",
-				amount: "",
-				decimals: "18"
-			});
-
-		} catch (error) {
-			console.error("转账提交错误:", error);
-
-			const errorMessage: Message = {
-				text: `
-					<div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05)); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; display: flex; align-items: center; gap: 1rem;">
-						<div style="font-size: 1.5rem; color: #ef4444;">❌</div>
-						<div style="color: #E6E6ED; font-weight: 500;">Transfer submission failed, please try again</div>
-					</div>
-				`,
-				sender: "ai",
-				type: "html"
-			};
-
-			setMessages((prev) => [...prev, errorMessage]);
-		} finally {
-			setIsSubmittingTransfer(false);
-		}
-	};
-
-	// 自动填充表单数据的函数
-	const autoFillTransferForm = () => {
-		setTransferFormData({
-			contractAddress: alipayTransferDefaults.polyagent_token_contract,
-			toAddress: alipayTransferDefaults.spender_address,
-			amount: "2.0", // 默认转账2个代币
-			decimals: alipayTransferDefaults.decimals,
-			// 支付宝转代币专用参数
-			senderAddress: alipayTransferDefaults.sender_address,
-			senderPrivateKey: alipayTransferDefaults.sender_private_key,
-			spenderPrivateKey: alipayTransferDefaults.spender_private_key,
-			rpcUrl: alipayTransferDefaults.testnet_rpc,
-			chainId: alipayTransferDefaults.chain_id.toString()
-		});
-		setShowTransferForm(true);
-	};
 
 	// 添加按钮点击状态管理
 	const [buttonClickedMap, setButtonClickedMap] = useState<Record<string, boolean>>({});
 
 	// 全局函数，供HTML按钮调用
 	useEffect(() => {
+		// 支付宝支付处理函数
+		(window as any).handleAlipayPayment = (linkElement: HTMLAnchorElement) => {
+			console.log("支付宝支付按钮被点击，将在10秒后模拟AI确认。");
+			
+			// 1. 打开支付链接
+			if (linkElement.href && linkElement.href !== "[支付链接]") {
+				window.open(linkElement.href, '_blank');
+			}
+			
+			// 2. 禁用按钮，防止重复点击
+			linkElement.style.pointerEvents = 'none';
+			linkElement.style.opacity = '0.5';
+			linkElement.textContent = 'Processing...';
+
+			// 3. 10秒后模拟AI回复
+			setTimeout(() => {
+				const aiConfirmationMessage: Message = {
+					text: `
+<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>✅ Payment confirmed successfully.</strong><br>
+    Next, please type "<strong>Authorize tokens</strong>" in the chat to proceed.
+</div>`,
+					sender: "ai",
+					type: "html",
+				};
+				
+				setMessages((prevMessages) => [...prevMessages, aiConfirmationMessage]);
+
+				// 滚动到聊天底部
+				setTimeout(() => {
+					if (chatContainerRef.current) {
+						chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+					}
+				}, 100);
+
+			}, 10000); // 10秒延迟
+		};
+
 		(window as any).showTransferForm = (buttonId?: string) => {
 			console.log("确认按钮被点击, buttonId:", buttonId);
 			console.log("当前对话ID:", currentConversationId);
@@ -840,21 +730,12 @@ function App() {
 				[uniqueButtonId]: true
 			}));
 
-			// 直接向AI发送确认执行的消息，而不是打开表单
-			const confirmMessage = "确认执行支付订单";
-
-			// 添加用户确认消息
-			const userConfirmMessage: Message = {
-				text: confirmMessage,
-				sender: "user"
-			};
-			setMessages((prev) => [...prev, userConfirmMessage]);
-
-			// 发送确认消息到AI
-			respondToMessage(confirmMessage);
+			// 提示用户需要手动输入确认信息，而不是自动执行
+			console.log("按钮已点击，请在聊天框中输入确认信息以继续下一步");
 		};
 
 		return () => {
+			delete (window as any).handleAlipayPayment;
 			delete (window as any).showTransferForm;
 		};
 	}, [currentConversationId, selectedAgent, setMessages, respondToMessage, buttonClickedMap]);
@@ -1204,140 +1085,7 @@ function App() {
 							</main>
 						</div>
 
-						{/* 转账表单悬浮层 */}
-						{showTransferForm && (
-							<div
-								className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md"
-								onClick={() => setShowTransferForm(false)}
-							>
-								<div
-									className="relative bg-gradient-to-br from-deep-black/95 to-bg-dark/95 backdrop-blur-xl border border-night-purple/30 rounded-xl p-6 w-full max-w-md mx-4 animate-fade-in"
-									onClick={(e) => e.stopPropagation()}
-								>
-									{/* 表单标题 */}
-									<div className="flex items-center justify-between mb-6">
-										<div className="flex items-center space-x-3">
-											<div className="w-10 h-10 bg-gradient-to-br from-neon-cyan/20 to-night-purple/20 rounded-lg flex items-center justify-center">
-												<FontAwesomeIcon icon={faWallet} className="text-neon-cyan" />
-											</div>
-											<h2 className="text-xl font-bold text-text-primary">Transfer Tokens</h2>
-										</div>
-										<button
-											className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all"
-											onClick={() => setShowTransferForm(false)}
-										>
-											<FontAwesomeIcon icon={faTimes} />
-										</button>
-									</div>
 
-									{/* 表单内容 */}
-									<div className="space-y-4">
-										{/* 合约地址 */}
-										<div>
-											<label className="block text-sm font-medium text-text-secondary mb-2">
-												Contract Address *
-											</label>
-											<input
-												type="text"
-												value={transferFormData.contractAddress}
-												onChange={(e) => setTransferFormData((prev: TransferFormData) => ({
-													...prev,
-													contractAddress: e.target.value
-												}))}
-												className="w-full bg-deep-black/50 border border-night-purple/30 rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary/50 focus:border-neon-cyan/50 focus:outline-none transition-colors"
-												placeholder="Enter ERC20 contract address"
-											/>
-										</div>
-
-										{/* 接收地址 */}
-										<div>
-											<label className="block text-sm font-medium text-text-secondary mb-2">
-												Recipient Address *
-											</label>
-											<input
-												type="text"
-												value={transferFormData.toAddress}
-												onChange={(e) => setTransferFormData((prev: TransferFormData) => ({
-													...prev,
-													toAddress: e.target.value
-												}))}
-												className="w-full bg-deep-black/50 border border-night-purple/30 rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary/50 focus:border-neon-cyan/50 focus:outline-none transition-colors"
-												placeholder="Enter recipient wallet address"
-											/>
-										</div>
-
-										{/* 转账金额 */}
-										<div>
-											<label className="block text-sm font-medium text-text-secondary mb-2">
-												Transfer Amount *
-											</label>
-											<input
-												type="number"
-												step="0.000001"
-												value={transferFormData.amount}
-												onChange={(e) => setTransferFormData((prev: TransferFormData) => ({
-													...prev,
-													amount: e.target.value
-												}))}
-												className="w-full bg-deep-black/50 border border-night-purple/30 rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary/50 focus:border-neon-cyan/50 focus:outline-none transition-colors"
-												placeholder="Enter transfer amount"
-											/>
-										</div>
-
-										{/* 代币精度 */}
-										<div>
-											<label className="block text-sm font-medium text-text-secondary mb-2">
-												Token Decimals
-											</label>
-											<select
-												value={transferFormData.decimals}
-												onChange={(e) => setTransferFormData((prev: TransferFormData) => ({
-													...prev,
-													decimals: e.target.value
-												}))}
-												className="w-full bg-deep-black/50 border border-night-purple/30 rounded-lg px-4 py-3 text-text-primary focus:border-neon-cyan/50 focus:outline-none transition-colors"
-											>
-												<option value="18">18 (Standard ERC20)</option>
-												<option value="6">6 (USDC/USDT)</option>
-												<option value="8">8 (WBTC)</option>
-												<option value="9">9 (Custom)</option>
-											</select>
-										</div>
-									</div>
-
-									{/* 提交按钮 */}
-									<div className="flex space-x-3 mt-6">
-										<button
-											onClick={() => setShowTransferForm(false)}
-											className="flex-1 px-4 py-3 bg-deep-black/50 border border-night-purple/30 rounded-lg text-text-secondary hover:text-text-primary hover:border-night-purple/50 transition-all"
-										>
-											Cancel
-										</button>
-										<button
-											onClick={handleTransferSubmit}
-											disabled={isSubmittingTransfer || !transferFormData.toAddress || !transferFormData.amount}
-											className="flex-1 px-4 py-3 bg-gradient-to-r from-neon-cyan to-night-purple text-deep-black font-medium rounded-lg hover:shadow-lg hover:shadow-neon-cyan/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-										>
-											{isSubmittingTransfer ? (
-												<div className="flex items-center justify-center space-x-2">
-													<div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-													<span>Submitting...</span>
-												</div>
-											) : (
-												"Confirm Transfer"
-											)}
-										</button>
-									</div>
-
-									{/* 安全提示 */}
-									<div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-										<p className="text-xs text-yellow-400/80">
-											⚠️ Please verify transfer details carefully. Blockchain transactions are irreversible.
-										</p>
-									</div>
-								</div>
-							</div>
-						)}
 
 						{/* Logo 放大覆盖层 */}
 						{showLogoOverlay && (
