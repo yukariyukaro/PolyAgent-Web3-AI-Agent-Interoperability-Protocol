@@ -424,9 +424,9 @@ class AgentManager:
         config_path = os.path.abspath(config_path)
         
         try:
-            async with MCPToolkit(config_path=config_path) as mcp_toolkit:
-                alipay_agent = ChatAgent(
-                    system_message="""
+        async with MCPToolkit(config_path=config_path) as mcp_toolkit:
+            alipay_agent = ChatAgent(
+                system_message="""
                     You are an Alipay Agent for a cross-border payment service. Your task is to create a payment order in Chinese Yuan (RMB) for a product priced in US Dollars.
 
                     **Action: Create Payment Order (`create_payment`)**
