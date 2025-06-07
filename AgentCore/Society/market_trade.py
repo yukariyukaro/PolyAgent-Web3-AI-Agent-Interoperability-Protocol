@@ -84,82 +84,70 @@ class AgentManager:
 
         self.iotex_agent = ChatAgent(
             system_message="""
-            你是一个 IoTeX 测试网专用的区块链助手 Agent，具备以下功能：
+            You are a professional IoTeX testnet blockchain assistant with the following capabilities:
 
             =================
-            ✅ 支持的查询功能
+            ✅ Query Functions
             =================
-            1. 查询账户 IOTX 主币余额  
-            - 函数: iotex_balance  
-            - 参数: wallet_address
+            1. Query account IOTX balance  
+            - Function: iotex_balance  
+            - Parameters: wallet_address
 
-            2. 查询账户 ERC20 代币余额  
-            - 函数: erc20_balance  
-            - 参数: wallet_address, token_contract_address
+            2. Query account ERC20 token balance  
+            - Function: erc20_balance  
+            - Parameters: wallet_address, token_contract_address
 
-            3. 查询 ERC20 授权额度（allowance）  
-            - 函数: erc20_allowance  
-            - 参数: owner_address, spender_address, token_contract_address, [decimals]（可选）
+            3. Query ERC20 allowance  
+            - Function: erc20_allowance  
+            - Parameters: owner_address, spender_address, token_contract_address, [decimals] (optional)
 
-            4. 查询 ERC20 代币合约信息  
-            - 函数: erc20_contract_info  
-            - 参数: token_contract_address
-
-            =================
-            🛠️ 支持的交易功能
-            =================
-            5. 授权 ERC20 代币使用（approve）  
-            - 函数: erc20_approve  
-            - 参数: private_key, spender_address, token_contract_address, amount, [decimals]（可选）
-
-            6. 执行 ERC20 代币的 transferFrom 转账  
-            - 函数: erc20_transfer_from  
-            - 参数: private_key, token_contract_address, from_address, to_address, amount, [decimals]（可选）
+            4. Query ERC20 contract information  
+            - Function: erc20_contract_info  
+            - Parameters: token_contract_address
 
             =================
-            💬 交互与提醒
-            💬 交互与提醒
+            🛠️ Transaction Functions
             =================
-            - 查询类操作需提供相关地址，若涉及 ERC20，需包含合约地址。
-            - 所有链上写入操作必须先确认，方可执行。
-            - 若涉及私钥（如交易类操作），必须提醒用户注意安全，**不建议明文传播私钥**，应使用环境变量或签名工具传递。
-            - 所有操作仅限 IoTeX 测试网。
+            5. Approve ERC20 token usage  
+            - Function: erc20_approve  
+            - Parameters: private_key, spender_address, token_contract_address, amount, [decimals] (optional)
+
+            6. Execute ERC20 transferFrom  
+            - Function: erc20_transfer_from  
+            - Parameters: private_key, token_contract_address, from_address, to_address, amount, [decimals] (optional)
+
+            =================
+            💬 Interaction Guidelines
+            =================
+            - For query operations, provide relevant addresses and contract addresses for ERC20 tokens
+            - All on-chain write operations require confirmation before execution
+            - For operations involving private keys, remind users about security - **never share private keys in plaintext**
+            - All operations are limited to IoTeX testnet
 
             =======================
-            📦 已知默认用户参数
+            📦 Default Parameters
             =======================
-            - 查询类操作需提供相关地址，若涉及 ERC20，需包含合约地址。
-            - 所有链上写入操作必须先确认，方可执行。
-            - 若涉及私钥（如交易类操作），必须提醒用户注意安全，**不建议明文传播私钥**，应使用环境变量或签名工具传递。
-            - 所有操作仅限 IoTeX 测试网。
-
-            =======================
-            📦 已知默认用户参数
-            =======================
-            # PolyAgent Token 合约地址（ERC20）
+            # PolyAgent Token Contract (ERC20)
             polyagent_token_contract = "0xD3286E20Ff71438D9f6969828F7218af4A375e2f"
 
-            # 发送者账户信息
+            # Sender Account
             Sender Address: "0xE4949a0339320cE9ec93c9d0836c260F23DFE8Ca"
             Sender Private Key: "e4ad52fbc8c6fe3f4069af70363b24ca4453dbf472d92f83a8adf38e8010991f"
 
-
-            # 授权者（Spender）账户信息
-
+            # Spender Account
             Spender Address: "0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE"
             Spender Private Key: "3efe78303dcf8ea3355ef363f04eb442e000081fe66ebcebf5d9cf19f3ace8b8"
-            # 默认精度和授权数量
+
+            # Default settings
             decimals = 18
             amount = 2
 
-
-
             =======================
+            🤖 Execution Rules [Important]
             =======================
-            🤖 调用行为规则[十分重要]
-            =======================
-            你已拥有所有所需参数，默认以上述信息填充。当用户发起查询或交易请求时，请根据内容直接选择合适的函数并执行。除非用户明确指定覆盖默认值，否则无需再次请求参数。
+            You have all required parameters. When users request queries or transactions, select and execute the appropriate function directly based on the content. Unless users explicitly specify different values, use the default parameters above without asking for additional input.
             
+            Respond in English and provide clear, professional explanations.
             """,
             model=self.model,
             token_limit=32768,
@@ -169,22 +157,22 @@ class AgentManager:
 
         self.story_agent = ChatAgent(
             system_message="""    
-            [系统提示]你已收到5个XRC20代币作为奖励。
+            [System Notice] You have received 5 XRC20 tokens as a reward.
 
-            请根据以下用户的需求，创作一段风格化的微型故事。请确保故事开头就体现这一事件："收到5个XRC20代币"。
+            Please create a stylized micro-story based on the user's request. Ensure the story begins by mentioning this event: "receiving 5 XRC20 tokens".
 
-            风格可以是奇幻、科幻、悬疑、童话或赛博朋克等任选其一。
+            Choose from styles like fantasy, sci-fi, mystery, fairy tale, or cyberpunk.
 
-            用户的需求是：$user_demand
+            User request: $user_demand
 
-            要求：
-            - 故事开头应明确提到"收到5个XRC20代币"
-            - 故事应围绕这个需求展开，体现其意义或引发的事件
-            - 文风有代入感，故事背景清晰，人物设定简洁有力
-            - 不需要分段，字数在150字左右
-            - 结尾应带有开放性或暗示更大背景的发展
+            Requirements:
+            - Story must clearly mention "receiving 5 XRC20 tokens" at the beginning
+            - Story should develop around this request, showing its significance or triggered events
+            - Immersive writing style with clear background and concise character development
+            - No paragraph breaks, around 150 words
+            - Ending should be open or hint at larger developments
 
-            请开始生成故事。""",
+            Please generate the story in English.""",
             model=self.model,
             token_limit=32768,
             output_language="en"
@@ -193,227 +181,120 @@ class AgentManager:
         # 添加演示流程状态跟踪
         self.demo_step = 0
         self.demo_context = {
-            "order_id": "ORDER20250106001",
-            "amount_usd": 15,
-            "amount_tokens": 15,
+            "order_id": "ORDER20250107001",
+            "amount_usd": 49.99,
+            "amount_tokens": 49.99,
             "merchant_wallet": "0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE",
             "user_wallet": "0xE4949a0339320cE9ec93c9d0836c260F23DFE8Ca",
             "usd_to_rmb_rate": 7.25,  # USD to RMB exchange rate
-            "download_link": "http://localhost:5000/download/premium_service_guide.txt" # 修改为downloads文件夹中的txt文件
+            "download_link": "https://pan.baidu.com/s/1F4TgbbTrz4LbSifczoDcXg?pwd=6712" # 真实的百度网盘链接
         }
 
     async def smart_route_request(self, user_input: str):
         """
-        智能路由用户请求到合适的Agent
-        根据演示流程和关键词自动选择处理方式
+        Intelligent routing system - Routes user input to appropriate handling processes
         """
         user_input_lower = user_input.lower()
         
-        # Step 1: 创建支付订单 - 修改为匹配alipay关键词
-        if any(keyword in user_input_lower for keyword in ["alipay", "purchase", "buy", "order", "service", "$"]):
-            self.demo_step = 1
+        # Course purchase flow detection
+        course_keywords = ["purchase", "buy", "course", "want to buy", "learning", "training", "enroll", "python", "web", "ai", "machine learning"]
+        if any(keyword in user_input_lower for keyword in course_keywords):
             return await self.handle_step1_create_order(user_input)
-            
-        # Step 2: 用户获得代币授权 (原Step 3)
-        elif any(keyword in user_input_lower for keyword in ["authorize", "approve tokens"]):
-            if self.demo_step >= 1: # 必须在创建订单后才能授权
-                self.demo_step = 2
-                return await self.handle_step2_token_authorization(user_input)
-            else:
-                return "Please create an order first by typing 'purchase'."
-            
-        # Step 3: 转账给商家 (原Step 4)
-        elif any(keyword in user_input_lower for keyword in ["transfer", "send tokens"]):
-            if self.demo_step >= 2:
-                self.demo_step = 3
-                return await self.handle_step3_token_transfer(user_input)
-            else:
-                return "Please authorize the token transfer first by typing 'Authorize tokens'."
-
-        # Step 4: PayPal收款转换 (原Step 5)
-        elif any(keyword in user_input_lower for keyword in ["convert", "paypal"]):
-            if self.demo_step >= 3:
-                self.demo_step = 4
-                return await self.handle_step4_paypal_conversion(user_input)
-            else:
-                return "Please transfer the tokens first by typing 'Transfer tokens'."
-            
-        # Step 5: 服务交付 (原Step 6)
-        elif any(keyword in user_input_lower for keyword in ["delivery", "download", "get guide"]):
-            if self.demo_step >= 4:
-                self.demo_step = 5
-                return await self.handle_step5_service_delivery(user_input)
-            else:
-                return "Please complete the PayPal conversion step first."
-            
-        # 默认支付宝查询
-        elif any(keyword in user_input_lower for keyword in ["query", "status", "check"]):
-            return await self.run_alipay_query("query order status")
-            
-        else:
-            # 其他请求路由到IoTeX agent
-            response = self.iotex_agent.step(user_input)
-            return response.msgs[0].content if response and response.msgs else "Unable to process your request"
+        
+        # Automated payment confirmation detection
+        if "confirm_payment" in user_input_lower:
+            return await self.handle_step2_automated_payment(user_input)
+        
+        # Blockchain query operation detection
+        blockchain_keywords = ["balance", "query", "check", "iotex", "token", "blockchain", "wallet", "address"]
+        if any(keyword in user_input_lower for keyword in blockchain_keywords):
+            return await self.handle_blockchain_query(user_input)
+        
+        # Token authorization operation detection
+        auth_keywords = ["authorize", "approve", "authorization", "allow", "permit", "allowance"]
+        if any(keyword in user_input_lower for keyword in auth_keywords):
+            return await self.handle_token_authorization(user_input)
+        
+        # Creative story generation detection
+        story_keywords = ["story", "create", "novel", "sci-fi", "fantasy", "cyberpunk", "received", "reward", "xrc20"]
+        if any(keyword in user_input_lower for keyword in story_keywords):
+            return await self.handle_creative_story(user_input)
+        
+        # Default: general assistant handling
+        return await self.handle_general_query(user_input)
 
     async def handle_step1_create_order(self, user_input: str):
         """
-        第一步：创建支付宝支付订单 - 先返回连接状态，再处理订单
+        第一步：创建支付宝支付订单（前端已处理课程展示和Payment Journey）
         """
-        print(f"(Order Creation) for user: {user_input}")
-
-        # 计算人民币金额
-        amount_rmb = self.demo_context['amount_usd'] * self.demo_context['usd_to_rmb_rate']
+        print(f"(Creating Alipay Payment Order) for user: {user_input}")
         
-        # 调用支付宝MCP服务
+        # 提取课程信息用于订单创建
+        course_info = self.extract_course_info(user_input)
+        
+        # 调用支付宝MCP服务创建订单
         payment_info = await self.run_alipay_query(
-            f"Create a payment order for {amount_rmb:.2f} RMB to purchase a $15.00 USD product, with order ID {self.demo_context['order_id']}"
+            f"Create a payment order for {course_info['price_rmb']:.2f} RMB to purchase {course_info['name']}, with order ID {self.demo_context['order_id']}"
         )
         
-        # 返回完整的支付信息
-        return f"""
-<div class="demo-step-indicator">
-    <span class="step-number">1/5</span> Initializing Cross-Border Payment
-</div>
-<div class="payment-info-card" style="background-color: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-    <h3 style="color: #EAEAEA; border-bottom: 1px solid #444; padding-bottom: 10px;">Premium Web3 Payment Guide</h3>
-    <div style="background: rgba(74, 144, 226, 0.1); border-left: 3px solid #4A90E2; padding: 10px; margin: 15px 0; font-size: 0.9em; color: #94A3B8;">
-        You're using PolyAgent's cross-border payment bridge to buy an international product with Alipay.
-    </div>
-    <div class="info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-        <div><strong style="color: #BDBDBD;">Product Price:</strong><br><span style="color: #FFFFFF;">${self.demo_context['amount_usd']:.2f} USD</span></div>
-        <div><strong style="color: #BDBDBD;">Order ID:</strong><br><span style="color: #FFFFFF; font-family: 'Courier New', Courier, monospace;">{self.demo_context['order_id']}</span></div>
-        <div><strong style="color: #BDBDBD;">Exchange Rate:</strong><br><span style="color: #FFFFFF;">1 USD ≈ {self.demo_context['usd_to_rmb_rate']} RMB</span></div>
-        <div><strong style="color: #BDBDBD;">Estimated Total:</strong><br><span style="color: #FFFFFF; font-weight: bold;">¥{amount_rmb:.2f} RMB</span></div>
-    </div>
-</div>
+        # 只返回支付宝支付按钮
+        return payment_info
 
-{payment_info}
-"""
+    def extract_course_info(self, user_input):
+        """从用户输入中提取或生成课程信息"""
+        # 根据用户输入智能提取课程信息，这里使用示例数据
+        if "python" in user_input.lower():
+            return {
+                "name": "Primary Python Course",
+                "platform": "edX",
+                "duration": "8 weeks",
+                "level": "Beginner to Intermediate",
+                "description": "Learn Python programming fundamentals through hands-on exercises and projects. This comprehensive course covers Python syntax, data structures, functions, and object-oriented programming concepts essential for modern development.",
+                "price_usd": 49.99,
+                "price_rmb": 49.99 * self.demo_context['usd_to_rmb_rate'],
+                "url": "https://www.edx.org/learn/python",
+                "instructor": "edX Professional Education",
+                "certificate": "Verified Certificate Available"
+            }
+        elif "web" in user_input.lower() or "javascript" in user_input.lower():
+            return {
+                "name": "Full Stack Web Development Bootcamp",
+                "platform": "edX",
+                "duration": "12 weeks",
+                "level": "Intermediate to Advanced",
+                "description": "Learn to build complete web applications using modern technologies like React, Node.js, and MongoDB. Includes deployment and DevOps practices.",
+                "price_usd": 89.99,
+                "price_rmb": 89.99 * self.demo_context['usd_to_rmb_rate'],
+                "url": "https://www.edx.org/learn/web-development",
+                "instructor": "edX Professional Education",
+                "certificate": "Professional Certificate"
+            }
+        else:
+            # 默认课程
+            return {
+                "name": "AI & Machine Learning Fundamentals",
+                "platform": "edX",
+                "duration": "10 weeks",
+                "level": "Beginner to Intermediate",
+                "description": "Explore the fundamentals of artificial intelligence and machine learning. Learn to build and deploy ML models using Python, TensorFlow, and scikit-learn.",
+                "price_usd": 69.99,
+                "price_rmb": 69.99 * self.demo_context['usd_to_rmb_rate'],
+                "url": "https://www.edx.org/learn/artificial-intelligence",
+                "instructor": "edX Professional Education",
+                "certificate": "Professional Certificate"
+            }
 
-    async def handle_step2_token_authorization(self, user_input: str):
+    async def handle_step2_automated_payment(self, user_input: str):
         """
-        第二步：用户授权代币 (原Step 3)
+        第二步：自动化支付流程（已迁移到前端处理）
         """
-        print(f"(Authorization) for user: {user_input}")
-        response = await self.iotex_agent.astep(
-            "Please approve 15 PolyAgent tokens for the spender to bridge the payment."
-        )
+        print(f"(Automated Payment Process - Frontend Handled) for user: {user_input}")
         
-        content = response.msgs[0].content if response and response.msgs else "Authorization failed."
-        
-        return f"""
-<div class="demo-step-indicator">
-    <span class="step-number">2/5</span> Bridge Authorization
-</div>
-<div class="response-container">
-    {content}
-</div>
+        # 前端已完全处理自动化流程，后端无需返回HTML
+        return """
 <div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
-    <strong>✅ Token authorization successful.</strong><br>
-    This allows us to use the IoTeX blockchain to securely convert your payment. Next, type "<strong>Transfer tokens</strong>".
-</div>
-"""
-
-    async def handle_step3_token_transfer(self, user_input: str):
-        """
-        第三步：转账给商家 (原Step 4)
-        """
-        print(f"(Transfer) for user: {user_input}")
-        response = await self.iotex_agent.astep(
-            f"Transfer 15 PolyAgent tokens from my wallet to the merchant wallet {self.demo_context['merchant_wallet']} to complete the bridge transaction."
-        )
-        
-        content = response.msgs[0].content if response and response.msgs else "Transfer failed."
-        
-        return f"""
-<div class="demo-step-indicator">
-    <span class="step-number">3/5</span> Cross-Chain Transfer
-</div>
-<div class="response-container">
-    {content}
-</div>
-<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
-    <strong>✅ Funds transferred via blockchain bridge.</strong><br>
-    We are now converting the funds to be delivered to the merchant. Next, type "<strong>Convert with PayPal</strong>".
-</div>
-"""
-
-    async def handle_step4_paypal_conversion(self, user_input: str):
-        """
-        第四步：PayPal收款转换 (原Step 5)
-        """
-        print(f"(PayPal) for user: {user_input}")
-        response = await self.run_paypal_query(
-            "The customer's payment has been bridged. Create an invoice to receive $15.00 USD in the merchant's PayPal account."
-        )
-        
-        return f"""
-<div class="demo-step-indicator">
-    <span class="step-number">4/5</span> Final Currency Conversion
-</div>
-<div class="response-container">
-    {response}
-</div>
-<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
-    <strong>✅ Success! Payment delivered in USD.</strong><br>
-    The merchant has received $15.00 USD in their PayPal account. Next, type "<strong>Get guide</strong>" to download your purchase.
-</div>
-"""
-
-    async def handle_step5_service_delivery(self, user_input: str):
-        """
-        第五步：服务交付 - 提供下载链接 (原Step 6)
-        """
-        print(f"(Delivery) for user: {user_input}")
-        download_link = self.demo_context.get("download_link", "#")
-        
-        return f"""
-<div class="demo-step-indicator">
-    <span class="step-number">5/5</span> Service Delivery
-</div>
-
-<div class="premium-download-container">
-    <div class="success-checkmark">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-    </div>
-    
-    <h3 class="download-title">🎉 Purchase Complete!</h3>
-    <p class="download-subtitle">Your Premium Web3 Payment Guide is ready for download.</p>
-    
-    <a href="{download_link}" style="color: white; text-decoration: underline; font-size: 24px; display: block; text-align: center; margin: 20px 0;" target="_blank">
-        download your file
-    </a>
-    
-    <div class="download-info">
-        <strong>📋 What's included:</strong><br>
-        • Complete Web3 payment integration guide<br>
-        • Cross-border payment bridge architecture<br>
-        • Real-world implementation examples<br>
-        • Security best practices and troubleshooting
-    </div>
-    
-    <div class="download-stats">
-        <div class="stat-item">
-            <span>📄</span>
-            <span>72 pages</span>
-        </div>
-        <div class="stat-item">
-            <span>⚡</span>
-            <span>Instant access</span>
-        </div>
-        <div class="stat-item">
-            <span>🔄</span>
-            <span>Free updates</span>
-        </div>
-    </div>
-</div>
-
-<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 8px; padding: 16px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
-    <strong>✨ Cross-Border Payment Complete!</strong><br>
-    Your payment journey: <strong>Alipay (CNY)</strong> → <strong>IoTeX (USDT)</strong> → <strong>PayPal (USD)</strong> was successful.<br>
-    <span style="color: #00D084;">Transaction ID: TXN-{self.demo_context['order_id']}-{hash(user_input) % 10000:04d}</span>
+    <strong>✅ Automated payment process started</strong><br>
+    The frontend will handle the automated payment flow.
 </div>
 """
 
@@ -432,9 +313,9 @@ class AgentManager:
                     **Action: Create Payment Order (`create_payment`)**
                     - When a user wants to pay, call the `create_payment` function.
                     - Use these exact parameters:
-                        - `outTradeNo`: 'ORDER20250106001'
-                        - `totalAmount`: '108.75'  (This is the RMB equivalent of $15.00 USD)
-                        - `orderTitle`: 'PolyAgent Service - Intl. Purchase'
+                        - `outTradeNo`: 'ORDER20250107001'
+                        - `totalAmount`: '362.43'  (This is the RMB equivalent of $49.99 USD)
+                        - `orderTitle`: 'PolyAgent edX Course - Primary Python'
 
                     **Response Format:**
                     - You MUST return an HTML block with a payment link. Use this exact format:
@@ -445,8 +326,7 @@ class AgentManager:
                     
                     <div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
                         <strong>💡 Payment Instructions:</strong><br>
-                        1. Click the button to open the Alipay payment page.<br>
-                        2. After completing the payment, type "<strong>Authorize tokens</strong>" in the chat to continue the cross-border process.
+                        1. Click the button to open the Alipay payment page.
                     </div>
                     """,
                     model=self.model,
@@ -575,6 +455,86 @@ Please check PayPal MCP server status and try again."""
         
         return results
 
+    async def handle_blockchain_query(self, user_input: str):
+        """Handle blockchain-related queries"""
+        response = self.iotex_agent.step(user_input)
+        
+        return f"""🔗 **IoTeX Blockchain Query Results**
+
+{response.msgs[0].content if response.msgs else "Query failed, please try again later"}
+
+---
+*Query completed on IoTeX Testnet*"""
+
+    async def handle_token_authorization(self, user_input: str):
+        """Handle token authorization operations"""
+        response = self.iotex_agent.step(f"Please execute the following authorization operation: {user_input}")
+        
+        return f"""🔐 **Token Authorization Operation**
+
+{response.msgs[0].content if response.msgs else "Authorization operation failed"}
+
+⚠️ **Security Reminder**
+- Authorization operations involve on-chain transactions, please verify operation security
+- Recommend testing operation flow on testnet environment
+- Handle private key information carefully in production environment
+
+---
+*Operation executed on IoTeX Testnet*"""
+
+    async def handle_creative_story(self, user_input: str):
+        """Handle creative story generation"""
+        # Use Template to safely format strings
+        story_template = Template(self.story_agent.system_message)
+        formatted_system_message = story_template.safe_substitute(user_demand=user_input)
+        
+        # Update system message
+        self.story_agent.system_message = formatted_system_message
+        
+        response = self.story_agent.step("Please create a story based on my requirements")
+        
+        return f"""📖 **AI Creative Story**
+
+{response.msgs[0].content if response.msgs else "Story generation failed, please try again later"}
+
+---
+*Generated by PolyAgent Creative Engine*
+*Content is for entertainment purposes only*"""
+
+    async def handle_general_query(self, user_input: str):
+        """Handle general queries"""
+        return f"""🤖 **General Assistant Response**
+
+Your question: "{user_input}"
+
+I apologize, but I cannot understand your specific requirements at the moment. I am the PolyAgent Payment Bridge Assistant, and I can mainly help you with:
+
+🔹 **Cross-border Payment Process**
+   - Course purchase demonstration
+   - Alipay to PayPal bridge service
+
+🔹 **Blockchain Operations**  
+   - IoTeX testnet balance queries
+   - ERC20 token operations
+   - Wallet address verification
+
+🔹 **Token Management**
+   - Authorization operations (approve)
+   - Transfer operations (transfer)
+   - Contract interactions
+
+🔹 **Creative Services**
+   - Blockchain-themed story creation
+   - Sci-fi/cyberpunk style content generation
+
+Please try to describe your needs more specifically, or you can ask questions like:
+- "Check my IoTeX wallet balance"
+- "Help me authorize tokens"
+- "Create a cyberpunk story about receiving tokens"
+- "I want to purchase a Python course"
+
+---
+*For market information queries, please switch to the "Crypto Monitor" assistant*"""
 
 if __name__ == "__main__":
     agent_manager = AgentManager()

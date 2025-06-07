@@ -1,7 +1,5 @@
 from camel.agents import ChatAgent
 from camel.models import ModelFactory
-from camel.societies.workforce import Workforce
-from camel.tasks import Task
 
 import sys
 import os
@@ -9,14 +7,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 from AgentCore.Tools.coingecko_toolkit import CoinGeckoToolkit
 from AgentCore.Tools.chaingpt_toolkit import ChainGPTToolkit
-from AgentCore.Tools.humanloop_toolkit import HumanToolkit
 
 from camel.types import (
     ModelPlatformType,
-    ModelType,
-    OpenAIBackendRole,
-    RoleType,
-    TaskType,
 )
 
 class MarketMonitorAgent:
@@ -30,46 +23,95 @@ class MarketMonitorAgent:
         
         # 初始化 agent
         self.coin_price_agent = ChatAgent(
-            system_message="你是一个加密货币历史价格助手，帮助用户获取指定加密货币在某一特定日期的历史价格数据，并作一个简单的分析。",
+            system_message="You are a professional cryptocurrency market analysis assistant. You can help users get real-time cryptocurrency prices, historical price data, and provide professional market analysis and investment advice. Please respond in English.",
             model=self.model,
             token_limit=32768,
             tools=[*CoinGeckoToolkit().get_tools()],
-            output_language="zh"
+            output_language="en"
         )
 
         self.coin_news_agent = ChatAgent(
-            system_message="你是一个加密货币新闻助手，帮助用户获取指定加密货币相关的新闻数据。并做一个简单分析。",
+            system_message="You are a professional cryptocurrency news analysis assistant. You can help users get the latest cryptocurrency-related news and provide in-depth market insights and trend analysis. Please respond in English.",
             model=self.model,
             token_limit=32768,
             tools=[*ChainGPTToolkit().get_tools()],
             output_language="en"
         )
+        
+        # 智能路由助手
+        self.router_agent = ChatAgent(
+            system_message="""You are an intelligent routing assistant responsible for analyzing user questions and deciding which professional assistant to use.
 
-        # 初始化 workforce
-        self.workforce = Workforce(
-            description="这是一个由两个智能体组成的协作系统，用来实时获取加密货币的市场信息。由价格信息代理和新闻信息代理组成，分别负责历史价格查询与相关新闻提取与分析。系统整合两类关键数据，为用户提供更全面的市场洞察，可作为交易策略制定、行情监测和市场研究的基础组件",
-            new_worker_agent_kwargs={'model': self.model},
-            coordinator_agent_kwargs={'model': self.model},
-            task_agent_kwargs={'model': self.model}
+Routing Rules:
+1. If the user asks about prices, exchange rates, historical prices, technical analysis, price predictions, choose 'price'
+2. If the user asks about news, market dynamics, policy impacts, industry developments, choose 'news'  
+3. If the user asks comprehensive questions requiring both price and news information, choose 'both'
+4. If uncertain, default to 'price'
+
+Only respond with one word: 'price', 'news', or 'both'""",
+            model=self.model,
+            token_limit=1024,
+            output_language="en"
         )
 
-        # 添加 agent 到 workforce
-        self.workforce.add_single_agent_worker(
-            "负责搜索加密货币价格",
-            worker=self.coin_price_agent
-        ).add_single_agent_worker(
-            "负责获取加密货币数据新闻",
-            worker=self.coin_news_agent
-        )
+    def _analyze_query_type(self, user_question: str) -> str:
+        """分析用户问题类型"""
+        try:
+            response = self.router_agent.step(user_question)
+            route_decision = response.msgs[0].content.strip().lower()
+            
+            if 'price' in route_decision:
+                return 'price'
+            elif 'news' in route_decision:
+                return 'news'
+            elif 'both' in route_decision:
+                return 'both'
+            else:
+                return 'price'  # 默认选择价格查询
+        except:
+            return 'price'  # 出错时默认选择价格查询
 
     def run(self, user_question: str) -> str:
-        # 创建并处理任务
-        task = Task(
-            content=user_question,
-            id="task-crypto-info"
-        )
-        task = self.workforce.process_task(task)
-        return task.result
+        """Intelligently route and process user questions"""
+        try:
+            # Analyze question type
+            query_type = self._analyze_query_type(user_question)
+            
+            if query_type == 'price':
+                # Use price query agent only
+                response = self.coin_price_agent.step(user_question)
+                return response.msgs[0].content if response.msgs else "Unable to get price information"
+                
+            elif query_type == 'news':
+                # Use news query agent only
+                response = self.coin_news_agent.step(user_question)
+                return response.msgs[0].content if response.msgs else "Unable to get news information"
+                
+            elif query_type == 'both':
+                # Use both agents and integrate results
+                price_response = self.coin_price_agent.step(f"Analyze from price perspective: {user_question}")
+                news_response = self.coin_news_agent.step(f"Analyze from news perspective: {user_question}")
+                
+                price_content = price_response.msgs[0].content if price_response.msgs else "Price information failed"
+                news_content = news_response.msgs[0].content if news_response.msgs else "News information failed"
+                
+                # Integrate both results
+                combined_result = f"""📊 **Market Price Analysis**
+{price_content}
+
+📰 **Market News Updates**  
+{news_content}
+
+---
+*Comprehensive Analysis: Combining price data and market news for complete market insights*"""
+                
+                return combined_result
+                
+            else:
+                return "Sorry, I cannot understand your question. Please rephrase it."
+                
+        except Exception as e:
+            return f"Error processing request: {str(e)}"
 
 def main():
     user_question = ["现在人民币兑 USDT 汇率是多少",

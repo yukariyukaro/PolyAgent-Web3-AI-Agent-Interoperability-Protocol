@@ -20,6 +20,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 // 添加自定义样式
 import "./ai-response.css";
+import "./rainbow.css";
 
 // Stagewise dev-tool integration (development only)
 declare const process: any; // Suppress TypeScript errors for process
@@ -539,6 +540,335 @@ function App() {
 		}
 	};
 
+	// 课程信息提取函数
+	const extractCourseInfo = (userInput: string) => {
+		if (userInput.toLowerCase().includes("python")) {
+			return {
+				name: "Primary Python Course",
+				platform: "edX",
+				duration: "8 weeks",
+				level: "Beginner to Intermediate",
+				description: "Learn Python programming fundamentals through hands-on exercises and projects. This comprehensive course covers Python syntax, data structures, functions, and object-oriented programming concepts essential for modern development.",
+				price_usd: 49.99,
+				price_rmb: 49.99 * 7.25,
+				order_id: "ORDER20250107001",
+				preview_url: "https://www.edx.org/learn/python",
+				instructor: "edX Professional Education",
+				certificate: "Verified Certificate Available"
+			};
+		} else if (userInput.toLowerCase().includes("web") || userInput.toLowerCase().includes("javascript")) {
+			return {
+				name: "Full Stack Web Development Bootcamp",
+				platform: "edX",
+				duration: "12 weeks",
+				level: "Intermediate to Advanced",
+				description: "Learn to build complete web applications using modern technologies like React, Node.js, and MongoDB. Includes deployment and DevOps practices.",
+				price_usd: 89.99,
+				price_rmb: 89.99 * 7.25,
+				order_id: "ORDER20250107002",
+				preview_url: "https://www.edx.org/learn/web-development",
+				instructor: "edX Professional Education",
+				certificate: "Professional Certificate"
+			};
+		} else {
+			return {
+				name: "AI & Machine Learning Fundamentals",
+				platform: "edX",
+				duration: "10 weeks",
+				level: "Beginner to Intermediate",
+				description: "Explore the fundamentals of artificial intelligence and machine learning. Learn to build and deploy ML models using Python, TensorFlow, and scikit-learn.",
+				price_usd: 69.99,
+				price_rmb: 69.99 * 7.25,
+				order_id: "ORDER20250107003",
+				preview_url: "https://www.edx.org/learn/artificial-intelligence",
+				instructor: "edX Professional Education",
+				certificate: "Professional Certificate"
+			};
+		}
+	};
+
+	// 前端课程购买流程处理
+	const handleCoursePurchaseFlow = async (userInput: string) => {
+		console.log("(Course Search & Order Creation) for user:", userInput);
+		
+		// 第一步：立即显示搜索状态并同时开始后端调用
+		const searchingMessage: Message = {
+			text: `
+<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>🔍 Analyzing your request...</strong>
+</div>`,
+			sender: "ai",
+			type: "html",
+		};
+		setMessages((prev) => [...prev, searchingMessage]);
+
+		// 💡 关键优化：立即开始后端API调用（并行处理）
+		const courseInfo = extractCourseInfo(userInput);
+		const backendPromise = (async () => {
+			try {
+				console.log("⚡ 立即开始调用后端获取支付宝按钮...");
+				const response = await fetch("http://localhost:5000/market-trade", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						message: `Create a payment order for ${courseInfo.price_rmb.toFixed(2)} RMB to purchase ${courseInfo.name}, with order ID ${courseInfo.order_id}`
+					}),
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+
+				if (!response.body) {
+					throw new Error("ReadableStream not supported");
+				}
+
+				// 获取response的ReadableStream
+				const reader = response.body.getReader();
+				const decoder = new TextDecoder();
+				let streamText = "";
+
+				// 读取流数据
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+
+					// 解码二进制数据为文本
+					const chunk = decoder.decode(value, { stream: !done });
+					streamText += chunk;
+				}
+
+				return streamText;
+
+			} catch (error) {
+				console.error("获取支付宝按钮失败:", error);
+				throw error;
+			}
+		})();
+
+		// 2秒后：显示搜索进度
+		setTimeout(() => {
+			const progressMessage: Message = {
+				text: `
+<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>🔍 Searching for course and planning payment path...</strong>
+</div>`,
+				sender: "ai",
+				type: "html",
+			};
+			setMessages((prev) => [...prev, progressMessage]);
+		}, 2000);
+
+		// 5秒后：显示课程详情
+		setTimeout(() => {
+			const courseDetailsMessage: Message = {
+				text: `
+<div class="payment-info-card" style="background-color: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+    <h3 style="color: #EAEAEA; border-bottom: 1px solid #444; padding-bottom: 10px;">📚 ${courseInfo.name}</h3>
+    
+    <div style="background: rgba(34, 197, 94, 0.1); border-left: 3px solid #22C55E; padding: 10px; margin: 15px 0; font-size: 0.9em; color: #94A3B8;">
+        <strong>✅ Course found successfully!</strong><br>
+        Platform: ${courseInfo.platform}<br>
+        Duration: ${courseInfo.duration}<br>
+        Level: ${courseInfo.level}<br>
+        Instructor: ${courseInfo.instructor}
+    </div>
+    
+    <!-- Course Preview Section -->
+    <div style="background: rgba(0, 123, 255, 0.1); border: 1px solid rgba(0, 123, 255, 0.3); border-radius: 8px; padding: 15px; margin: 15px 0;">
+        <h4 style="color: #4FC3F7; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-flex; align-items: center; font-size: 1.1em;">🔍</span>
+            <span>Course Preview</span>
+        </h4>
+        <p style="color: #B0BEC5; font-size: 0.9em; margin-bottom: 12px;">
+            Preview the course content and curriculum before purchase
+        </p>
+        <p style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-flex; align-items: center; font-size: 1.1em;">🌐</span>
+            <a href="${courseInfo.preview_url}" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               style="color: #4FC3F7; text-decoration: none; font-weight: 600;">
+                Visit edX Course Page ↗
+            </a>
+        </p>
+        <div style="margin-top: 8px; font-size: 0.8em; color: #90A4AE; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-flex; align-items: center; font-size: 1.1em;">📋</span>
+            <span>Certificate: ${courseInfo.certificate}</span>
+        </div>
+    </div>
+    
+    <div class="course-description" style="margin: 15px 0; padding: 10px; background: rgba(0, 0, 0, 0.2); border-radius: 6px;">
+        <h4 style="color: #EAEAEA; margin-bottom: 8px;">Course Description:</h4>
+        <p style="color: #BDBDBD; line-height: 1.5;">${courseInfo.description}</p>
+    </div>
+    
+    <div class="info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+        <div><strong style="color: #BDBDBD;">Course Price:</strong><br><span style="color: #FFFFFF;">$${courseInfo.price_usd.toFixed(2)} USD</span></div>
+        <div><strong style="color: #BDBDBD;">Order ID:</strong><br><span style="color: #FFFFFF; font-family: 'Courier New', Courier, monospace;">${courseInfo.order_id}</span></div>
+        <div><strong style="color: #BDBDBD;">Exchange Rate:</strong><br><span style="color: #FFFFFF;">1 USD ≈ 7.25 RMB</span></div>
+        <div><strong style="color: #BDBDBD;">Total Amount:</strong><br><span style="color: #FFFFFF; font-weight: bold;">¥${courseInfo.price_rmb.toFixed(2)} RMB</span></div>
+    </div>
+    
+    <div class="payment-path-container" style="margin: 24px 0; padding: 0; background: transparent; border-radius: 16px;">
+        <h4 style="color: #EAEAEA; margin-bottom: 16px; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <span style="background: linear-gradient(135deg, #00FFD1, #6C40F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🔄 Payment Journey</span>
+        </h4>
+        
+        <div class="payment-flow-steps" style="display: flex; align-items: stretch; justify-content: space-between; background: linear-gradient(135deg, rgba(31, 31, 42, 0.8), rgba(24, 24, 32, 0.9)); padding: 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; overflow: hidden; min-height: 120px;">
+            <!-- Background decoration -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #00FFD1 0%, #6C40F7 33%, #4A90E2 66%, #22C55E 100%);"></div>
+            
+            <!-- Step 1: Alipay -->
+            <div class="payment-step" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; position: relative; z-index: 2; padding-top: 10px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #00FFD1, #00B8A3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(0, 255, 209, 0.3); border: 2px solid rgba(255, 255, 255, 0.1); flex-shrink: 0;">
+                    <span style="font-size: 20px; line-height: 1;">💰</span>
+                </div>
+                <div style="color: #00FFD1; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 4px; line-height: 1.2;">Alipay</div>
+                <div style="color: #A0A0B4; font-size: 12px; text-align: center; line-height: 1.2;">RMB Payment</div>
+            </div>
+            
+            <!-- Arrow 1 -->
+            <div class="flow-arrow" style="flex: 0 0 auto; margin: 0 8px; color: #6C40F7; font-size: 18px; display: flex; align-items: center; justify-content: center; height: 100%; padding-top: 10px;">
+                <svg width="24" height="16" viewBox="0 0 24 16" fill="none" style="filter: drop-shadow(0 2px 4px rgba(108, 64, 247, 0.3));">
+                    <path d="M16 0L14.59 1.41L19.17 6H0V8H19.17L14.59 12.59L16 14L24 6L16 0Z" fill="currentColor"/>
+                </svg>
+            </div>
+            
+            <!-- Step 2: Token Transfer -->
+            <div class="payment-step" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; position: relative; z-index: 2; padding-top: 10px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #6C40F7, #8B5CF6); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(108, 64, 247, 0.3); border: 2px solid rgba(255, 255, 255, 0.1); flex-shrink: 0;">
+                    <span style="font-size: 20px; line-height: 1;">🔗</span>
+                </div>
+                <div style="color: #6C40F7; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 4px; line-height: 1.2;">Token Bridge</div>
+                <div style="color: #A0A0B4; font-size: 12px; text-align: center; line-height: 1.2;">Cross-chain</div>
+            </div>
+            
+            <!-- Arrow 2 -->
+            <div class="flow-arrow" style="flex: 0 0 auto; margin: 0 8px; color: #4A90E2; font-size: 18px; display: flex; align-items: center; justify-content: center; height: 100%; padding-top: 10px;">
+                <svg width="24" height="16" viewBox="0 0 24 16" fill="none" style="filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.3));">
+                    <path d="M16 0L14.59 1.41L19.17 6H0V8H19.17L14.59 12.59L16 14L24 6L16 0Z" fill="currentColor"/>
+                </svg>
+            </div>
+            
+            <!-- Step 3: PayPal -->
+            <div class="payment-step" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; position: relative; z-index: 2; padding-top: 10px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #4A90E2, #2563EB); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3); border: 2px solid rgba(255, 255, 255, 0.1); flex-shrink: 0;">
+                    <span style="font-size: 20px; line-height: 1;">💳</span>
+                </div>
+                <div style="color: #4A90E2; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 4px; line-height: 1.2;">PayPal</div>
+                <div style="color: #A0A0B4; font-size: 12px; text-align: center; line-height: 1.2;">USD Settlement</div>
+            </div>
+            
+            <!-- Arrow 3 -->
+            <div class="flow-arrow" style="flex: 0 0 auto; margin: 0 8px; color: #22C55E; font-size: 18px; display: flex; align-items: center; justify-content: center; height: 100%; padding-top: 10px;">
+                <svg width="24" height="16" viewBox="0 0 24 16" fill="none" style="filter: drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3));">
+                    <path d="M16 0L14.59 1.41L19.17 6H0V8H19.17L14.59 12.59L16 14L24 6L16 0Z" fill="currentColor"/>
+                </svg>
+            </div>
+            
+            <!-- Step 4: Course Access -->
+            <div class="payment-step" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; position: relative; z-index: 2; padding-top: 10px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #22C55E, #16A34A); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3); border: 2px solid rgba(255, 255, 255, 0.1); flex-shrink: 0;">
+                    <span style="font-size: 20px; line-height: 1;">📚</span>
+                </div>
+                <div style="color: #22C55E; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 4px; line-height: 1.2;">Course Access</div>
+                <div style="color: #A0A0B4; font-size: 12px; text-align: center; line-height: 1.2;">Instant Delivery</div>
+            </div>
+            
+            <!-- Animated background particles -->
+            <div style="position: absolute; top: 50%; left: 10%; width: 4px; height: 4px; background: #00FFD1; border-radius: 50%; opacity: 0.6;"></div>
+            <div style="position: absolute; top: 30%; right: 20%; width: 3px; height: 3px; background: #6C40F7; border-radius: 50%; opacity: 0.4;"></div>
+            <div style="position: absolute; bottom: 20%; left: 30%; width: 2px; height: 2px; background: #4A90E2; border-radius: 50%; opacity: 0.5;"></div>
+        </div>
+        
+        <!-- Processing time indicator -->
+        <div style="margin-top: 12px; text-align: center; color: #A0A0B4; font-size: 13px; font-weight: 500;">
+            <span style="background: rgba(255, 255, 255, 0.05); padding: 4px 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                ⚡ Estimated completion: ~25 seconds
+            </span>
+        </div>
+    </div>
+</div>`,
+				sender: "ai",
+				type: "html",
+			};
+			setMessages((prev) => [...prev, courseDetailsMessage]);
+		}, 5000);
+
+		// 7秒后：显示正在创建支付宝订单
+		setTimeout(() => {
+			const orderCreationMessage: Message = {
+				text: `
+<div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px; padding: 16px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8; position: relative; overflow: hidden;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="spinner" style="width: 20px; height: 20px; border: 2px solid rgba(139, 92, 246, 0.3); border-top: 2px solid #8B5CF6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <div>
+            <strong style="color: #A78BFA;">🔄 Creating your Alipay payment order...</strong><br>
+            <span style="color: #94A3B8; font-size: 0.85em;">Backend processing almost complete...</span>
+        </div>
+    </div>
+    
+    <!-- 进度条动画 -->
+    <div style="margin-top: 12px; background: rgba(139, 92, 246, 0.2); height: 4px; border-radius: 2px; overflow: hidden;">
+        <div style="height: 100%; background: linear-gradient(90deg, #8B5CF6, #A78BFA); border-radius: 2px; animation: progress 2s ease-out forwards; width: 0%;"></div>
+    </div>
+    
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 65%; }
+            100% { width: 100%; }
+        }
+    </style>
+</div>`,
+				sender: "ai",
+				type: "html",
+			};
+			setMessages((prev) => [...prev, orderCreationMessage]);
+		}, 7000);
+
+		// 优化：等待后端API完成（通常在7-9秒内完成）
+		try {
+			const streamText = await backendPromise;
+			
+			// 添加AI Agent的响应（支付宝按钮）
+			const alipayButtonMessage: Message = {
+				text: streamText.replace(/\n/g, "<br>").replace(/\r/g, ""),
+				sender: "ai",
+				type: "html",
+			};
+			setMessages((prev) => [...prev, alipayButtonMessage]);
+
+		} catch (error) {
+			console.error("获取支付宝按钮失败:", error);
+			const errorMessage: Message = {
+				text: `<div style="background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; color: #F87171;">
+					<strong>❌ Payment setup failed</strong><br>
+					Please try again later.
+				</div>`,
+				sender: "ai",
+				type: "html",
+			};
+			setMessages((prev) => [...prev, errorMessage]);
+		} finally {
+			setIsTyping(false);
+		}
+	};
+
+	// 检测是否为课程购买请求
+	const isCourseRequest = (message: string): boolean => {
+		const keywords = ["purchase", "buy", "course", "want to buy", "希望购买", "课程", "learn", "training", "enroll"];
+		return keywords.some(keyword => message.toLowerCase().includes(keyword));
+	};
+
 	// 响应消息
 	const respondToMessage = async (message: string) => {
 		setIsTyping(true);
@@ -552,6 +882,13 @@ function App() {
 			createNewConversation();
 			// 等待状态更新
 			await new Promise(resolve => setTimeout(resolve, 100));
+		}
+
+		// 特殊处理：检测课程购买请求且当前是trade agent
+		if (selectedAgent === "trade" && isCourseRequest(message)) {
+			console.log("检测到课程购买请求，启动前端流程");
+			await handleCoursePurchaseFlow(message);
+			return; // 直接返回，不调用后端API
 		}
 
 		try {
@@ -670,11 +1007,188 @@ function App() {
 	// 添加按钮点击状态管理
 	const [buttonClickedMap, setButtonClickedMap] = useState<Record<string, boolean>>({});
 
+	// 前端自动化支付演示函数
+	const startAutomatedPaymentDemo = () => {
+		console.log("开始前端自动化支付演示");
+		
+		// 第一步：代币转账（立即开始）
+		const tokenTransferMessage: Message = {
+			text: `
+<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>⏳ Executing token transfer...</strong>
+</div>`,
+			sender: "ai",
+			type: "html",
+		};
+		
+		setMessages((prevMessages) => [...prevMessages, tokenTransferMessage]);
+		
+		// 8秒后：代币转账完成
+		setTimeout(() => {
+			const tokenSuccessMessage: Message = {
+				text: `
+<div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>✅ Token transfer completed!</strong><br>
+    From: 0xE4949a0339320cE9ec93c9d0836c260F23DFE8Ca<br>
+    To: 0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE<br>
+    Amount: 49.99 USDT<br>
+    Tx Hash: 0x1a2b3c4d5e6f789012345678901234567890abcd<br>
+    <em>Converting to merchant PayPal account...</em>
+</div>`,
+				sender: "ai",
+				type: "html",
+			};
+			
+			setMessages((prevMessages) => [...prevMessages, tokenSuccessMessage]);
+			
+			// 立即显示PayPal处理状态
+			setTimeout(() => {
+				const paypalProcessingMessage: Message = {
+					text: `
+<div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>⏳ Converting to merchant PayPal...</strong>
+</div>`,
+					sender: "ai",
+					type: "html",
+				};
+				
+				setMessages((prevMessages) => [...prevMessages, paypalProcessingMessage]);
+			}, 100);
+			
+		}, 8000);
+
+		// 13秒后：PayPal收款完成
+		setTimeout(() => {
+			const paypalSuccessMessage: Message = {
+				text: `
+<div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>✅ Merchant received payment!</strong><br>
+    
+    <div class="paypal-receipt" style="background: #f5f5f5; color: #333; padding: 15px; border-radius: 8px; margin: 10px 0; font-family: Arial, sans-serif;">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjI2IiB2aWV3Qm94PSIwIDAgMTAwIDI2IiBmaWxsPSJub25lIj4KICA8cGF0aCBkPSJNMTIgNGg4YzQgMCA3IDMgNyA3cy0zIDctNyA3SDEybC0yIDhoLTRsMy0yMmg3eiIgZmlsbD0iIzAwMzA4NyIvPgogIDxwYXRoIGQ9Ik0zNSA0aDhjNSAwIDggNCA4IDlzLTMgOS04IDhoLThsLTIgOGgtNGwzLTI2aDExeiIgZmlsbD0iIzAwOTZkNiIvPgo8L3N2Zz4K" alt="PayPal" style="width: 80px;"/>
+            <h3 style="margin: 10px 0; color: #0070ba;">Payment Receipt</h3>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+            <div><strong>Transaction ID:</strong><br>7XB123456789</div>
+            <div><strong>Amount:</strong><br>$49.99 USD</div>
+            <div><strong>Status:</strong><br><span style="color: #00a020;">Completed</span></div>
+            <div><strong>Date:</strong><br>${new Date().toLocaleDateString()}</div>
+            <div><strong>From:</strong><br>payment-bridge@polyagent.ai</div>
+            <div><strong>To:</strong><br>merchant@courseplatform.com</div>
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">
+            <strong>Description:</strong> Primary Python Course<br>
+            <strong>Merchant:</strong> edX Professional Education Services
+        </div>
+    </div>
+    
+    <em>Preparing your course access...</em>
+</div>`,
+				sender: "ai",
+				type: "html",
+			};
+			
+			setMessages((prevMessages) => [...prevMessages, paypalSuccessMessage]);
+			
+			// 立即显示课程交付准备状态
+			setTimeout(() => {
+				const deliveryProcessingMessage: Message = {
+					text: `
+<div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>⏳ Preparing course delivery...</strong>
+</div>`,
+					sender: "ai",
+					type: "html",
+				};
+				
+				setMessages((prevMessages) => [...prevMessages, deliveryProcessingMessage]);
+			}, 100);
+			
+		}, 13000);
+
+		// 18秒后：课程交付完成
+		setTimeout(() => {
+			const courseDeliveryMessage: Message = {
+				text: `
+<div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>🎉 Course access granted!</strong><br>
+    
+    <div class="course-delivery" style="background: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 20px; margin: 15px 0;">
+        <h3 style="color: #EAEAEA; margin-bottom: 15px;">📚 Your Course is Ready!</h3>
+        
+        <div style="background: rgba(0, 255, 209, 0.1); border-left: 3px solid #00FFD1; padding: 10px; margin: 15px 0;">
+            <strong>Course:</strong> Primary Python Course<br>
+            <strong>Platform:</strong> edX Professional Education<br>
+            <strong>Access:</strong> Lifetime Access
+        </div>
+        
+        <div style="background: rgba(74, 144, 226, 0.1); padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="color: #EAEAEA; margin-bottom: 8px; font-size: 16px;">
+                <strong>📁 Your download link:</strong>
+            </p>
+            <p style="margin-bottom: 10px;">
+                <a href="https://pan.baidu.com/s/1F4TgbbTrz4LbSifczoDcXg?pwd=6712" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   style="color: #00FFD1; text-decoration: none; font-weight: 600; font-size: 14px; word-break: break-all;">
+                    https://pan.baidu.com/s/1F4TgbbTrz4LbSifczoDcXg?pwd=6712
+                </a>
+            </p>
+            <p style="color: #94A3B8; font-size: 14px; margin-bottom: 0;">
+                <strong>Extract Code:</strong> <span style="color: #00FFD1; font-family: monospace; font-size: 16px; font-weight: bold;">6712</span>
+            </p>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 0.9em; color: #94A3B8;">
+            <strong>📋 What's included:</strong><br>
+            • Complete Primary Python video course (25+ hours)<br>
+            • Python fundamentals and practice exercises<br>
+            • Interactive Jupyter notebooks and code examples<br>
+            • edX Verified Certificate of completion<br>
+            • Python programming cheat sheets and resources<br>
+            • Access to online Python community
+        </div>
+    </div>
+</div>
+
+<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 8px; padding: 16px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>✨ Cross-Border Payment Complete!</strong><br>
+    Your payment journey: <strong>Alipay (CNY)</strong> → <strong>Token Bridge</strong> → <strong>PayPal (USD)</strong> → <strong>Course Access</strong><br>
+    <span style="color: #00D084;">Total transaction time: ~18 seconds</span>
+</div>`,
+				sender: "ai",
+				type: "html",
+			};
+			
+			setMessages((prevMessages) => [...prevMessages, courseDeliveryMessage]);
+			console.log("前端自动化支付演示流程完成！");
+			
+		}, 18000);
+
+		// 确保每次添加消息后都滚动到底部
+		const scrollToBottom = () => {
+			setTimeout(() => {
+				if (chatContainerRef.current) {
+					chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+				}
+			}, 100);
+		};
+
+		// 在每个消息添加后滚动
+		setTimeout(scrollToBottom, 100);
+		setTimeout(scrollToBottom, 8100);
+		setTimeout(scrollToBottom, 13100);
+		setTimeout(scrollToBottom, 18100);
+	};
+
 	// 全局函数，供HTML按钮调用
 	useEffect(() => {
 		// 支付宝支付处理函数
 		(window as any).handleAlipayPayment = (linkElement: HTMLAnchorElement) => {
-			console.log("支付宝支付按钮被点击，将在10秒后模拟AI确认。");
+			console.log("支付宝支付按钮被点击，将在10秒后自动开始前端动画演示。");
 			
 			// 1. 打开支付链接
 			if (linkElement.href && linkElement.href !== "[支付链接]") {
@@ -686,19 +1200,21 @@ function App() {
 			linkElement.style.opacity = '0.5';
 			linkElement.textContent = 'Processing...';
 
-			// 3. 10秒后模拟AI回复
+			// 3. 10秒后显示支付宝成功消息并开始前端自动化流程
 			setTimeout(() => {
-				const aiConfirmationMessage: Message = {
+				const alipaySuccessMessage: Message = {
 					text: `
-<div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
-    <strong>✅ Payment confirmed successfully.</strong><br>
-    Next, please type "<strong>Authorize tokens</strong>" in the chat to proceed.
+<div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
+    <strong>✅ Alipay payment successful!</strong><br>
+    Amount: ¥362.43 RMB<br>
+    Transaction ID: 2025010712345678<br>
+    <em>Now initiating token transfer...</em>
 </div>`,
 					sender: "ai",
 					type: "html",
 				};
 				
-				setMessages((prevMessages) => [...prevMessages, aiConfirmationMessage]);
+				setMessages((prevMessages) => [...prevMessages, alipaySuccessMessage]);
 
 				// 滚动到聊天底部
 				setTimeout(() => {
@@ -707,7 +1223,20 @@ function App() {
 					}
 				}, 100);
 
+				// 1秒后开始前端自动化演示流程
+				setTimeout(() => {
+					startAutomatedPaymentDemo();
+				}, 1000);
+
 			}, 10000); // 10秒延迟
+		};
+
+		// 新的自动化支付确认处理函数
+		(window as any).handlePaymentConfirmation = () => {
+			console.log("自动化支付确认按钮被点击");
+			
+			// 立即发送confirm_payment消息到后端触发自动化流程
+			respondToMessage("confirm_payment");
 		};
 
 		(window as any).showTransferForm = (buttonId?: string) => {
@@ -736,6 +1265,7 @@ function App() {
 
 		return () => {
 			delete (window as any).handleAlipayPayment;
+			delete (window as any).handlePaymentConfirmation;
 			delete (window as any).showTransferForm;
 		};
 	}, [currentConversationId, selectedAgent, setMessages, respondToMessage, buttonClickedMap]);
@@ -972,6 +1502,8 @@ function App() {
 										/>
 										<span className="text-sm truncate">set up</span>
 									</button> */}
+
+
 								</div>
 
                 {/* 签名工具面板 */}
