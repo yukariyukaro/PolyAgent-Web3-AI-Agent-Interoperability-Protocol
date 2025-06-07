@@ -1,7 +1,5 @@
 import os
 import sys
-import threading
-import queue
 import asyncio
 from flask import Flask, request, jsonify, Response, stream_with_context, send_file
 from flask_cors import CORS
@@ -63,46 +61,18 @@ print("✅ AI Agents 已加载。")
 
 
 # --- 流式响应辅助工具 ---
-class StreamToQueue:
-    """一个辅助类，将标准输出重定向到队列，用于捕获Agent的打印输出。"""
-    def __init__(self, q):
-        self.q = q
+def clean_agent_output(text):
+    """清理Agent输出，移除ANSI颜色代码和多余空行"""
+    import re
+    if not text:
+        return ""
     
-    def write(self, msg):
-        if msg:
-            self.q.put(msg)
+    # 移除 ANSI 颜色代码
+    clean_text = re.sub(r'\x1b\[[0-9;]*m', '', str(text))
+    # 移除过多的空行
+    clean_text = re.sub(r'\n\s*\n\s*\n', '\n\n', clean_text)
     
-    def flush(self):
-        pass
-
-def stream_agent_response(agent_instance, user_message):
-    """
-    通用函数，用于执行Agent并流式返回其响应。
-    它通过重定向stdout来捕获并流式传输CAMEL-AI库中的打印信息。
-    """
-    q = queue.Queue()
-    
-    def worker():
-        original_stdout = sys.stdout
-        sys.stdout = StreamToQueue(q)
-        try:
-            result = agent_instance.step(user_message)
-            # 最终的 return 结果也放入队列
-            q.put(result.msgs[0].content if result and result.msgs else "未能获取响应")
-        except Exception as e:
-            error_msg = f"--- AGENT_EXECUTION_ERROR ---\n处理请求时出错: {e}"
-            print(error_msg)
-        finally:
-            sys.stdout = original_stdout
-            q.put(None)  # 使用 None 作为流结束的信号
-
-    threading.Thread(target=worker).start()
-
-    while True:
-        chunk = q.get()
-        if chunk is None:
-            break
-        yield f"{chunk}\n"
+    return clean_text.strip()
 
 # --- API 端点定义 ---
 
@@ -138,30 +108,25 @@ def handle_market_monitor():
          return jsonify({"error": "Market Monitor Agent 未成功初始化"}), 500
 
     def stream_monitor_response():
-        """专门为 MarketMonitorAgent 设计的流式响应生成器。"""
-        q = queue.Queue()
-        
-        def worker():
-            original_stdout = sys.stdout
-            sys.stdout = StreamToQueue(q)
-            try:
-                # MarketMonitorAgent 使用 'run' 方法并直接返回字符串
-                result = market_monitor.run(message)
-                q.put(result)
-            except Exception as e:
-                error_msg = f"--- AGENT_EXECUTION_ERROR ---\n处理 Market Monitor 请求时出错: {e}"
-                print(error_msg)
-            finally:
-                sys.stdout = original_stdout
-                q.put(None)  # 流结束信号
-
-        threading.Thread(target=worker).start()
-
-        while True:
-            chunk = q.get()
-            if chunk is None:
-                break
-            yield f"{chunk}\n"
+        """优化的 MarketMonitorAgent 流式响应生成器。"""
+        try:
+            # 直接运行 MarketMonitorAgent
+            result = market_monitor.run(message)
+            
+            # 清理结果输出
+            if result:
+                clean_result = clean_agent_output(result)
+                
+                # 逐行输出，提供更好的流式体验
+                lines = clean_result.split('\n')
+                for line in lines:
+                    if line.strip():  # 只输出非空行
+                        yield f"{line}\n"
+            else:
+                yield "未能获取市场监控信息，请稍后重试。\n"
+                
+        except Exception as e:
+            yield f"处理市场监控请求时出错: {e}\n"
 
     return Response(stream_with_context(stream_monitor_response()), mimetype="text/plain")
 
@@ -176,38 +141,27 @@ def handle_market_trade():
         return jsonify({"error": "Agent Manager 未成功初始化"}), 500
         
     def stream_agent_response():
-        q = queue.Queue()
-        
-        def worker():
-            original_stdout = sys.stdout
-            sys.stdout = StreamToQueue(q)
-            try:
-                # 使用新的智能路由系统处理用户消息
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                result = loop.run_until_complete(agent_manager.smart_route_request(message))
-                loop.close()
+        try:
+            # 使用新的智能路由系统处理用户消息
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            result = loop.run_until_complete(agent_manager.smart_route_request(message))
+            loop.close()
+            
+            # 清理结果输出
+            if result:
+                clean_result = clean_agent_output(result)
                 
-                # 直接输出结果
-                if result:
-                    q.put(result)
-                else:
-                    q.put("Unable to process your request. Please try again.")
-                        
-            except Exception as e:
-                error_msg = f"处理请求时出错: {e}"
-                q.put(error_msg)
-            finally:
-                sys.stdout = original_stdout
-                q.put(None)  # 使用 None 作为流结束的信号
-
-        threading.Thread(target=worker).start()
-
-        while True:
-            chunk = q.get()
-            if chunk is None:
-                break
-            yield f"{chunk}\n"
+                # 逐行输出
+                lines = clean_result.split('\n')
+                for line in lines:
+                    if line.strip():
+                        yield f"{line}\n"
+            else:
+                yield "无法处理您的请求，请稍后重试。\n"
+                    
+        except Exception as e:
+            yield f"处理请求时出错: {e}\n"
     
     return Response(stream_with_context(stream_agent_response()), mimetype="text/plain")
 
