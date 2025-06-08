@@ -300,7 +300,7 @@ function WalletSignature() {
           >
             {isSendPending
               ? "Sending..."
-              : `Send ${chain?.nativeCurrency.symbol || "Token"}`}
+              : `Send ${chain?.nativeCurrency.symbol || "Stablecoin"}`}
           </button>
         </div>
       </div>
@@ -352,7 +352,7 @@ function App() {
 		setSelectedAgent(agentType);
 		setIsAgentSwitching(false);
 
-		console.log(`AI助手已切换至: ${agentType === 'monitor' ? '加密货币监控' : '支付宝转代币'}`);
+		console.log(`AI助手已切换至: ${agentType === 'monitor' ? '加密货币监控' : '支付宝转stablecoin'}`);
 	};
 
 	// Tooltip处理函数
@@ -390,7 +390,7 @@ function App() {
 		} else {
 			return {
 				title: "💰 Payment Bridge Assistant",
-				description: "Assist with token transfers and cross-border payment operations",
+				description: "Assist with stablecoin transfers and cross-border payment operations",
 				features: [
 
 
@@ -737,12 +737,12 @@ function App() {
                 </svg>
             </div>
             
-            <!-- Step 2: Token Transfer -->
+            <!-- Step 2: Stablecoin Transfer -->
             <div class="payment-step" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; position: relative; z-index: 2; padding-top: 10px;">
                 <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #6C40F7, #8B5CF6); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(108, 64, 247, 0.3); border: 2px solid rgba(255, 255, 255, 0.1); flex-shrink: 0;">
                     <span style="font-size: 20px; line-height: 1;">🔗</span>
                 </div>
-                <div style="color: #6C40F7; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 4px; line-height: 1.2;">Token Bridge</div>
+                <div style="color: #6C40F7; font-weight: 600; font-size: 14px; text-align: center; margin-bottom: 4px; line-height: 1.2;">Stablecoin Bridge</div>
                 <div style="color: #A0A0B4; font-size: 12px; text-align: center; line-height: 1.2;">Cross-chain</div>
             </div>
             
@@ -1012,23 +1012,23 @@ function App() {
 		console.log("开始前端自动化支付演示");
 		
 		// 第一步：代币转账（立即开始）
-		const tokenTransferMessage: Message = {
+		const stablecoinTransferMessage: Message = {
 			text: `
 <div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
-    <strong>⏳ Executing token transfer...</strong>
+    <strong>⏳ Executing stablecoin transfer...</strong>
 </div>`,
 			sender: "ai",
 			type: "html",
 		};
 		
-		setMessages((prevMessages) => [...prevMessages, tokenTransferMessage]);
+		setMessages((prevMessages) => [...prevMessages, stablecoinTransferMessage]);
 		
 		// 8秒后：代币转账完成
 		setTimeout(() => {
-			const tokenSuccessMessage: Message = {
+			const stablecoinSuccessMessage: Message = {
 				text: `
 <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; padding: 12px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
-    <strong>✅ Token transfer completed!</strong><br>
+    <strong>✅ Stablecoin transfer completed!</strong><br>
     From: 0xE4949a0339320cE9ec93c9d0836c260F23DFE8Ca<br>
     To: 0xf874871Bc0f99a06b5327F34AceAa80Ae71905DE<br>
     Amount: 49.99 USDT<br>
@@ -1039,7 +1039,7 @@ function App() {
 				type: "html",
 			};
 			
-			setMessages((prevMessages) => [...prevMessages, tokenSuccessMessage]);
+			setMessages((prevMessages) => [...prevMessages, stablecoinSuccessMessage]);
 			
 			// 立即显示PayPal处理状态
 			setTimeout(() => {
@@ -1066,7 +1066,7 @@ function App() {
     
     <div class="paypal-receipt" style="background: #f5f5f5; color: #333; padding: 15px; border-radius: 8px; margin: 10px 0; font-family: Arial, sans-serif;">
         <div style="text-align: center; margin-bottom: 15px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjI2IiB2aWV3Qm94PSIwIDAgMTAwIDI2IiBmaWxsPSJub25lIj4KICA8cGF0aCBkPSJNMTIgNGg4YzQgMCA3IDMgNyA3cy0zIDctNyA3SDEybC0yIDhoLTRsMy0yMmg3eiIgZmlsbD0iIzAwMzA4NyIvPgogIDxwYXRoIGQ9Ik0zNSA0aDhjNSAwIDggNCA4IDlzLTMgOS04IDhoLThsLTIgOGgtNGwzLTI2aDExeiIgZmlsbD0iIzAwOTZkNiIvPgo8L3N2Zz4K" alt="PayPal" style="width: 80px;"/>
+            <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" style="width: 80px;"/>
             <h3 style="margin: 10px 0; color: #0070ba;">Payment Receipt</h3>
         </div>
         
@@ -1130,16 +1130,14 @@ function App() {
                 <strong>📁 Your download link:</strong>
             </p>
             <p style="margin-bottom: 10px;">
-                <a href="https://pan.baidu.com/s/1F4TgbbTrz4LbSifczoDcXg?pwd=6712" 
+                <a href="https://www.dropbox.com/scl/fo/qa0db0e4yfmaohrzox6ym/ADKAhnvn1GayIwqd_MPCsQE?rlkey=8rde0y77v3minbl9fbjsfsiqa&st=tohswbdl&dl=0" 
                    target="_blank" 
                    rel="noopener noreferrer"
                    style="color: #00FFD1; text-decoration: none; font-weight: 600; font-size: 14px; word-break: break-all;">
-                    https://pan.baidu.com/s/1F4TgbbTrz4LbSifczoDcXg?pwd=6712
+                    https://www.dropbox.com/scl/fo/qa0db0e4yfmaohrzox6ym/ADKAhnvn1GayIwqd_MPCsQE?rlkey=8rde0y77v3minbl9fbjsfsiqa&st=tohswbdl&dl=0
                 </a>
             </p>
-            <p style="color: #94A3B8; font-size: 14px; margin-bottom: 0;">
-                <strong>Extract Code:</strong> <span style="color: #00FFD1; font-family: monospace; font-size: 16px; font-weight: bold;">6712</span>
-            </p>
+            
         </div>
         
         <div style="margin-top: 15px; font-size: 0.9em; color: #94A3B8;">
@@ -1156,7 +1154,7 @@ function App() {
 
 <div style="background: rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 8px; padding: 16px; margin: 1rem 0; font-size: 0.9em; color: #94A3B8;">
     <strong>✨ Cross-Border Payment Complete!</strong><br>
-    Your payment journey: <strong>Alipay (CNY)</strong> → <strong>Token Bridge</strong> → <strong>PayPal (USD)</strong> → <strong>Course Access</strong><br>
+    Your payment journey: <strong>Alipay (CNY)</strong> → <strong>Stablecoin Bridge</strong> → <strong>PayPal (USD)</strong> → <strong>Course Access</strong><br>
     <span style="color: #00D084;">Total transaction time: ~18 seconds</span>
 </div>`,
 				sender: "ai",
@@ -1208,7 +1206,7 @@ function App() {
     <strong>✅ Alipay payment successful!</strong><br>
     Amount: ¥362.43 RMB<br>
     Transaction ID: 2025010712345678<br>
-    <em>Now initiating token transfer...</em>
+    <em>Now initiating stablecoin transfer...</em>
 </div>`,
 					sender: "ai",
 					type: "html",
