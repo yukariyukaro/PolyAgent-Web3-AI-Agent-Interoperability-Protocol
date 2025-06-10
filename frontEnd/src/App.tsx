@@ -1,14 +1,10 @@
 import {
-	faBolt,
-	faCog,
 	faCommentAlt,
-	faHistory,
 	faMicrophone,
 	faPaperPlane,
 	// faUser,
 	faPlus,
 	faTimes,
-	faWallet,
 	faSignature,
 	faPen,
 } from "@fortawesome/free-solid-svg-icons";
@@ -153,7 +149,7 @@ function WalletSignature() {
   const [signatureResult, setSignatureResult] = useState("");
   const [recipientAddress, setRecipientAddress] = useState("");
   const [sendAmount, setSendAmount] = useState("");
-  const [showSignaturePanel, setShowSignaturePanel] = useState(false);
+  // const [showSignaturePanel, setShowSignaturePanel] = useState(false);
   const { signMessage, isPending: isSignPending } = useSignMessage({
     mutation: {
       onSuccess: (signature) => {
@@ -413,7 +409,9 @@ function App() {
 			const currentConversation = JSON.parse(storedConversations || "[]").find(
 				(conv: Conversation) => conv.id === currentId
 			);
-			
+			if (currentConversation) {
+				setMessages(currentConversation.messages);
+			}
 		}
 	}, []);
 
