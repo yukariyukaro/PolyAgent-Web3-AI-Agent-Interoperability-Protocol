@@ -605,7 +605,7 @@ function App() {
 		const backendPromise = (async () => {
 			try {
 				console.log("⚡ 立即开始调用后端获取支付宝按钮...");
-				const response = await fetch("http://localhost:5000/market-trade", {
+				const response = await fetch("/market-trade", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -903,10 +903,10 @@ function App() {
 			// 根据选择的agent类型调用不同的API接口
 			let apiEndpoint = "";
 			if (selectedAgent === "monitor") {
-				apiEndpoint = "http://localhost:5000/market-monitor"; // 加密货币市场助手
+				apiEndpoint = "/market-monitor"; // 加密货币市场助手
 				console.log("使用Monitor Agent API");
 			} else if (selectedAgent === "trade") {
-				apiEndpoint = "http://localhost:5000/market-trade"; // 支付宝转代币助手
+				apiEndpoint = "/market-trade"; // 支付宝转代币助手
 				console.log("使用Trade Agent API");
 			} else {
 				console.error("未知的Agent类型:", selectedAgent);
