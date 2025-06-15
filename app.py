@@ -30,8 +30,6 @@ CORS(app)
 # 而是创建两个 A2AClient 实例
 # ==============================================================================
 print("🔌 正在初始化A2A客户端以连接后台Agent服务...")
-market_monitor_client = None
-market_trade_client = None
 try:
     # 从配置中读取后台服务的URL
     # 使用 getattr 提供一个默认端口，增加健壮性
@@ -40,9 +38,6 @@ try:
     
     MONITOR_URL = f"http://localhost:{MONITOR_PORT}"
     TRADE_URL = f"http://localhost:{TRADE_PORT}"
-    
-    market_monitor_client = A2AClient(endpoint_url=MONITOR_URL)
-    market_trade_client = A2AClient(endpoint_url=TRADE_URL)
     
     print("✅ A2A客户端已配置:")
     print(f"   - Market Monitor Service at: {MONITOR_URL}")
@@ -81,35 +76,6 @@ def get_app_config():
         "iotex_rpc_url": config.IOTEX_RPC_URL,
     })
 
-@app.route("/agents/status")
-def get_agents_status():
-    """
-    检查并返回所有核心Agent服务器的运行状态。
-    这个端点现在会真实地通过网络检查后台服务的健康状况。
-    """
-    monitor_status = "error"
-    trade_status = "error"
-    
-    # 检查 Market Monitor 服务
-    try:
-        if market_monitor_client and market_monitor_client.get_agent_card():
-            # get_agent_card() 会发起一次网络请求，如果成功，说明服务在线
-            monitor_status = "ok"
-    except Exception as e:
-        print(f"⚠️无法连接到 Market Monitor 服务: {e}")
-
-    # 检查 Market Trade 服务
-    try:
-        if market_trade_client and market_trade_client.get_agent_card():
-            trade_status = "ok"
-    except Exception as e:
-        print(f"⚠️无法连接到 Market Trade 服务: {e}")
-        
-    return jsonify({
-        "market_monitor_service": monitor_status,
-        "market_trade_service": trade_status,
-    })
-
 @app.route("/market-monitor", methods=["POST"])
 def handle_market_monitor():
     """
@@ -120,13 +86,12 @@ def handle_market_monitor():
     message = data.get("message")
     if not message:
         return jsonify({"error": "请求体中缺少'message'字段"}), 400
-    if not market_monitor_client:
-         return jsonify({"error": "Market Monitor client 未成功初始化或无法连接到服务"}), 503 # 503 Service Unavailable
 
     def stream_response():
         """通过A2A客户端请求后台服务，并流式返回结果"""
         try:
             # 使用 A2A 客户端的 ask 方法，它会处理所有网络通信
+            market_monitor_client = A2AClient(endpoint_url=MONITOR_URL)
             response_text = market_monitor_client.ask(message)
             
             clean_result = clean_agent_output(response_text)
@@ -154,12 +119,11 @@ def handle_market_trade():
     message = data.get("message")
     if not message:
         return jsonify({"error": "请求体中缺少'message'字段"}), 400
-    if not market_trade_client:
-        return jsonify({"error": "Market Trade client 未成功初始化或无法连接到服务"}), 503
         
     def stream_response():
         try:
             # ask() 方法现在直接返回我们需要的HTML字符串
+            market_trade_client = A2AClient(endpoint_url=TRADE_URL)
             response_text = market_trade_client.ask(message)
             
             # (可选) 打印一下，确认收到的就是HTML

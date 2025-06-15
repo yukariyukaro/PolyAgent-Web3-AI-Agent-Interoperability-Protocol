@@ -61,8 +61,12 @@ git --version
    ```
 
 #### 第二步：启动后端服务
+1. 确保虚拟环境已激活，激活agent
+   cd AgentCore/Society
+   python market_trade.py
+   python market_monitor.py (不同终端窗口)
 
-确保虚拟环境已激活，在同一个窗口输入：
+2.确保虚拟环境已激活，在同一个窗口输入：
 
 ```cmd
 python app.py
@@ -176,13 +180,16 @@ pnpm install
    cd D:\github_repository\PolyAgent-Web3-AI-Agent-Interoperability-Protocol
    venv\Scripts\activate
    ```
-
-2. 启动后端：
+2. 激活agent
+   cd AgentCore/Society
+   python market_trade.py
+   python market_monitor.py (不同终端窗口)
+3. 启动后端：
    ```cmd
    python app.py
    ```
 
-3. 启动前端（新窗口）：
+4. 启动前端（新窗口）：
    ```cmd
    cd frontEnd
    pnpm run dev
