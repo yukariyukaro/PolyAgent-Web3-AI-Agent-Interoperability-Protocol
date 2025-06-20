@@ -15,7 +15,7 @@ from typing import Dict, Any, List, Optional, Tuple
 
 # 设置环境变量 - 确保在最早时机设置
 if not os.environ.get('MODELSCOPE_SDK_TOKEN'):
-    os.environ['MODELSCOPE_SDK_TOKEN'] = '9d3aed4d-eca1-4e0c-9805-cb923ccbbf21'
+os.environ['MODELSCOPE_SDK_TOKEN'] = '9d3aed4d-eca1-4e0c-9805-cb923ccbbf21'
     print("🔧 设置MODELSCOPE_SDK_TOKEN环境变量")
 
 if not os.environ.get('FEWSATS_API_KEY'):
@@ -154,10 +154,10 @@ class ConversationTurn:
     shopping_state: ShoppingState
     tools_used: List[str]
     thinking_content: str = ""  # Qwen3思考内容
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典格式用于序列化"""
-        return {
+            return {
             'user_input': self.user_input,
             'ai_response': self.ai_response,
             'timestamp': self.timestamp.isoformat(),
@@ -835,7 +835,7 @@ class AmazonShoppingAgentQwen3:
                     try:
                         print("📝 尝试MCP配置格式3（仅Amazon）...")
                         self.qwen_agent = Assistant(llm=llm_cfg, function_list=tools_config_3)
-                        self.mcp_available = True
+                    self.mcp_available = True
                         print("✅ qwen-agent MCP工具初始化成功 (格式3)")
                         return
                     except Exception as e3:
@@ -851,7 +851,7 @@ class AmazonShoppingAgentQwen3:
                         except Exception as e4:
                             print(f"❌ 所有qwen-agent配置都失败: {e4}")
                             raise e4
-            
+                    
         except Exception as e:
             print(f"⚠️ qwen-agent初始化失败: {e}")
             print(f"🔍 详细错误信息: {traceback.format_exc()}")
@@ -917,7 +917,7 @@ class AmazonShoppingAgentQwen3:
 **参数**：完整的支付参数
 
 ### 4. get_order_by_external_id - 通过外部ID查询订单
-### 5. get_order_by_payment_token - 通过支付令牌查询订单  
+### 5. get_order_by_payment_token - 通过支付令牌查询订单
 ### 6. get_user_orders - 获取用户所有订单
 
 ## 💳 Fewsats MCP工具
@@ -1038,7 +1038,7 @@ class AmazonShoppingAgentQwen3:
             messages.append({"role": "user", "content": user_input})
             
             response = ""
-            tools_used = []
+        tools_used = []
             thinking_content = ""
             
             # 优先使用qwen-agent进行MCP工具调用
@@ -1064,8 +1064,8 @@ class AmazonShoppingAgentQwen3:
                             raise Exception("qwen-agent响应格式异常")
                     else:
                         raise Exception("qwen-agent返回空响应")
-                        
-                except Exception as e:
+                    
+        except Exception as e:
                     print(f"⚠️ qwen-agent调用失败: {e}")
                     print(f"错误详情: {traceback.format_exc()}")
                     response = ""
@@ -1091,10 +1091,10 @@ class AmazonShoppingAgentQwen3:
                         response = api_response.choices[0].message.content.strip()
                         tools_used = ["openai_api_fallback"]
                         print("✅ OpenAI客户端调用成功")
-                    else:
+            else:
                         raise Exception("OpenAI API返回空响应")
-                        
-                except Exception as e:
+                
+        except Exception as e:
                     print(f"❌ OpenAI客户端调用失败: {e}")
                     response = ""
             
