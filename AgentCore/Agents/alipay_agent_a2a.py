@@ -36,7 +36,7 @@ class AlipayServiceManager:
             # 这里我们保留它，假设您的环境中是有效的。
             model_type=ModelType.GPT_4_1,
             # 建议将API密钥和URL放在环境变量或配置文件中，而不是硬编码
-            api_key="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",
+            api_key=os.environ.get("OPENAI_API_KEY"),
             url="https://api.openai.com/v1/",
         )
         print("✅ [AlipayServer] AI model is ready.")
