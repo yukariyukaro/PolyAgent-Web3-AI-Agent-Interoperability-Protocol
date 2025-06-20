@@ -1,0 +1,28 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "我想在亚马逊上买一盒黑笔，请你为我寻找",
+      "ai_response": "看起来多次尝试搜索亚马逊商品时都遇到了超时问题，可能是网络连接或亚马逊接口暂时不可用。建议稍后重试或检查网络状况。如果需要，可以尝试更具体的搜索词（例如品牌+型号）或更换亚马逊区域站点。是否继续重试？",
+      "timestamp": "2025-06-21T02:08:50.494211",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "我想在亚马逊上买一盒黑笔，请你为我寻找"
+    },
+    {
+      "role": "assistant",
+      "content": "看起来多次尝试搜索亚马逊商品时都遇到了超时问题，可能是网络连接或亚马逊接口暂时不可用。建议稍后重试或检查网络状况。如果需要，可以尝试更具体的搜索词（例如品牌+型号）或更换亚马逊区域站点。是否继续重试？"
+    }
+  ],
+  "session_id": "9d619b10-a603-4f8a-a2ab-83b1270d2c0a",
+  "user_id": "default_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-21T02:08:50.494211"
+}
