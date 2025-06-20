@@ -1381,7 +1381,7 @@ function App() {
 										</div>
 									</div>
 									<h1 className="text-xl font-bold tracking-tight">
-										InterAgent
+										PolyAgent
 										{/* <span className="text-neon-cyan">.AI</span> */}
 									</h1>
 								</div>
