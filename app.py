@@ -58,7 +58,7 @@ def index():
     """主页"""
     return jsonify({
         'status': 'ok',
-        'message': 'PolyAgent Amazon购物助手 - Qwen3原生版本 (同步实现)',
+        'message': 'InterAgent Amazon购物助手 - Qwen3原生版本 (同步实现)',
         'version': '3.0-native',
         'agent_type': 'Amazon Shopping Agent with Qwen3 Native (Sync)',
         'features': [

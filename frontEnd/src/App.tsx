@@ -65,7 +65,7 @@ const iotexTestnet: Chain = {
 
 // 配置 RainbowKit
 const config = getDefaultConfig({
-	appName: "PolyAgent",
+	appName: "InterAgent",
 	// 从 WalletConnect Cloud 获取项目ID: https://cloud.walletconnect.com/
 	// 1. 注册/登录 WalletConnect Cloud
 	// 2. 创建一个新项目并输入应用名称和URL
@@ -1381,7 +1381,7 @@ function App() {
 										</div>
 									</div>
 									<h1 className="text-xl font-bold tracking-tight">
-										PolyAgent
+										InterAgent
 										{/* <span className="text-neon-cyan">.AI</span> */}
 									</h1>
 								</div>
@@ -1577,7 +1577,7 @@ function App() {
 															</div>
 														</div>
 														<p className="text-sm text-text-secondary">
-															PolyAgent
+															InterAgent
 														</p>
 													</div>
 													{msg.type === "html" ? (
@@ -1683,7 +1683,7 @@ function App() {
 
 									{/* Logo 信息 */}
 									<div className="mt-6 text-center text-white/90">
-										<h2 className="text-2xl font-bold mb-2">PolyAgent</h2>
+										<h2 className="text-2xl font-bold mb-2">InterAgent</h2>
 										<p className="text-sm text-white/70">Web3 AI Agent Interoperability Protocol</p>
 										<p className="text-xs text-white/50 mt-2">320x320 pixels - Ready for icon processing</p>
 									</div>
