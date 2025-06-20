@@ -6,3 +6,4 @@ web3>=6.0.0
 camel-ai>=0.2.0
 gunicorn
 asknews 
+python_a2a
