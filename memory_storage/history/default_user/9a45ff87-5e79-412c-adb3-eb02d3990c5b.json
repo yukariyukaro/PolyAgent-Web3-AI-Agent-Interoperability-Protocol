@@ -1,0 +1,64 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "你好",
+      "ai_response": "您好！我是您的Amazon购物助手，可以帮您搜索商品、比价、下单和支付。有什么需要购买的吗？",
+      "timestamp": "2025-06-20T22:11:46.479769",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "openai_api_fallback"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "我想买一个iPhone 15 Pro",
+      "ai_response": "好的，我正在为您在Amazon上搜索iPhone 15 Pro。请稍等片刻...",
+      "timestamp": "2025-06-20T22:11:47.436700",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "openai_api_fallback"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "帮我搜索苹果手机",
+      "ai_response": "好的，我正在为您在Amazon上搜索苹果手机。请稍等片刻...",
+      "timestamp": "2025-06-20T22:11:48.449213",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "openai_api_fallback"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "你好"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！我是您的Amazon购物助手，可以帮您搜索商品、比价、下单和支付。有什么需要购买的吗？"
+    },
+    {
+      "role": "user",
+      "content": "我想买一个iPhone 15 Pro"
+    },
+    {
+      "role": "assistant",
+      "content": "好的，我正在为您在Amazon上搜索iPhone 15 Pro。请稍等片刻..."
+    },
+    {
+      "role": "user",
+      "content": "帮我搜索苹果手机"
+    },
+    {
+      "role": "assistant",
+      "content": "好的，我正在为您在Amazon上搜索苹果手机。请稍等片刻..."
+    }
+  ],
+  "session_id": "9a45ff87-5e79-412c-adb3-eb02d3990c5b",
+  "user_id": "default_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-20T22:11:48.449213"
+}

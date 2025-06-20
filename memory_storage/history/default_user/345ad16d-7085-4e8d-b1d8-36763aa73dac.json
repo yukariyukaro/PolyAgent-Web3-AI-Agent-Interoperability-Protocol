@@ -1,0 +1,28 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "我想在亚马逊上买一盒黑笔",
+      "ai_response": "请提供以下信息以便继续：\n1. 收货地址（包括姓名、详细地址、城市、省份/州、国家、邮政编码）\n2. 用户信息（姓名和邮箱）\n3. 需要购买的数量\n4. 是否有特定的品牌或型号要求？\n\n示例格式：\n```\n收货地址：{\n  \"full_name\": \"张三\",\n  \"address\": \"XX市XX区XX路123号\",\n  \"city\": \"XX市\",\n  \"state\": \"XX省\",\n  \"country\": \"中国\",\n  \"postal_code\": \"123456\"\n}\n\n用户信息：{\n  \"full_name\": \"张三\",\n  \"email\": \"zhangsan@example.com\"\n}\n\n数量：2盒\n品牌要求：晨光\n```",
+      "timestamp": "2025-06-20T22:20:33.073056",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "我想在亚马逊上买一盒黑笔"
+    },
+    {
+      "role": "assistant",
+      "content": "请提供以下信息以便继续：\n1. 收货地址（包括姓名、详细地址、城市、省份/州、国家、邮政编码）\n2. 用户信息（姓名和邮箱）\n3. 需要购买的数量\n4. 是否有特定的品牌或型号要求？\n\n示例格式：\n```\n收货地址：{\n  \"full_name\": \"张三\",\n  \"address\": \"XX市XX区XX路123号\",\n  \"city\": \"XX市\",\n  \"state\": \"XX省\",\n  \"country\": \"中国\",\n  \"postal_code\": \"123456\"\n}\n\n用户信息：{\n  \"full_name\": \"张三\",\n  \"email\": \"zhangsan@example.com\"\n}\n\n数量：2盒\n品牌要求：晨光\n```"
+    }
+  ],
+  "session_id": "345ad16d-7085-4e8d-b1d8-36763aa73dac",
+  "user_id": "default_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-20T22:20:33.073056"
+}

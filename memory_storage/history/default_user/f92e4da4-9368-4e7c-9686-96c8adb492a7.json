@@ -1,0 +1,64 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "你好",
+      "ai_response": "你好！有什么可以帮助你的吗？",
+      "timestamp": "2025-06-21T00:17:11.664064",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "我想买一个iPhone 15 Pro",
+      "ai_response": "以下是在亚马逊上找到的 iPhone 15 Pro 相关产品的主要选项，按价格和特性整理：\n\n---\n\n### **1. Apple iPhone 15 Pro 256GB 蓝钛色（解锁版）**\n- **价格**: $696.50（最低价 $674.95）\n- **评分**: 4.1 ⭐ (1449 评论)\n- **配送**: 免费送达 6 月 26 日（最快 6 月 24 日）\n- **库存**: 本月已售 400+ 件\n- **链接**: [查看商品](https://www.amazon.com/Apple-iPhone-15-Pro-Titanium/dp/B0CMYXFK3R)\n\n---\n\n### **2. Apple iPhone 15 Pro 128GB 自然钛色（解锁版）**\n- **价格**: $680.00（原价 $729，节省 $49）\n- **评分**: 4.1 ⭐ (559 评论)\n- **配送**: 最快明日送达\n- **库存**: 仅剩 1 件，需尽快下单\n- **链接**: [查看商品](https://www.amazon.com/Apple-iPhone-128GB-Natural-Titanium/dp/B0CRJ1MYNR)\n\n---\n\n### **3. Apple iPhone 15 Pro 128GB 白钛色（Cricket 无线版）**\n- **价格**: $634.97（原价 $678，节省 $43）\n- **评分**: 5.0 ⭐ (2 评论)\n- **配送**: 免费送达 6 月 24 日\n- **库存**: 仅剩 1 件\n- **链接**: [查看商品](https://www.amazon.com/Apple-iPhone-128GB-White-Titanium/dp/B0DJWRSV4L)\n\n---\n\n### **其他选项**\n- **iPhone 15 Pro Max**（256GB/128GB）：价格 $735 起，屏幕更大（6.7 英寸），但价格更高。\n- **iPhone 14 Pro**（128GB）：价格低至 $493，但非最新款。\n- **保护壳/配件**：如 MOCCA 磁吸保护壳 $25.49（原价 $29.99）。\n\n---\n\n### **下一步操作**\n1. **选择偏好**：您更倾向哪个存储容量（128GB/256GB）或颜色？\n2. **确认购买**：需要帮助获取支付选项或直接下单吗？",
+      "timestamp": "2025-06-21T00:17:53.131172",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "帮我搜索苹果手机",
+      "ai_response": "\n抱歉，当前无法连接到Amazon和支付服务。\n\n🔧 **技术状态**：\n- MCP服务暂时不可用\n- 无法执行真实的商品搜索和购买操作\n\n🌟 **建议**：\n1. 请稍后重试\n2. 检查网络连接\n3. 或直接访问 Amazon.com 进行购买\n\n如需帮助，请联系技术支持。\n",
+      "timestamp": "2025-06-21T00:17:53.138674",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "error_fallback"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "你好"
+    },
+    {
+      "role": "assistant",
+      "content": "你好！有什么可以帮助你的吗？"
+    },
+    {
+      "role": "user",
+      "content": "我想买一个iPhone 15 Pro"
+    },
+    {
+      "role": "assistant",
+      "content": "以下是在亚马逊上找到的 iPhone 15 Pro 相关产品的主要选项，按价格和特性整理：\n\n---\n\n### **1. Apple iPhone 15 Pro 256GB 蓝钛色（解锁版）**\n- **价格**: $696.50（最低价 $674.95）\n- **评分**: 4.1 ⭐ (1449 评论)\n- **配送**: 免费送达 6 月 26 日（最快 6 月 24 日）\n- **库存**: 本月已售 400+ 件\n- **链接**: [查看商品](https://www.amazon.com/Apple-iPhone-15-Pro-Titanium/dp/B0CMYXFK3R)\n\n---\n\n### **2. Apple iPhone 15 Pro 128GB 自然钛色（解锁版）**\n- **价格**: $680.00（原价 $729，节省 $49）\n- **评分**: 4.1 ⭐ (559 评论)\n- **配送**: 最快明日送达\n- **库存**: 仅剩 1 件，需尽快下单\n- **链接**: [查看商品](https://www.amazon.com/Apple-iPhone-128GB-Natural-Titanium/dp/B0CRJ1MYNR)\n\n---\n\n### **3. Apple iPhone 15 Pro 128GB 白钛色（Cricket 无线版）**\n- **价格**: $634.97（原价 $678，节省 $43）\n- **评分**: 5.0 ⭐ (2 评论)\n- **配送**: 免费送达 6 月 24 日\n- **库存**: 仅剩 1 件\n- **链接**: [查看商品](https://www.amazon.com/Apple-iPhone-128GB-White-Titanium/dp/B0DJWRSV4L)\n\n---\n\n### **其他选项**\n- **iPhone 15 Pro Max**（256GB/128GB）：价格 $735 起，屏幕更大（6.7 英寸），但价格更高。\n- **iPhone 14 Pro**（128GB）：价格低至 $493，但非最新款。\n- **保护壳/配件**：如 MOCCA 磁吸保护壳 $25.49（原价 $29.99）。\n\n---\n\n### **下一步操作**\n1. **选择偏好**：您更倾向哪个存储容量（128GB/256GB）或颜色？\n2. **确认购买**：需要帮助获取支付选项或直接下单吗？"
+    },
+    {
+      "role": "user",
+      "content": "帮我搜索苹果手机"
+    },
+    {
+      "role": "assistant",
+      "content": "\n抱歉，当前无法连接到Amazon和支付服务。\n\n🔧 **技术状态**：\n- MCP服务暂时不可用\n- 无法执行真实的商品搜索和购买操作\n\n🌟 **建议**：\n1. 请稍后重试\n2. 检查网络连接\n3. 或直接访问 Amazon.com 进行购买\n\n如需帮助，请联系技术支持。\n"
+    }
+  ],
+  "session_id": "f92e4da4-9368-4e7c-9686-96c8adb492a7",
+  "user_id": "default_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-21T00:17:53.138674"
+}

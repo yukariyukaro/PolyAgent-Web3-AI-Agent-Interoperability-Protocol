@@ -1,0 +1,64 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "我想买一盒黑笔",
+      "ai_response": "\n我为您搜索了\"黑笔\"，找到了以下商品：\n\n{\n  \"position\": 1,\n  \"asin\": \"B07K7F4QTJ\",\n  \"title\": \"Pilot G2 Premium Gel Pens, Bold Tip, Black Ink, 12-Count\",\n  \"link\": \"https://www.amazon.com/dp/B07K7F4QTJ\", \n  \"price\": \"$15.89\",\n  \"rating\": 4.7,\n  \"reviews\": \"23,456\",\n  \"thumbnail\": \"https://images-na.ssl-images-amazon.com/images/I/61QkUh8VQXL._AC_SX425_.jpg\",\n  \"extracted_price\": 15.89,\n  \"recent_sales\": \"500+ bought in past month\"\n}\n\n{\n  \"position\": 2, \n  \"asin\": \"B001GAOTSW\",\n  \"title\": \"BIC Round Stic Xtra Life Ballpoint Pen, Medium Point (1.0mm), Black, 60-Count\",\n  \"link\": \"https://www.amazon.com/dp/B001GAOTSW\",\n  \"price\": \"$12.99\", \n  \"rating\": 4.6,\n  \"reviews\": \"45,789\",\n  \"thumbnail\": \"https://images-na.ssl-images-amazon.com/images/I/71XYZ123456._AC_SX425_.jpg\",\n  \"extracted_price\": 12.99,\n  \"recent_sales\": \"1,000+ bought in past month\"\n}\n\n{\n  \"position\": 3,\n  \"asin\": \"B07QJQ7X8M\", \n  \"title\": \"Sharpie Permanent Markers, Fine Point, Black, Pack of 12\",\n  \"link\": \"https://www.amazon.com/dp/B07QJQ7X8M\",\n  \"price\": \"$8.47\",\n  \"rating\": 4.8,\n  \"reviews\": \"12,345\", \n  \"thumbnail\": \"https://images-na.ssl-images-amazon.com/images/I/61ABC789DEF._AC_SX425_.jpg\",\n  \"extracted_price\": 8.47,\n  \"recent_sales\": \"300+ bought in past month\"\n}\n\n这些都是不错的选择，您想要哪一款？\n",
+      "timestamp": "2025-06-21T00:22:17.360237",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "amazon_search"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "我要第1个商品",
+      "ai_response": "好的，您选择了Pilot G2 Premium Gel Pens。请提供您的收货信息以便生成支付报价。",
+      "timestamp": "2025-06-21T00:22:17.362629",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "product_selection"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "我的姓名是张三，邮箱是zhangsan@example.com，地址是北京市朝阳区某某街道123号",
+      "ai_response": "\n已为您生成支付报价：\n\n{\n  \"offers\": [\n    {\n      \"id\": \"amazon_order_456\", \n      \"amount\": 15.89,\n      \"currency\": \"usd\",\n      \"description\": \"Pilot G2 Premium Gel Pens payment\",\n      \"title\": \"Amazon Purchase\"\n    }\n  ],\n  \"payment_context_token\": \"abc123-def456-ghi789-jkl012\",\n  \"payment_request_url\": \"https://api.fewsats.com/v0/l402/payment-request\", \n  \"version\": \"0.2.2\"\n}\n\n请确认支付信息，点击确认后将进行支付...\n",
+      "timestamp": "2025-06-21T00:22:17.365105",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "amazon_get_payment_offers"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "我想买一盒黑笔"
+    },
+    {
+      "role": "assistant",
+      "content": "\n我为您搜索了\"黑笔\"，找到了以下商品：\n\n{\n  \"position\": 1,\n  \"asin\": \"B07K7F4QTJ\",\n  \"title\": \"Pilot G2 Premium Gel Pens, Bold Tip, Black Ink, 12-Count\",\n  \"link\": \"https://www.amazon.com/dp/B07K7F4QTJ\", \n  \"price\": \"$15.89\",\n  \"rating\": 4.7,\n  \"reviews\": \"23,456\",\n  \"thumbnail\": \"https://images-na.ssl-images-amazon.com/images/I/61QkUh8VQXL._AC_SX425_.jpg\",\n  \"extracted_price\": 15.89,\n  \"recent_sales\": \"500+ bought in past month\"\n}\n\n{\n  \"position\": 2, \n  \"asin\": \"B001GAOTSW\",\n  \"title\": \"BIC Round Stic Xtra Life Ballpoint Pen, Medium Point (1.0mm), Black, 60-Count\",\n  \"link\": \"https://www.amazon.com/dp/B001GAOTSW\",\n  \"price\": \"$12.99\", \n  \"rating\": 4.6,\n  \"reviews\": \"45,789\",\n  \"thumbnail\": \"https://images-na.ssl-images-amazon.com/images/I/71XYZ123456._AC_SX425_.jpg\",\n  \"extracted_price\": 12.99,\n  \"recent_sales\": \"1,000+ bought in past month\"\n}\n\n{\n  \"position\": 3,\n  \"asin\": \"B07QJQ7X8M\", \n  \"title\": \"Sharpie Permanent Markers, Fine Point, Black, Pack of 12\",\n  \"link\": \"https://www.amazon.com/dp/B07QJQ7X8M\",\n  \"price\": \"$8.47\",\n  \"rating\": 4.8,\n  \"reviews\": \"12,345\", \n  \"thumbnail\": \"https://images-na.ssl-images-amazon.com/images/I/61ABC789DEF._AC_SX425_.jpg\",\n  \"extracted_price\": 8.47,\n  \"recent_sales\": \"300+ bought in past month\"\n}\n\n这些都是不错的选择，您想要哪一款？\n"
+    },
+    {
+      "role": "user",
+      "content": "我要第1个商品"
+    },
+    {
+      "role": "assistant",
+      "content": "好的，您选择了Pilot G2 Premium Gel Pens。请提供您的收货信息以便生成支付报价。"
+    },
+    {
+      "role": "user",
+      "content": "我的姓名是张三，邮箱是zhangsan@example.com，地址是北京市朝阳区某某街道123号"
+    },
+    {
+      "role": "assistant",
+      "content": "\n已为您生成支付报价：\n\n{\n  \"offers\": [\n    {\n      \"id\": \"amazon_order_456\", \n      \"amount\": 15.89,\n      \"currency\": \"usd\",\n      \"description\": \"Pilot G2 Premium Gel Pens payment\",\n      \"title\": \"Amazon Purchase\"\n    }\n  ],\n  \"payment_context_token\": \"abc123-def456-ghi789-jkl012\",\n  \"payment_request_url\": \"https://api.fewsats.com/v0/l402/payment-request\", \n  \"version\": \"0.2.2\"\n}\n\n请确认支付信息，点击确认后将进行支付...\n"
+    }
+  ],
+  "session_id": "test_session_001",
+  "user_id": "test_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-21T00:22:17.365105"
+}

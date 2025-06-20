@@ -1,0 +1,64 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "你好",
+      "ai_response": "你好！有什么可以帮助你的吗？",
+      "timestamp": "2025-06-20T22:15:03.636738",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "我想买一个iPhone 15 Pro",
+      "ai_response": "看起来在搜索亚马逊上的iPhone 15 Pro时遇到了网络问题（`getaddrinfo failed`）。这可能是由于网络连接不稳定或亚马逊服务暂时不可用导致的。您可以稍后再试，或者检查网络设置后重试操作。如果需要，也可以告诉我您所在的国家/地区，我可以尝试调整搜索域名（例如 `amazon.cn` 或 `amazon.co.uk`）来继续帮助您。",
+      "timestamp": "2025-06-20T22:15:27.718652",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "帮我搜索苹果手机",
+      "ai_response": "以下是亚马逊中国上部分苹果手机的搜索结果，包含iPhone 15系列相关产品：\n\n1. **iPhone 15 Pro（128GB）**  \n   - 价格：￥6,999  \n   - 颜色：深空黑、银色、金色、蓝色  \n   - 特点：钛金属机身，A17 Pro芯片，4800万主摄  \n\n2. **iPhone 14（256GB）**  \n   - 价格：￥5,999  \n   - 颜色：蓝色、紫色、红色、星光色  \n   - 特点：A15芯片，动态岛设计，超瓷晶面板  \n\n3. **iPhone 15（256GB）**  \n   - 价格：￥6,199  \n   - 颜色：黑色、白色、蓝色、粉色  \n   - 特点：USB-C接口，A16芯片，iOS 17  \n\n是否需要查看某个具体商品的支付选项或获取更多详情？",
+      "timestamp": "2025-06-20T22:16:22.770399",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "你好"
+    },
+    {
+      "role": "assistant",
+      "content": "你好！有什么可以帮助你的吗？"
+    },
+    {
+      "role": "user",
+      "content": "我想买一个iPhone 15 Pro"
+    },
+    {
+      "role": "assistant",
+      "content": "看起来在搜索亚马逊上的iPhone 15 Pro时遇到了网络问题（`getaddrinfo failed`）。这可能是由于网络连接不稳定或亚马逊服务暂时不可用导致的。您可以稍后再试，或者检查网络设置后重试操作。如果需要，也可以告诉我您所在的国家/地区，我可以尝试调整搜索域名（例如 `amazon.cn` 或 `amazon.co.uk`）来继续帮助您。"
+    },
+    {
+      "role": "user",
+      "content": "帮我搜索苹果手机"
+    },
+    {
+      "role": "assistant",
+      "content": "以下是亚马逊中国上部分苹果手机的搜索结果，包含iPhone 15系列相关产品：\n\n1. **iPhone 15 Pro（128GB）**  \n   - 价格：￥6,999  \n   - 颜色：深空黑、银色、金色、蓝色  \n   - 特点：钛金属机身，A17 Pro芯片，4800万主摄  \n\n2. **iPhone 14（256GB）**  \n   - 价格：￥5,999  \n   - 颜色：蓝色、紫色、红色、星光色  \n   - 特点：A15芯片，动态岛设计，超瓷晶面板  \n\n3. **iPhone 15（256GB）**  \n   - 价格：￥6,199  \n   - 颜色：黑色、白色、蓝色、粉色  \n   - 特点：USB-C接口，A16芯片，iOS 17  \n\n是否需要查看某个具体商品的支付选项或获取更多详情？"
+    }
+  ],
+  "session_id": "b65bfac3-942a-4d58-a8dc-f947e524a036",
+  "user_id": "default_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-20T22:16:22.770399"
+}
