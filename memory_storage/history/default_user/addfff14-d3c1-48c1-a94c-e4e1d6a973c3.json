@@ -1,0 +1,28 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "你好",
+      "ai_response": "你好！有什么我可以帮助你的吗？",
+      "timestamp": "2025-06-20T22:45:02.368894",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "你好"
+    },
+    {
+      "role": "assistant",
+      "content": "你好！有什么我可以帮助你的吗？"
+    }
+  ],
+  "session_id": "addfff14-d3c1-48c1-a94c-e4e1d6a973c3",
+  "user_id": "default_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-20T22:45:02.368894"
+}

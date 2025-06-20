@@ -1,0 +1,28 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "测试输入",
+      "ai_response": "测试响应",
+      "timestamp": "2025-06-21T00:22:21.252100",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "test_tool"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "测试输入"
+    },
+    {
+      "role": "assistant",
+      "content": "测试响应"
+    }
+  ],
+  "session_id": "persistence_test",
+  "user_id": "test_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-21T00:22:21.252100"
+}
