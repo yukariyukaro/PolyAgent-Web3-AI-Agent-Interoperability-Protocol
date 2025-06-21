@@ -179,7 +179,7 @@ class ConversationTurn:
         )
 
 class MCPResponseParser:
-    """MCP工具响应解析器 - 提取关键数据用于后续调用"""
+    """MCP工具响应解析器 - 简化版本，专注于支付数据"""
     
     @staticmethod
     def parse_amazon_search_response(response_content: str, max_products: int = 6) -> List[ProductInfo]:
@@ -456,65 +456,25 @@ class MCPResponseParser:
 
 @dataclass
 class ShoppingContext:
-    """购物会话上下文 - 存储搜索和购买过程中的关键数据"""
-    search_results: List[ProductInfo] = None
-    selected_products: List[ProductInfo] = None
-    current_search_query: str = ""
+    """购物会话上下文 - 简化版本，仅存储必要的支付信息"""
     payment_offers: Dict[str, Any] = None
-    last_search_timestamp: datetime = None
+    last_payment_timestamp: datetime = None
     
     def __post_init__(self):
-        if self.search_results is None:
-            self.search_results = []
-        if self.selected_products is None:
-            self.selected_products = []
         if self.payment_offers is None:
             self.payment_offers = {}
-        if self.last_search_timestamp is None:
-            self.last_search_timestamp = datetime.now()
+        if self.last_payment_timestamp is None:
+            self.last_payment_timestamp = datetime.now()
     
-    def add_search_results(self, products: List[ProductInfo], query: str, max_store: int = 6):
-        """添加搜索结果（限制存储数量）"""
-        # 🔥 限制存储的商品数量
-        if len(products) > max_store:
-            self.search_results = products[:max_store]
-            print(f"💾 存储了前 {max_store} 个商品的搜索结果（原始数量：{len(products)}）")
-        else:
-            self.search_results = products
-            print(f"💾 存储了 {len(products)} 个商品的搜索结果")
-        
-        self.current_search_query = query
-        self.last_search_timestamp = datetime.now()
-    
-    def select_product(self, product_index: int) -> Optional[ProductInfo]:
-        """选择商品"""
-        if 0 <= product_index < len(self.search_results):
-            selected = self.search_results[product_index]
-            if selected not in self.selected_products:
-                self.selected_products.append(selected)
-            print(f"✅ 选择了商品: {selected.title[:50]}...")
-            return selected
-        return None
+    def update_payment_offers(self, payment_data: Dict[str, Any]):
+        """更新支付信息"""
+        self.payment_offers = payment_data
+        self.last_payment_timestamp = datetime.now()
+        print("💾 支付信息已更新")
     
     def get_context_summary(self) -> str:
-        """获取上下文摘要，用于添加到对话历史"""
+        """获取上下文摘要 - 简化版本"""
         summary_parts = []
-        
-        if self.search_results:
-            summary_parts.append(f"🔍 当前搜索: '{self.current_search_query}' (找到{len(self.search_results)}个商品)")
-            
-            # 添加商品列表摘要 - 显示所有存储的商品（已经限制在6个以内）
-            summary_parts.append("📦 可购买商品:")
-            for i, product in enumerate(self.search_results):
-                summary_parts.append(f"  {i+1}. {product.title[:60]} - {product.price} (ASIN: {product.asin})")
-                summary_parts.append(f"     链接: {product.url}")
-            
-            # 移除"还有更多商品"的提示，因为我们已经限制了存储数量
-        
-        if self.selected_products:
-            summary_parts.append(f"✅ 已选择商品: {len(self.selected_products)} 个")
-            for product in self.selected_products:
-                summary_parts.append(f"  - {product.title[:50]} ({product.asin})")
         
         if self.payment_offers:
             summary_parts.append("💳 支付信息已准备就绪")
@@ -637,21 +597,9 @@ class ConversationManager:
         return "\n".join(context_parts)
     
     def get_chat_messages(self) -> List[Dict[str, str]]:
-        """获取完整的聊天消息列表（qwen-agent格式），包含购物上下文"""
-        messages = self.chat_history.copy()
-        
-        # 🔧 修复：如果有购物上下文，将其附加到最后一个用户消息中
-        context_summary = self.shopping_context.get_context_summary()
-        if context_summary and messages:
-            # 查找最后一个用户消息
-            for i in range(len(messages) - 1, -1, -1):
-                if messages[i]["role"] == "user":
-                    # 将上下文信息附加到用户消息中
-                    original_content = messages[i]["content"]
-                    messages[i]["content"] = f"{original_content}\n\n[购物上下文参考]\n{context_summary}\n[/购物上下文参考]"
-                    break
-        
-        return messages
+        """获取完整的聊天消息列表（qwen-agent格式）- 简化版本"""
+        # 直接返回聊天历史，不添加复杂的购物上下文
+        return self.chat_history.copy()
     
     def clear_history(self):
         """清除对话历史"""
@@ -886,16 +834,16 @@ class AmazonShoppingAgentQwen3:
 🎯 **核心使命**：
 为用户提供完整的Amazon购物服务，包括商品搜索、比价分析、订单创建、支付处理和订单追踪。
 
-⚡ **性能优化原则**：
-- 每次搜索只显示和存储前6个最相关的商品
-- 重点关注商品质量而非数量
-- 确保快速响应和高效存储
+⚡ **一键购买原则**：
+- 用户提供商品URL即可直接购买，无需复杂的商品搜索和选择流程
+- 一次回复内完成：获取支付报价 → 立即执行支付
+- 简化用户体验，快速完成购买
 
 🛠️ **可用MCP工具详解**：
 
 ## 🛒 Amazon MCP工具
 
-### 1. amazon_search - 商品搜索
+### 1. amazon_search - 商品搜索（可选）
 **功能**：在Amazon上搜索商品
 **参数**：
 - q (必需)：搜索关键词或产品ASIN
@@ -903,8 +851,8 @@ class AmazonShoppingAgentQwen3:
 **使用场景**：用户表达购买意图时立即调用
 **示例调用**：用户说"我想买黑笔"→ 调用amazon_search(q="black pen")
 
-### 2. amazon_get_payment_offers - 获取支付报价
-**功能**：为选定商品生成支付报价信息
+### 2. amazon_get_payment_offers - 获取支付报价 ⭐ **核心工具1**
+**功能**：为指定商品URL生成支付报价信息
 **参数**：
 - product_url (必需)：Amazon商品链接
 - shipping_address (必需)：收货地址对象
@@ -912,120 +860,119 @@ class AmazonShoppingAgentQwen3:
 - asin (可选)：商品ASIN编号
 - quantity (可选)：购买数量，默认1
 
-### 3. pay_with_x402 - X402协议支付
-**功能**：使用X402协议完成支付
-**参数**：完整的支付参数
-
-### 4. get_order_by_external_id - 通过外部ID查询订单
-### 5. get_order_by_payment_token - 通过支付令牌查询订单
-### 6. get_user_orders - 获取用户所有订单
-
 ## 💳 Fewsats MCP工具
 
-### 1. balance - 查询钱包余额
-### 2. payment_methods - 查询支付方式
-### 3. pay_offer - 支付报价
+### 1. pay_offer - 支付报价 ⭐ **核心工具2**
+**功能**：从l402_offers中支付指定ID的报价
+**参数**：
+- offer_id (字符串)：报价的字符串标识符  
+- l402_offer (对象)：包含以下内容的报价详情：
+  - offers：包含ID、金额、货币、描述和标题的报价对象数组
+  - payment_context_token：支付上下文令牌字符串
+  - payment_request_url：支付请求URL
+  - version：API版本字符串
+**返回**：支付状态响应
+
+### 2. balance - 查询钱包余额
+### 3. payment_methods - 查询支付方式  
 ### 4. payment_info - 查询支付详情
 ### 5. billing_info - 查询账单信息
 ### 6. create_x402_payment_header - 创建X402支付头
 
 🔄 **重要指导原则 (基于AgentScope MCP实践)**：
 
-## 📋 标准操作程序 (SOP)
-基于实践经验，MCP工具存在隐性的标准操作程序，必须严格遵循：
+## 📋 一键购买操作程序 (SOP)
+基于简化的购买流程，严格遵循以下操作程序：
 
-### Amazon购物SOP：
+### 🚀 **一键购买SOP**（推荐流程）：
+**前提**：用户提供Amazon商品URL和基本信息
+
+1. **信息验证阶段**：
+   - 确认用户提供了Amazon商品URL
+   - 收集或确认用户基本信息（姓名、邮箱）
+   - 收集或确认收货地址信息
+
+2. **一键购买执行阶段**：
+   - 🔥 **关键**：在同一次回复中依次调用两个工具
+   - 首先调用 `amazon_get_payment_offers` 获取支付报价
+   - 立即解析支付报价中的offer_id和l402_offer数据
+   - 然后调用 `pay_offer` 完成支付
+   - 整个过程在一次AI回复中完成
+
+### 🔍 **备用搜索SOP**（仅当无URL时使用）：
+**前提**：用户没有提供具体商品URL
+
 1. **商品搜索阶段**：
-   - 先调用 `amazon_search` 获取商品列表
-   - 📋 **重要**：只向用户展示前6个最相关的商品
-   - 不要基于先验知识假设商品信息
-   - 确保搜索关键词准确匹配用户需求
-   - 重点推荐最相关、高评分的商品
+   - 调用 `amazon_search` 获取商品列表
+   - 向用户展示搜索结果
+   - 用户选择具体商品并提供URL
 
-2. **商品选择阶段**：
-   - 向用户展示真实的搜索结果（限制6个商品）
-   - 以清晰的格式展示每个商品的关键信息
-   - 让用户选择具体商品（提供序号选择）
-   - 获取选中商品的完整URL和ASIN
+2. **转入一键购买流程**：
+   - 获得商品URL后，立即转入上述一键购买SOP
 
-3. **信息收集阶段**：
-   - 收集用户的完整收货地址
-   - 收集用户的基本信息（姓名、邮箱）
-   - 验证信息完整性
+## ⚠️ 关键约束 (一键购买模式)：
 
-4. **支付准备阶段**：
-   - 调用 `amazon_get_payment_offers` 获取支付报价
-   - 确保传递完整的地址和用户信息
-   - 不要跳过任何必需参数
+### 1. **简化假设原则**
+- 用户提供商品URL即表示确认购买意图
+- 默认购买数量为1（除非用户明确指定）
+- 优先使用用户提供的地址和信息
 
-5. **支付执行阶段**：
-   - 使用Fewsats工具处理支付
-   - 遵循X402协议标准
-   - 确保支付状态跟踪
+### 2. **连续工具调用要求** 🔥
+- **必须在同一次回复中调用两个工具**：
+  1. `amazon_get_payment_offers` → 获取支付报价
+  2. `pay_offer` → 立即完成支付
+- 不要等待用户确认，直接执行完整流程
+- 两个工具调用之间不要有任何停顿或等待
 
-## ⚠️ 关键约束 (基于AgentScope实践)：
-
-### 1. **不要做任何假设**
-- 所有商品信息必须来自工具调用结果
-- 不要基于先验知识编造价格、规格、可用性
-- 不要假设用户的地址或支付偏好
-
-### 2. **严格的工具调用顺序**
-- 商品搜索 → 用户选择 → 信息收集 → 支付报价 → 支付执行
-- 不要跳过中间步骤
-- 每个步骤的输出是下一步骤的输入
-
-### 3. **精度意识**
-- MCP工具可能存在精度问题
-- 如果结果不准确，尝试不同的搜索关键词
-- 必要时要求用户提供更具体的信息
+### 3. **数据流转要求**
+- 从`amazon_get_payment_offers`的响应中提取：
+  - offer_id（通常是offers数组中第一个offer的id）
+  - 完整的l402_offer对象
+- 立即将这些数据传递给`pay_offer`工具
 
 ### 4. **错误处理**
-- 如果工具调用失败，明确说明问题
-- 提供具体的错误信息和建议
-- 不要回退到模拟数据
+- 如果第一个工具调用失败，停止流程并说明问题
+- 如果第二个工具调用失败，提供支付失败的具体信息
+- 不要回退到模拟数据或分步执行
 
-### 5. **用户确认**
-- 在关键步骤前获得用户确认
-- 特别是在支付前展示完整的订单摘要
-- 确保用户理解整个流程
+## 🎯 **一键购买执行指南**：
 
-## 🎯 **实际执行指南**：
+### 🔥 **核心流程**（必须严格遵循）：
+```
+用户提供商品URL + 地址信息 
+↓
+同一次回复内：
+1. 调用 amazon_get_payment_offers(product_url, user_info, shipping_address)
+2. 解析响应获取 offer_id 和 l402_offer
+3. 调用 pay_offer(offer_id, l402_offer)
+↓
+返回完整的购买结果
+```
 
-1. **始终尝试工具调用**：对于任何购物相关请求，都要尝试调用相应的MCP工具
-2. **不要生成模拟数据**：不要编造商品信息、价格或订单详情
-3. **真实工具优先**：优先使用真实的MCP服务，而不是提供虚假信息
-4. **错误时明确说明**：如果工具调用失败，明确告知用户并提供替代建议
-5. **完整流程执行**：确保从搜索到支付的每个步骤都使用真实工具
-
-💡 **对话流程**：
-1. 接收用户需求 → 立即调用amazon_search
-2. 展示真实搜索结果 → 用户选择商品
-3. 收集用户信息 → 调用amazon_get_payment_offers
-4. 执行支付 → 使用Fewsats工具完成支付
-5. 订单追踪 → 查询真实订单状态
+### 📋 **具体实现要求**：
+1. **不要分步骤**：必须在一次AI回复中完成所有工具调用
+2. **不要等待确认**：用户提供URL即表示购买确认
+3. **直接处理数据**：从第一个工具的响应直接提取数据给第二个工具
+4. **完整错误处理**：任何步骤失败都要明确说明并停止流程
 
 🚨 **重要**：
 - 永远不要生成虚假的商品信息、价格或订单数据
 - 如果MCP工具不可用，请明确告知用户并建议替代方案
-- 遵循标准操作程序，确保工具调用的正确顺序
-- 在工具调用出现问题时，尝试不同的参数或重新搜索
+- 严格遵循一键购买流程，在同一次回复中完成两个工具调用
+- 不要将购买流程分解为多个步骤或等待用户确认
 
-🔄 **购物上下文使用**：
-- 当用户要求购买时，优先检查[购物上下文]中的商品列表
-- 如果上下文中有商品信息，直接使用其中的product_url和asin进行购买
-- 用户选择"第N个商品"时，从上下文商品列表中获取对应商品信息
-- 进行支付时，使用上下文中存储的payment_offers信息
-
-💡 **数据流示例**：
+💡 **一键购买数据流示例**：
 ```
-用户："我想买一盒黑笔" → 调用amazon_search → 存储搜索结果到上下文
-用户："我要第3个商品" → 从上下文选择第3个商品 → 收集用户信息
-收集完用户信息后 → 使用选中商品的URL调用amazon_get_payment_offers
-获得支付报价后 → 使用Fewsats工具完成支付
+用户："请帮我购买这个商品：https://amazon.com/dp/B0XXXXX，寄到xxx地址"
+↓
+AI在同一次回复中：
+1. 调用 amazon_get_payment_offers(product_url="https://amazon.com/dp/B0XXXXX", ...)
+2. 从响应中提取 offer_id="test_offer_1" 和完整l402_offer对象
+3. 调用 pay_offer(offer_id="test_offer_1", l402_offer={...})
+4. 返回购买完成的结果
 ```
 
-你的目标是提供真实、准确、完整的Amazon购物体验！基于AgentScope的实践经验，严格遵循MCP工具的标准操作程序，充分利用购物上下文中的存储数据！
+🎯 **你的目标**：提供最简化、最高效的Amazon一键购买体验！用户提供URL即可完成购买，无需复杂的搜索和选择流程！
 """
     
     def process_request(self, user_input: str) -> str:
@@ -1149,7 +1096,7 @@ class AmazonShoppingAgentQwen3:
             return error_response
     
     def _process_mcp_responses(self, qwen_responses: List, user_input: str):
-        """处理MCP工具调用的响应，提取和存储关键数据"""
+        """处理MCP工具调用的响应 - 简化版本，专注于支付流程"""
         try:
             # 提取所有响应内容
             all_content = ""
@@ -1161,60 +1108,34 @@ class AmazonShoppingAgentQwen3:
             
             print(f"📄 分析响应内容长度: {len(all_content)} 字符")
             
-            # 检测并处理Amazon搜索结果
-            if self._is_amazon_search_response(all_content, user_input):
-                print("🔍 检测到Amazon搜索响应，开始解析...")
-                products = MCPResponseParser.parse_amazon_search_response(all_content)
-                if products:
-                    # 提取搜索查询
-                    search_query = self._extract_search_query(user_input)
-                    self.conversation_manager.shopping_context.add_search_results(products, search_query)
-                    
-                    # 更新Agent内部状态
-                    if products:
-                        self.selected_product = products[0]  # 暂时选择第一个作为候选
-                        print(f"🎯 设置候选商品: {self.selected_product.title[:50]}...")
-            
-            # 检测并处理支付报价响应
-            elif self._is_payment_offers_response(all_content):
+            # 仅处理支付相关响应，不存储商品信息
+            if self._is_payment_offers_response(all_content):
                 print("💳 检测到支付报价响应，开始解析...")
                 payment_data = MCPResponseParser.parse_payment_offers_response(all_content)
                 if payment_data:
-                    self.conversation_manager.shopping_context.payment_offers = payment_data
+                    # 临时存储支付信息用于当前会话
                     self.payment_info.payment_offers = payment_data
-                    
-                    # 提取关键支付信息
                     if 'payment_context_token' in payment_data:
                         self.payment_info.payment_context_token = payment_data['payment_context_token']
-                    print("💾 支付报价信息已存储")
+                    print("💾 支付报价信息已临时存储")
             
-            # 检测用户商品选择
-            elif self._is_product_selection(user_input):
-                print("🛒 检测到用户商品选择...")
-                selected_index = self._extract_product_selection_index(user_input)
-                if selected_index is not None:
-                    selected = self.conversation_manager.shopping_context.select_product(selected_index)
-                    if selected:
-                        self.selected_product = selected
-                        print(f"✅ 更新选中商品: {selected.title[:50]}...")
+            # 检测支付完成响应
+            elif "payment" in all_content.lower() and ("success" in all_content.lower() or "completed" in all_content.lower()):
+                print("✅ 检测到支付完成响应")
+                self.payment_info.payment_status = "completed"
+            
+            print("🔄 响应处理完成（简化模式）")
             
         except Exception as e:
             print(f"⚠️ 处理MCP响应失败: {e}")
             print(f"🔍 详细错误: {traceback.format_exc()}")
     
     def _is_amazon_search_response(self, content: str, user_input: str) -> bool:
-        """判断是否为Amazon搜索响应"""
-        # 检查内容是否包含Amazon搜索结果的特征
+        """判断是否为Amazon搜索响应（简化版本）"""
+        # 简化检测逻辑，仅用于备用搜索场景
         amazon_indicators = ['asin', 'amazon.com', 'position', 'rating', 'reviews', 'price']
-        search_indicators = ['搜索', 'search', '商品', '找到', '结果', '买', '购买', 'buy']
-        
         content_lower = content.lower()
-        user_input_lower = user_input.lower()
-        
-        has_amazon_data = any(indicator in content_lower for indicator in amazon_indicators)
-        has_search_intent = any(indicator in user_input_lower for indicator in search_indicators)
-        
-        return has_amazon_data and (has_search_intent or 'amazon_search' in content_lower)
+        return any(indicator in content_lower for indicator in amazon_indicators)
     
     def _is_payment_offers_response(self, content: str) -> bool:
         """判断是否为支付报价响应"""
@@ -1222,36 +1143,16 @@ class AmazonShoppingAgentQwen3:
         content_lower = content.lower()
         return any(indicator in content_lower for indicator in payment_indicators)
     
-    def _is_product_selection(self, user_input: str) -> bool:
-        """判断用户是否在选择商品"""
-        selection_patterns = ['选择', '要', '买', '第', '号', 'select', 'choose', '这个', '那个']
-        user_input_lower = user_input.lower()
-        return any(pattern in user_input_lower for pattern in selection_patterns)
-    
     def _extract_search_query(self, user_input: str) -> str:
-        """从用户输入中提取搜索查询"""
-        # 简单的查询提取逻辑
+        """从用户输入中提取搜索查询（简化版本）"""
+        # 简单的查询提取逻辑，仅用于备用搜索
         query_keywords = ['搜索', '找', '买', '购买', 'search', 'find', 'buy']
         for keyword in query_keywords:
             if keyword in user_input:
-                # 提取关键词后的内容作为搜索查询
                 parts = user_input.split(keyword, 1)
                 if len(parts) > 1:
                     return parts[1].strip()
         return user_input.strip()
-    
-    def _extract_product_selection_index(self, user_input: str) -> Optional[int]:
-        """从用户输入中提取商品选择索引"""
-        import re
-        # 查找数字模式
-        numbers = re.findall(r'\d+', user_input)
-        if numbers:
-            try:
-                # 转换为0-based索引
-                return int(numbers[0]) - 1
-            except ValueError:
-                pass
-        return None
     
     def get_service_status(self) -> Dict[str, Any]:
         """获取服务状态"""
