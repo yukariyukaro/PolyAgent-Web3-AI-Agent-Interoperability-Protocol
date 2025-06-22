@@ -19,7 +19,7 @@ if not os.environ.get('MODELSCOPE_SDK_TOKEN'):
     print("🔧 设置MODELSCOPE_SDK_TOKEN环境变量")
 
 if not os.environ.get('FEWSATS_API_KEY'):
-    os.environ['FEWSATS_API_KEY'] = '3q-t95sj95DywRNY4v4QsShXfyS1Gs4uvYRnwipK4Hg'
+    os.environ['FEWSATS_API_KEY'] = 'YOUR-API-KEY'
     print("🔧 设置FEWSATS_API_KEY环境变量")
 
 # 尝试导入qwen-agent进行MCP工具调用
