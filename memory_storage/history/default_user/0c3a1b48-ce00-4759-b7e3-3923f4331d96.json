@@ -1,0 +1,46 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "你好",
+      "ai_response": "您好！我是Amazon购物助手。\n\n当前状态：连接异常 (Connection error.)\n\n我目前可以为您提供：\n💬 购物咨询和对话\n📝 商品需求分析  \n💡 购买建议和策略\n🛒 购物流程指导\n\n虽然部分功能暂时受限，但我仍然很乐意为您提供购物方面的帮助！\n\n请告诉我您需要什么？",
+      "timestamp": "2025-06-27T16:34:42.410634",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "final_fallback"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "我想买一个iPhone 15 Pro",
+      "ai_response": "抱歉，当前遇到技术问题(Connection error.)，暂时无法执行购买操作。\n\n我仍然可以为您提供：\n💬 购物咨询和建议\n📝 商品需求分析\n🛒 购买策略推荐\n\n请稍后重试购买功能，或者告诉我您需要什么帮助？",
+      "timestamp": "2025-06-27T16:38:05.712898",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "final_fallback"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "你好"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！我是Amazon购物助手。\n\n当前状态：连接异常 (Connection error.)\n\n我目前可以为您提供：\n💬 购物咨询和对话\n📝 商品需求分析  \n💡 购买建议和策略\n🛒 购物流程指导\n\n虽然部分功能暂时受限，但我仍然很乐意为您提供购物方面的帮助！\n\n请告诉我您需要什么？"
+    },
+    {
+      "role": "user",
+      "content": "我想买一个iPhone 15 Pro"
+    },
+    {
+      "role": "assistant",
+      "content": "抱歉，当前遇到技术问题(Connection error.)，暂时无法执行购买操作。\n\n我仍然可以为您提供：\n💬 购物咨询和建议\n📝 商品需求分析\n🛒 购买策略推荐\n\n请稍后重试购买功能，或者告诉我您需要什么帮助？"
+    }
+  ],
+  "session_id": "0c3a1b48-ce00-4759-b7e3-3923f4331d96",
+  "user_id": "default_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-27T16:38:05.712898"
+}
