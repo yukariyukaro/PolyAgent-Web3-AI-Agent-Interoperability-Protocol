@@ -13,6 +13,8 @@ from camel.types import (
     RoleType,
     TaskType,
 )
+# 添加 A2A 相关导入
+from python_a2a import A2AServer, run_server, AgentCard, AgentSkill, TaskStatus, TaskState
 
 
 class AlipayOrderService:
@@ -21,6 +23,7 @@ class AlipayOrderService:
         self.model = model or ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
             model_type=ModelType.GPT_4_1,
+            api_key = 
             url="https://api.openai.com/v1/",
         )
 
@@ -233,6 +236,109 @@ async def main():
             print("状态信息:")
             print(status_result.get('status_info'))
 
+
+# 添加 A2A 服务器实现
+class AlipayA2AServer(A2AServer):
+    """
+    支付宝 A2A 服务器，提供支付宝支付功能的 A2A 接口
+    """
+    def __init__(self, agent_card: AgentCard):
+        super().__init__(agent_card=agent_card)
+        self.alipay_service = AlipayOrderService()
+        print("✅ [AlipayA2AServer] Server initialized and ready.")
+
+    def handle_task(self, task):
+        """A2A 服务器的核心处理函数"""
+        text = task.message.get("content", {}).get("text", "")
+        print(f"📩 [AlipayA2AServer] Received task: '{text}'")
+
+        if not text:
+            response_text = "错误: 收到了一个空的请求。"
+            task.status = TaskStatus(state=TaskState.FAILED)
+        else:
+            try:
+                # 使用nest_asyncio允许在已有事件循环中运行新的事件循环
+                import nest_asyncio
+                nest_asyncio.apply()
+                
+                # 使用asyncio.run运行异步函数
+                result = asyncio.run(self.process_payment_request(text))
+                
+                # 使用结果构建响应
+                if result.get('success'):
+                    response_text = result.get('response_content', '支付订单已创建')
+                else:
+                    error_msg = result.get('error', '未知错误')
+                    response_text = f"❌ 支付处理错误: {error_msg}"
+                
+                task.status = TaskStatus(state=TaskState.COMPLETED)
+                print("💬 [AlipayA2AServer] Processing complete.")
+
+            except Exception as e:
+                import traceback
+                print(f"❌ [AlipayA2AServer] Critical error during task handling: {e}")
+                traceback.print_exc()
+                response_text = f"服务器内部错误: {e}"
+                task.status = TaskStatus(state=TaskState.FAILED)
+
+        task.artifacts = [{"parts": [{"type": "text", "text": str(response_text)}]}]
+        return task
+    
+    async def process_payment_request(self, text: str):
+        """处理支付请求，提取产品信息并创建支付订单"""
+        # 简单解析产品信息，实际应用中可能需要更复杂的解析逻辑
+        product_info = None
+        
+        # 检查是否包含产品信息
+        if "product:" in text.lower() or "price:" in text.lower():
+            try:
+                # 尝试提取产品信息
+                lines = text.split('\n')
+                product_name = None
+                price = None
+                
+                for line in lines:
+                    if "product:" in line.lower():
+                        product_name = line.split(":", 1)[1].strip()
+                    elif "price:" in line.lower():
+                        price_str = line.split(":", 1)[1].strip()
+                        # 移除美元符号并转换为浮点数
+                        price = float(price_str.replace("$", "").strip())
+                
+                if product_name and price:
+                    product_info = {
+                        "name": product_name,
+                        "usd_price": price,
+                        "exchange_rate": 7.26  # 默认汇率
+                    }
+            except Exception as e:
+                print(f"解析产品信息时出错: {e}")
+        
+        # 调用支付宝服务创建订单
+        return await self.alipay_service.run_alipay_query(text, product_info)
+
+
+def main():
+    """主函数，用于配置和启动A2A服务器"""
+    port = int(os.environ.get("ALIPAY_A2A_PORT", 5005))
+    
+    agent_card = AgentCard(
+        name="Alipay Payment A2A Agent",
+        description="An A2A agent that creates Alipay payment orders for cross-border transactions.",
+        url=f"http://localhost:{port}",
+        skills=[
+            AgentSkill(name="create_payment", description="Create an Alipay payment order for a product.")
+        ]
+    )
+    
+    server = AlipayA2AServer(agent_card)
+    
+    print("\n" + "="*60)
+    print("🚀 Starting Alipay Payment A2A Server...")
+    print(f"👂 Listening on http://localhost:{port}")
+    print("="*60 + "\n")
+    
+    run_server(server, host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
     asyncio.run(main())
