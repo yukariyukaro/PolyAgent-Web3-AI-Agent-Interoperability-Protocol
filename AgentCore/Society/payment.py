@@ -21,10 +21,10 @@ class AlipayOrderService:
     def __init__(self, model=None):
         """初始化支付宝订单服务"""
         self.model = model or ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4_1,
-            api_key = 
-            url="https://api.openai.com/v1/",
+            model_platform=ModelPlatformType.MODELSCOPE,
+            model_type='Qwen/Qwen2.5-72B-Instruct',
+            model_config_dict={'temperature': 0.2},
+            api_key='9d3aed4d-eca1-4e0c-9805-cb923ccbbf21',
         )
 
     def generate_order_number(self):

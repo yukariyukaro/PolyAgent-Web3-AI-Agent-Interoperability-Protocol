@@ -55,13 +55,12 @@ class AmazonServiceManager:
     def __init__(self):
         """初始化模型和配置"""
         print("🧠 [AmazonServer] Initializing the core AI model...")
-        # 改用与Alipay Agent相同的模型工厂
+        # 使用Qwen2.5模型替代GPT
         self.model = ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI,
-            model_type=ModelType.GPT_4O,
-            # 建议将API密钥放在环境变量或配置文件中
-            api_key="",
-            url="",
+            model_platform=ModelPlatformType.MODELSCOPE,
+            model_type='Qwen/Qwen2.5-72B-Instruct',
+            model_config_dict={'temperature': 0.2},
+            api_key='9d3aed4d-eca1-4e0c-9805-cb923ccbbf21',
         )
         print("✅ [AmazonServer] AI model is ready.")
 
@@ -262,46 +261,21 @@ class AmazonServiceManager:
                 "strategy": strategy.value,
             }
             
-            # 5. 调用 Amazon A2A Agent 下订单，然后调用支付宝Agent支付
-            logger.info("📞 Step 1: Calling Amazon A2A Agent to place order...")
+            # 5. 先调用支付宝Agent支付，然后调用Amazon A2A Agent确认订单
+            logger.info("📞 Step 1: Calling Alipay A2A Agent for payment...")
             try:
-                # 第一步：调用Amazon Agent下订单
-                AMAZON_AGENT_URL = "http://0.0.0.0:5012"  # Amazon Agent端口
-                logger.info(f"🔗 Connecting to Amazon A2A Agent at {AMAZON_AGENT_URL}")
-                print(f"🔗 正在连接Amazon A2A Agent: {AMAZON_AGENT_URL}")
-
-                # 构造Amazon订单请求，包含商品URL
-                amazon_request_text = f"""请为以下商品下订单：
-                                    商品URL: {solution['product_url']}
-                                    商品名称: {solution['title']}
-                                    ASIN: {solution['asin']}
-                                    数量: {solution['quantity']}
-                                    单价: ${solution['unit_price']:.2f} USD
-                                    总价: ${solution['total_amount']:.2f} USD
-
-                                    请处理此订单并返回订单信息。"""
-
-                logger.info(f"📤 Sending Amazon order request...")
-                print(f"📤 发送Amazon订单请求...")
-
-                # 使用A2AClient调用Amazon Agent
-                amazon_client = A2AClient(AMAZON_AGENT_URL)
-                amazon_response = amazon_client.ask(amazon_request_text)
-
-                print(f"📥 收到Amazon Agent响应: {amazon_response[:200]}...")
-                logger.info("✅ Successfully received response from Amazon Agent.")
-
-                # 第二步：调用支付宝Agent创建支付
-                logger.info("📞 Step 2: Calling Alipay A2A Agent for payment...")
+                # 第一步：调用支付宝Agent创建支付
                 ALIPAY_AGENT_URL = "http://0.0.0.0:5005"
                 logger.info(f"🔗 Connecting to Alipay A2A Agent at {ALIPAY_AGENT_URL}")
                 print(f"🔗 正在连接支付宝 A2A Agent: {ALIPAY_AGENT_URL}")
 
-                # 构造支付请求，包含Amazon订单信息
-                payment_request_text = f"""请为以下Amazon订单创建支付：
+                # 构造支付请求
+                payment_request_text = f"""请为以下商品创建支付：
                                     商品: {solution['title']}
+                                    ASIN: {solution['asin']}
+                                    数量: {solution['quantity']}
+                                    单价: ${solution['unit_price']:.2f} USD
                                     总价: ${solution['total_amount']:.2f} USD
-                                    Amazon订单信息: 已通过Amazon Agent下单
 
                                     请创建支付宝支付订单。"""
 
@@ -315,11 +289,39 @@ class AmazonServiceManager:
                 print(f"📥 收到支付宝 Agent 响应: {payment_response[:200]}...")
                 logger.info("✅ Successfully received payment info from Alipay Agent.")
 
-                # 将Amazon订单和支付信息附加到最终结果中
-                solution['amazon_order_info'] = amazon_response
+                # 第二步：支付成功后调用Amazon Agent确认订单
+                logger.info("📞 Step 2: Calling Amazon A2A Agent to confirm order...")
+                AMAZON_AGENT_URL = "http://0.0.0.0:5012"  # Amazon Agent端口
+                logger.info(f"🔗 Connecting to Amazon A2A Agent at {AMAZON_AGENT_URL}")
+                print(f"🔗 正在连接Amazon A2A Agent: {AMAZON_AGENT_URL}")
+
+                # 构造Amazon订单确认请求，包含支付信息
+                amazon_request_text = f"""请为以下商品确认订单（支付已完成）：
+                                    商品URL: {solution['product_url']}
+                                    商品名称: {solution['title']}
+                                    ASIN: {solution['asin']}
+                                    数量: {solution['quantity']}
+                                    单价: ${solution['unit_price']:.2f} USD
+                                    总价: ${solution['total_amount']:.2f} USD
+                                    支付状态: 支付宝支付已完成
+
+                                    请处理此订单确认并返回订单信息。"""
+
+                logger.info(f"📤 Sending Amazon order confirmation request...")
+                print(f"📤 发送Amazon订单确认请求...")
+
+                # 使用A2AClient调用Amazon Agent
+                amazon_client = A2AClient(AMAZON_AGENT_URL)
+                amazon_response = amazon_client.ask(amazon_request_text)
+
+                print(f"📥 收到Amazon Agent响应: {amazon_response[:200]}...")
+                logger.info("✅ Successfully received response from Amazon Agent.")
+
+                # 将支付和Amazon订单信息附加到最终结果中
                 solution['payment_info'] = payment_response
-                solution['status'] = 'order_and_payment_completed'
-                solution['response'] = f"""✅ 订单已下达并创建支付！
+                solution['amazon_order_info'] = amazon_response
+                solution['status'] = 'payment_and_order_completed'
+                solution['response'] = f"""✅ 支付完成并订单已确认！
 
                                     **商品信息**:
                                     • 名称: {solution['title']}
@@ -327,30 +329,30 @@ class AmazonServiceManager:
                                     • 总价: ${solution['total_amount']:.2f} USD
                                     • 商品链接: {solution['product_url']}
 
-                **Amazon订单状态**:
-                {amazon_response[:300]}...
-
                 **支付信息**:
-                {payment_response[:300]}..."""
+                {payment_response[:300]}...
+
+                **Amazon订单确认**:
+                {amazon_response[:300]}..."""
                 
             except Exception as e:
-                logger.error(f"❌ Failed to call Amazon or Alipay Agent: {e}")
+                logger.error(f"❌ Failed to call Alipay or Amazon Agent: {e}")
                 import traceback
                 error_details = traceback.format_exc()
                 logger.error(f"详细错误: {error_details}")
-                print(f"❌ 连接Amazon或支付宝 Agent 失败: {e}")
+                print(f"❌ 连接支付宝或Amazon Agent 失败: {e}")
                 print(f"详细错误: {error_details}")
 
+                solution['payment_info'] = f"Error: Could not complete payment process. {str(e)}"
                 solution['amazon_order_info'] = f"Error: Could not connect to Amazon Agent."
-                solution['payment_info'] = f"Error: Could not complete order and payment process. {str(e)}"
-                solution['status'] = 'order_payment_failed'
-                solution['response'] = f"""❌ 订单和支付失败
+                solution['status'] = 'payment_order_failed'
+                solution['response'] = f"""❌ 支付和订单确认失败
 
                                     **商品**: {solution['title']}
                                     **总价**: ${solution['total_amount']:.2f} USD
                                     **商品链接**: {solution['product_url']}
 
-                                    无法完成Amazon订单和支付流程，请稍后重试。
+                                    无法完成支付和Amazon订单确认流程，请稍后重试。
                                     错误：{str(e)}"""
             
                 return solution
@@ -401,7 +403,7 @@ class AmazonA2AServer(A2AServer, AmazonServiceManager):
                     response_text = result["response"]
                 else:
                     # 格式化输出
-                    if result.get('status') == 'solution' or result.get('status') == 'payment_initiated':
+                    if result.get('status') == 'solution' or result.get('status') == 'payment_and_order_completed':
                         response_text = (
                             f"✅ **方案已生成**\n\n"
                             f"**商品详情:**\n"
@@ -439,7 +441,7 @@ def main():
     agent_card = AgentCard(
         name="Amazon Shopping Coordinator A2A Agent",
         description="An intelligent A2A agent that coordinates Amazon shopping by working with specialized agents. "
-                    "Searches products, generates solutions with URLs, and coordinates with Amazon Agent for orders and Payment Agent for transactions.",
+                    "Searches products, generates solutions with URLs, and coordinates payment-first workflow with Payment Agent for transactions followed by Amazon Agent for order confirmation.",
         url=f"http://localhost:{port}",
         skills=[
             AgentSkill(
@@ -447,16 +449,16 @@ def main():
                 description="Search Amazon products and generate purchase recommendations with product URLs."
             ),
             AgentSkill(
-                name="amazon_agent_coordination",
-                description="Coordinate with Amazon A2A Agent to place orders using product URLs."
+                name="payment_agent_coordination",
+                description="Coordinate with Payment A2A Agent to process payments before order placement."
             ),
             AgentSkill(
-                name="payment_agent_coordination",
-                description="Coordinate with Payment A2A Agent to process payments after order placement."
+                name="amazon_agent_coordination",
+                description="Coordinate with Amazon A2A Agent to confirm orders after payment completion."
             ),
             AgentSkill(
                 name="end_to_end_purchase_flow",
-                description="Manage the complete purchase flow: search → recommend → order → payment."
+                description="Manage the complete purchase flow: search → recommend → payment → order confirmation."
             )
         ]
     )
