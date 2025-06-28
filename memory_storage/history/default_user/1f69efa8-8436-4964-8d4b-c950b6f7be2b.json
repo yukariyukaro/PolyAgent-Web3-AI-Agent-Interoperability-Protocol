@@ -1,0 +1,46 @@
+{
+  "conversation_history": [
+    {
+      "user_input": "Hello, 这是一个A2A通信测试消息",
+      "ai_response": "您好！这是一个A2A通信测试消息已收到。我是您的Amazon购物助手，请问需要我帮您购买什么商品吗？请提供：\n1. 商品URL或ASIN\n2. 收货地址\n3. 用户信息（姓名/邮箱）\n\n我可以为您完成一键购买流程。",
+      "timestamp": "2025-06-28T22:02:44.141571",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    },
+    {
+      "user_input": "Hello, 这是一个A2A通信测试消息",
+      "ai_response": "您好！这是第二次收到A2A通信测试消息。为了帮助您完成Amazon商品购买，请提供以下信息：\n\n1. 商品URL或ASIN（例如：https://www.amazon.com/dp/B08N5WRWNW）\n2. 收货地址（例如：John Doe, 123 Main St, New York, NY 10001, US）\n3. 用户信息（姓名/邮箱：如 John Doe / john@example.com）\n\n当您准备好这些信息时，我将在一次回复中完成支付流程。",
+      "timestamp": "2025-06-28T22:02:51.499844",
+      "shopping_state": "browsing",
+      "tools_used": [
+        "qwen_agent_mcp"
+      ],
+      "thinking_content": ""
+    }
+  ],
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "Hello, 这是一个A2A通信测试消息"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！这是一个A2A通信测试消息已收到。我是您的Amazon购物助手，请问需要我帮您购买什么商品吗？请提供：\n1. 商品URL或ASIN\n2. 收货地址\n3. 用户信息（姓名/邮箱）\n\n我可以为您完成一键购买流程。"
+    },
+    {
+      "role": "user",
+      "content": "Hello, 这是一个A2A通信测试消息"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！这是第二次收到A2A通信测试消息。为了帮助您完成Amazon商品购买，请提供以下信息：\n\n1. 商品URL或ASIN（例如：https://www.amazon.com/dp/B08N5WRWNW）\n2. 收货地址（例如：John Doe, 123 Main St, New York, NY 10001, US）\n3. 用户信息（姓名/邮箱：如 John Doe / john@example.com）\n\n当您准备好这些信息时，我将在一次回复中完成支付流程。"
+    }
+  ],
+  "session_id": "1f69efa8-8436-4964-8d4b-c950b6f7be2b",
+  "user_id": "default_user",
+  "current_state": "browsing",
+  "last_updated": "2025-06-28T22:02:51.499844"
+}
