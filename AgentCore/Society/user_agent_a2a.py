@@ -320,6 +320,9 @@ class AmazonServiceManager:
                 **Amazon订单确认**:
                 {amazon_response[:300]}..."""
                 
+                # 修复：添加缺失的return语句，确保成功情况下返回结果
+                return solution
+                
             except Exception as e:
                 logger.error(f"❌ Failed to call Alipay or Amazon Agent: {e}")
                 import traceback
@@ -543,6 +546,13 @@ class AmazonA2AServer(A2AServer, AmazonServiceManager):
         text = task.message.get("content", {}).get("text", "")
         print(f"📩 [AmazonA2AServer] Received task: '{text}'")
 
+        # 处理健康检查请求，避免触发业务逻辑
+        if text.lower().strip() in ["health check", "health", "ping", ""]:
+            print("✅ [AmazonA2AServer] Health check request - returning healthy status")
+            task.artifacts = [{"parts": [{"type": "text", "text": "healthy - User Agent (Amazon Shopping Coordinator) is operational"}]}]
+            task.status = TaskStatus(state=TaskState.COMPLETED)
+            return task
+
         if not text:
             response_text = "错误: 收到了一个空的请求。"
             task.status = TaskStatus(state=TaskState.FAILED)
@@ -567,8 +577,11 @@ class AmazonA2AServer(A2AServer, AmazonServiceManager):
                     print("🔍 [AmazonA2AServer] Processing product search...")
                     result = asyncio.run(self.autonomous_purchase(text))
                 
-                # 使用 result 中的 response 字段或构建响应
-                if "response" in result:
+                # 安全地处理result，确保不是None
+                if result is None:
+                    print("⚠️ [AmazonA2AServer] Warning: Method returned None")
+                    response_text = "❌ **处理失败**\n\n原因: 内部处理异常，未返回有效结果"
+                elif "response" in result:
                     response_text = result["response"]
                 else:
                     # 格式化输出
