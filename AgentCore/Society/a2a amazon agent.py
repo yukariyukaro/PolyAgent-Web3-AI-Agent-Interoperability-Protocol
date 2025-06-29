@@ -1104,6 +1104,13 @@ class AmazonShoppingA2AAgent(A2AServer, AmazonShoppingServiceManager):
         text = task.message.get("content", {}).get("text", "")
         print(f"📩 [AmazonShoppingA2AAgent] 收到任务: '{text}'")
         
+        # 处理健康检查请求，避免触发业务逻辑
+        if text.lower().strip() in ["health check", "health", "ping", ""]:
+            print("✅ [AmazonShoppingA2AAgent] Health check request - returning healthy status")
+            task.artifacts = [{"parts": [{"type": "text", "text": "healthy - Amazon Agent (Shopping & Payment) is operational"}]}]
+            task.status = TaskStatus(state=TaskState.COMPLETED)
+            return task
+        
         if not text:
             response_text = "错误: 收到了一个空的请求。"
             task.status = TaskStatus(state=TaskState.FAILED)

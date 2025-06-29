@@ -803,11 +803,6 @@ User Agent分析结果: {user_response}
                 'pure_a2a_mode': True
             })
             
-            if result["success"]:
-                logger.info(f"✅ [{datetime.now().strftime('%H:%M:%S')}] 工作流处理成功 - 状态: {result.get('workflow_state')}")
-            else:
-                logger.warning(f"⚠️ [{datetime.now().strftime('%H:%M:%S')}] 工作流处理失败")
-            
             return result
             
         except Exception as e:
@@ -900,6 +895,11 @@ def chat():
         # 使用固定工作流编排器处理请求
         result = workflow_orchestrator.process_workflow(user_message, user_id, session_id)
         
+        if result["success"]:
+            logger.info(f"✅ [{datetime.now().strftime('%H:%M:%S')}] 工作流处理成功 - 状态: {result.get('workflow_state')}")
+            else:
+            logger.warning(f"⚠️ [{datetime.now().strftime('%H:%M:%S')}] 工作流处理失败")
+
         return jsonify(result)
 
     except Exception as e:
@@ -934,7 +934,7 @@ def health_check():
                     'name': agent_config["name"],
                     'a2a_available': agent_config.get("available", False)
                 }
-            except Exception as e:
+    except Exception as e:
                 health_status['agents'][agent_type] = {
                     'status': 'error', 
                     'error': str(e),
@@ -1005,12 +1005,12 @@ def start_agents():
         results = agent_manager.start_all_agents()
         ready_status = agent_manager.wait_for_agents_ready()
         
-        return jsonify({
-            'success': True,
+            return jsonify({
+                'success': True,
             'start_results': results,
             'ready_status': ready_status,
-            'timestamp': datetime.now().isoformat()
-        })
+                'timestamp': datetime.now().isoformat()
+            })
     except Exception as e:
         logger.error(f"❌ 启动Agent服务器失败: {e}")
         return jsonify({
@@ -1025,11 +1025,11 @@ def stop_agents():
     try:
         agent_manager.shutdown_all_agents()
         
-        return jsonify({
-            'success': True,
+            return jsonify({
+                'success': True,
             'message': '所有Agent服务器已停止',
-            'timestamp': datetime.now().isoformat()
-        })
+                'timestamp': datetime.now().isoformat()
+            })
     except Exception as e:
         logger.error(f"❌ 停止Agent服务器失败: {e}")
         return jsonify({
@@ -1165,10 +1165,10 @@ if __name__ == '__main__':
         
         # 启动Flask应用
         logger.info("🚀 启动Flask Web服务器...")
-        app.run(
-            host='0.0.0.0',
-            port=5000,
-            debug=False,
+    app.run(
+        host='0.0.0.0',
+        port=5000,
+        debug=False,
             threaded=True  # 启用多线程支持异步调用和A2A通信
         )
         

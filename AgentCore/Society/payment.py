@@ -252,6 +252,13 @@ class AlipayA2AServer(A2AServer):
         text = task.message.get("content", {}).get("text", "")
         print(f"📩 [AlipayA2AServer] Received task: '{text}'")
 
+        # 处理健康检查请求，避免触发业务逻辑
+        if text.lower().strip() in ["health check", "health", "ping", ""]:
+            print("✅ [AlipayA2AServer] Health check request - returning healthy status")
+            task.artifacts = [{"parts": [{"type": "text", "text": "healthy - Payment Agent (Alipay) is operational"}]}]
+            task.status = TaskStatus(state=TaskState.COMPLETED)
+            return task
+
         if not text:
             response_text = "错误: 收到了一个空的请求。"
             task.status = TaskStatus(state=TaskState.FAILED)
