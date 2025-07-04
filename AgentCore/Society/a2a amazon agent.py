@@ -12,6 +12,8 @@ from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, asdict
 from typing import Dict, Any, List, Optional, Tuple
+import asyncio
+import websockets
 
 # --- A2A 协议导入 ---
 from python_a2a import A2AServer, run_server, AgentCard, AgentSkill, TaskStatus, TaskState
@@ -966,7 +968,19 @@ class AmazonShoppingServiceManager:
             elif "payment" in all_content.lower() and ("success" in all_content.lower() or "completed" in all_content.lower()):
                 print("✅ 检测到支付完成响应")
                 self.payment_info.payment_status = "completed"
-            
+                # 构造订单信息
+                order_details = {
+                    "status": "completed",
+                    "order_id": str(uuid.uuid4()),  # 示例订单ID
+                    "timestamp": datetime.now().isoformat(),
+                    "product": self.selected_product.title,
+                    "amount": self.payment_info.payment_offers.get("amount", "未知金额"),
+                    "currency": self.payment_info.payment_offers.get("currency", "USD")
+                }
+
+                # 调用websocket 通知前端已经发货
+                notify_frontend_via_websocket(f"订单已发货: {order_details}")
+
             print("🔄 响应处理完成（仅支付数据）")
             
         except Exception as e:
@@ -1218,4 +1232,18 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
         test_qwen3_agent()
     else:
-        main() 
+        main()
+
+def notify_frontend_via_websocket(message: str):
+    """使用 websockets 向 ws://localhost:6789 发送消息（异步调用）"""
+    async def _send():
+        try:
+            async with websockets.connect('ws://localhost:6789') as websocket:
+                await websocket.send(message)
+        except Exception as e:
+            print(f"[WebSocket] 发送消息失败: {e}")
+    try:
+        asyncio.get_event_loop().run_until_complete(_send())
+    except RuntimeError:
+        # 如果已在事件循环中
+        asyncio.run(_send())
