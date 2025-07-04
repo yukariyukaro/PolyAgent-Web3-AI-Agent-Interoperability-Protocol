@@ -18,4 +18,5 @@ eth-account==0.13.7
 eth-keys==0.7.0
 python_a2a
 websockets
+camel-ai
 

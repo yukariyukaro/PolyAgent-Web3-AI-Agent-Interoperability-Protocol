@@ -12,6 +12,8 @@ from camel.models import ModelFactory
 from camel.types import ModelPlatformType, ModelType
 from camel.toolkits import MCPToolkit
 
+from AgentCore.Society.youxuan_shopping_agent import YouxuanShoppingAgent
+
 # --- 项目内部模块导入 ---
 # 路径设置，确保能找到项目核心模块
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
@@ -40,17 +42,17 @@ class AgentManager:
         ]
 
         # --- 模型初始化 ---
-        print("🧠 [MarketTradeServer] Initializing the core AI model...")
+        print("AI Initializing the core AI model...")
         self.model = ModelFactory.create(
             model_platform=ModelPlatformType.MODELSCOPE,
             model_type='Qwen/Qwen2.5-72B-Instruct',
             model_config_dict={'temperature': 0.2},
             api_key='9d3aed4d-eca1-4e0c-9805-cb923ccbbf21',
         )
-        print("✅ [MarketTradeServer] AI model is ready.")
+        print("AI model is ready.")
 
         # --- 子 Agent 初始化 ---
-        print("🤖 [MarketTradeServer] Initializing sub-agents...")
+        print("AI Initializing sub-agents...")
         self.iotex_agent = ChatAgent(
             system_message="""
             You are a professional IoTeX testnet blockchain assistant with the following capabilities:
@@ -146,7 +148,7 @@ class AgentManager:
             token_limit=32768,
             output_language="en"
         )
-        print("✅ [MarketTradeServer] Sub-agents are ready.")
+        print("AI Sub-agents are ready.")
 
         # --- 状态跟踪 ---
         self.demo_step = 0
@@ -322,7 +324,7 @@ class AgentManager:
             import traceback
             print(f"支付宝处理过程中出现错误: {str(e)}")
             traceback.print_exc() # 打印完整的错误堆栈
-            return f"""❌ 支付宝处理错误
+            return f""" 支付宝处理错误
 
 处理支付宝请求时发生错误: {str(e)}
 请检查支付宝MCP服务器状态并重试。"""
@@ -346,27 +348,27 @@ class AgentManager:
                 response = await paypal_agent.astep(query)
                 return response.msgs[0].content if response and response.msgs else "Unable to get PayPal response"
         except Exception as e:
-            return f"""❌ PayPal Processing Error: {str(e)}"""
+            return f""" PayPal Processing Error: {str(e)}"""
     
     # ... (run_amap_query, run_all, etc., can be kept or removed if not directly exposed via the router)
 
     async def handle_blockchain_query(self, user_input: str):
         response = self.iotex_agent.step(user_input)
-        return f"""🔗 **IoTeX Blockchain Query Results**\n\n{response.msgs[0].content if response.msgs else "Query failed"}"""
+        return f""" **IoTeX Blockchain Query Results**\n\n{response.msgs[0].content if response.msgs else "Query failed"}"""
 
     async def handle_token_authorization(self, user_input: str):
         response = self.iotex_agent.step(f"Please execute the following authorization operation: {user_input}")
-        return f"""🔐 **Token Authorization Operation**\n\n{response.msgs[0].content if response.msgs else "Authorization failed"}"""
+        return f""" **Token Authorization Operation**\n\n{response.msgs[0].content if response.msgs else "Authorization failed"}"""
 
     async def handle_creative_story(self, user_input: str):
         story_template = Template(self.story_agent.system_message)
         formatted_system_message = story_template.safe_substitute(user_demand=user_input)
         self.story_agent.system_message = formatted_system_message
         response = self.story_agent.step("Please create a story based on my requirements")
-        return f"""📖 **AI Creative Story**\n\n{response.msgs[0].content if response.msgs else "Story generation failed"}"""
+        return f""" **AI Creative Story**\n\n{response.msgs[0].content if response.msgs else "Story generation failed"}"""
 
     async def handle_general_query(self, user_input: str):
-        return f"""🤖 **General Assistant Response**\n\nYour question: "{user_input}"\n\nI apologize, but I cannot understand your specific requirements at the moment... (rest of the message)"""
+        return f""" **General Assistant Response**\n\nYour question: "{user_input}"\n\nI apologize, but I cannot understand your specific requirements at the moment... (rest of the message)"""
 
 
 # ==============================================================================
@@ -382,7 +384,7 @@ class MarketTradeServer(A2AServer, AgentManager):
         A2AServer.__init__(self, agent_card=agent_card)
         # 2. 初始化 AgentManager 部分 (包含了模型、子Agent等的创建)
         AgentManager.__init__(self)
-        print("✅ MarketTradeServer fully initialized.")
+        print("AI MarketTradeServer fully initialized.")
 
     def handle_task(self, task):
         """
@@ -417,7 +419,7 @@ def main():
     # 使用config.py中定义的端口，或者一个默认值
     port = getattr(config, 'MARKET_TRADE_PORT', 5003)
     
-    # 定义服务器的“名片”
+    # 定义服务器的"名片"
     agent_card = AgentCard(
         name="Market Trade A2A Agent",
         description="Handles cross-border payment bridging, blockchain operations, and other complex tasks.",
