@@ -1,3 +1,8 @@
+import sys
+if sys.platform == "win32":
+    import os
+    os.system("chcp 65001")
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
@@ -15,6 +20,7 @@ from typing import Dict, Any, Optional, List
 from enum import Enum
 import asyncio
 import nest_asyncio
+from AgentCore.Society.user_agent_a2a import AmazonServiceManager
 
 # 设置nest_asyncio以支持嵌套事件循环
 nest_asyncio.apply()
@@ -53,7 +59,7 @@ class AgentServerManager:
     
     def _signal_handler(self, signum, frame):
         """信号处理器"""
-        print(f"\n🛑 收到信号 {signum}，正在关闭所有Agent服务器...")
+        print("\n收到信号 " + str(signum) + "，正在关闭所有Agent服务器...")
         self.shutdown_all_agents()
         sys.exit(0)
     
@@ -64,7 +70,7 @@ class AgentServerManager:
             script_path = os.path.join(os.path.dirname(__file__), config["script"])
             
             if not os.path.exists(script_path):
-                print(f"❌ Agent脚本不存在: {script_path}")
+                print("Agent脚本不存在: " + script_path)
                 return False
             
             # 设置环境变量 - 添加更完整的环境变量
@@ -74,25 +80,25 @@ class AgentServerManager:
             # 确保必要的环境变量存在
             if not env.get('MODELSCOPE_SDK_TOKEN'):
                 env['MODELSCOPE_SDK_TOKEN'] = '9d3aed4d-eca1-4e0c-9805-cb923ccbbf21'
-                print(f"🔧 为 {agent_name} 设置MODELSCOPE_SDK_TOKEN")
+                print("为 " + agent_name + " 设置MODELSCOPE_SDK_TOKEN")
             
             if not env.get('FEWSATS_API_KEY'):
                 env['FEWSATS_API_KEY'] = '3q-t95sj95DywRNY4v4QsShXfyS1Gs4uvYRnwipK4Hg'
-                print(f"🔧 为 {agent_name} 设置FEWSATS_API_KEY")
+                print("为 " + agent_name + " 设置FEWSATS_API_KEY")
             
             # 关键修复：设置UTF-8编码，解决Windows GBK编码无法显示emoji的问题
             env['PYTHONIOENCODING'] = 'utf-8'
             env['PYTHONLEGACYWINDOWSSTDIO'] = '1'  # Windows兼容性
-            print(f"🔧 为 {agent_name} 设置UTF-8编码环境")
+            print("为 " + agent_name + " 设置UTF-8编码环境")
             
             # 设置正确的工作目录
             working_dir = os.path.dirname(__file__)
             
-            print(f"🚀 启动 {agent_name} 服务器...")
-            print(f"   📁 工作目录: {working_dir}")
-            print(f"   📄 脚本路径: {script_path}")
-            print(f"   🌐 端口: {config['port']}")
-            print(f"   🔧 环境变量: {config['env_var']}={config['port']}")
+            print("启动 " + agent_name + " 服务器...")
+            print("   工作目录: " + working_dir)
+            print("   脚本路径: " + script_path)
+            print("   端口: " + str(config['port']))
+            print("   环境变量: " + config['env_var'] + "=" + str(config['port']))
             
             # 启动进程 - 设置正确的工作目录和编码
             process = subprocess.Popen(
@@ -133,22 +139,22 @@ class AgentServerManager:
             # 等待一小段时间检查进程是否立即退出
             time.sleep(1)
             if process.poll() is not None:
-                print(f"❌ {agent_name} 进程立即退出 (退出码: {process.returncode})")
+                print(agent_name + " 进程立即退出 (退出码: " + str(process.returncode) + ")")
                 # 读取stderr获取错误信息
                 stderr_output = process.stderr.read()
                 if stderr_output:
-                    print(f"❌ {agent_name} 错误输出:")
+                    print(agent_name + " 错误输出:")
                     for line in stderr_output.strip().split('\n'):
-                        print(f"   {line}")
+                        print("   " + line)
                 return False
             
-            print(f"✅ {agent_name} 服务器启动成功 (PID: {process.pid})")
+            print(agent_name + " 服务器启动成功 (PID: " + str(process.pid) + ")")
             return True
             
         except Exception as e:
-            print(f"❌ 启动 {agent_name} 失败: {e}")
+            print("启动 " + agent_name + " 失败: " + str(e))
             import traceback
-            print(f"详细错误: {traceback.format_exc()}")
+            print("详细错误: " + traceback.format_exc())
             return False
     
     def _monitor_agent_stdout(self, agent_name: str, process: subprocess.Popen):
@@ -157,9 +163,9 @@ class AgentServerManager:
             while process.poll() is None:
                 output = process.stdout.readline()
                 if output:
-                    print(f"[{agent_name}] {output.strip()}")
+                    print("[" + agent_name + "] " + output.strip())
         except Exception as e:
-            print(f"⚠️ {agent_name} stdout监控异常: {e}")
+            print(agent_name + " stdout监控异常: " + str(e))
     
     def _monitor_agent_stderr(self, agent_name: str, process: subprocess.Popen):
         """监控Agent错误输出"""
@@ -167,33 +173,33 @@ class AgentServerManager:
             while process.poll() is None:
                 error = process.stderr.readline()
                 if error:
-                    print(f"[{agent_name}] ❌ {error.strip()}")
+                    print("[" + agent_name + "] 错误 " + error.strip())
         except Exception as e:
-            print(f"⚠️ {agent_name} stderr监控异常: {e}")
+            print(agent_name + " stderr监控异常: " + str(e))
     
     def start_all_agents(self) -> Dict[str, bool]:
         """启动所有Agent服务器"""
         results = {}
         
-        print("🤖 开始逐个启动Agent服务器...")
+        print("开始逐个启动Agent服务器...")
         for i, agent_name in enumerate(self.agent_configs.keys(), 1):
-            print(f"\n📍 [{i}/{len(self.agent_configs)}] 启动 {agent_name}...")
+            print("\n[" + str(i) + "/" + str(len(self.agent_configs)) + "] 启动 " + agent_name + "...")
             results[agent_name] = self.start_agent(agent_name)
             
             if results[agent_name]:
-                print(f"✅ {agent_name} 启动成功，等待稳定...")
+                print(agent_name + " 启动成功，等待稳定...")
             else:
-                print(f"❌ {agent_name} 启动失败")
+                print(agent_name + " 启动失败")
             
             # 增加启动间隔，让每个Agent有足够时间初始化
             if i < len(self.agent_configs):
-                print(f"⏳ 等待 5 秒后启动下一个Agent...")
+                print("等待 5 秒后启动下一个Agent...")
                 time.sleep(5)
         
-        print(f"\n📊 启动结果总览:")
+        print("\n启动结果总览:")
         for agent_name, success in results.items():
-            status = "✅ 成功" if success else "❌ 失败"
-            print(f"   {agent_name}: {status}")
+            status = "成功" if success else "失败"
+            print("   " + agent_name + ": " + status)
         
         return results
     
@@ -208,7 +214,7 @@ class AgentServerManager:
         
         # 检查进程是否运行
         if process.poll() is not None:
-            print(f"⚠️ {agent_name} 进程已退出 (退出码: {process.returncode})")
+            print(agent_name + " 进程已退出 (退出码: " + str(process.returncode) + ")")
             return False
         
         # 检查端口是否可访问
@@ -220,19 +226,19 @@ class AgentServerManager:
             sock.close()
             return result == 0
         except Exception as e:
-            print(f"⚠️ 检查 {agent_name} 端口失败: {e}")
+            print("检查 " + agent_name + " 端口失败: " + str(e))
             return False
     
     def wait_for_agents_ready(self, timeout: int = 120) -> Dict[str, bool]:
         """等待所有Agent服务器就绪"""
-        print("\n⏳ 等待Agent服务器完全启动...")
+        print("\n等待Agent服务器完全启动...")
         start_time = time.time()
         ready_status = {}
         check_count = 0
         
         while time.time() - start_time < timeout:
             check_count += 1
-            print(f"\n🔍 第 {check_count} 次检查Agent状态...")
+            print("\n第 " + str(check_count) + " 次检查Agent状态...")
             
             all_ready = True
             
@@ -242,7 +248,7 @@ class AgentServerManager:
                     if agent_name in self.agent_processes:
                         process = self.agent_processes[agent_name]["process"]
                         if process.poll() is not None:
-                            print(f"❌ {agent_name} 进程已退出 (退出码: {process.returncode})")
+                            print(agent_name + " 进程已退出 (退出码: " + str(process.returncode) + ")")
                             ready_status[agent_name] = False
                             all_ready = False
                             continue
@@ -252,21 +258,21 @@ class AgentServerManager:
                     ready_status[agent_name] = is_ready
                     
                     if is_ready:
-                        print(f"✅ {agent_name} 服务器就绪")
+                        print(agent_name + " 服务器就绪")
                     else:
-                        print(f"⏳ {agent_name} 尚未就绪...")
+                        print(agent_name + " 尚未就绪...")
                         all_ready = False
                 else:
-                    print(f"✅ {agent_name} 已就绪")
+                    print(agent_name + " 已就绪")
             
             if all_ready:
-                print("\n🎉 所有Agent服务器已就绪！")
+                print("\n所有Agent服务器已就绪！")
                 return ready_status
             
-            print("⏳ 等待 8 秒后重新检查...")
+            print("等待 8 秒后重新检查...")
             time.sleep(8)
         
-        print(f"\n⚠️ 等待超时 ({timeout}秒)，部分Agent服务器可能未完全启动")
+        print("\n等待超时 (" + str(timeout) + "秒)，部分Agent服务器可能未完全启动")
         return ready_status
     
     def shutdown_agent(self, agent_name: str):
@@ -276,21 +282,21 @@ class AgentServerManager:
             process = process_info["process"]
             
             try:
-                print(f"🛑 正在关闭 {agent_name} 服务器...")
+                print("正在关闭 " + agent_name + " 服务器...")
                 process.terminate()
                 
                 # 等待进程正常退出
                 try:
                     process.wait(timeout=10)
-                    print(f"✅ {agent_name} 服务器已正常关闭")
+                    print(agent_name + " 服务器已正常关闭")
                 except subprocess.TimeoutExpired:
-                    print(f"⚠️ {agent_name} 强制关闭...")
+                    print(agent_name + " 强制关闭...")
                     process.kill()
                     process.wait()
-                    print(f"✅ {agent_name} 服务器已强制关闭")
+                    print(agent_name + " 服务器已强制关闭")
                     
             except Exception as e:
-                print(f"❌ 关闭 {agent_name} 失败: {e}")
+                print("关闭 " + agent_name + " 失败: " + str(e))
             
             del self.agent_processes[agent_name]
     
@@ -299,12 +305,12 @@ class AgentServerManager:
         if not self.agent_processes:
             return
             
-        print("🛑 正在关闭所有Agent服务器...")
+        print("正在关闭所有Agent服务器...")
         
         for agent_name in list(self.agent_processes.keys()):
             self.shutdown_agent(agent_name)
         
-        print("✅ 所有Agent服务器已关闭")
+        print("所有Agent服务器已关闭")
     
     def get_agent_status(self) -> Dict[str, Any]:
         """获取所有Agent状态"""
@@ -347,9 +353,9 @@ try:
     AmazonShoppingServiceManager = amazon_agent_module.AmazonShoppingServiceManager
     ThinkingMode = amazon_agent_module.ThinkingMode
     ALL_AGENTS_AVAILABLE = True
-    print("✅ 所有Agent模块导入成功")
+    print( "所有Agent模块导入成功")
 except ImportError as e:
-    print(f"⚠️ Agent导入失败: {e}")
+    print(" Agent导入失败: " + str(e))
     ALL_AGENTS_AVAILABLE = False
     UserServiceManager = None
     AlipayOrderService = None
@@ -360,7 +366,7 @@ try:
     from python_a2a import A2AClient
     A2A_CLIENT_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ A2A客户端导入失败: {e}")
+    print(" A2A客户端导入失败: " + str(e))
     A2A_CLIENT_AVAILABLE = False
 
 app = Flask(__name__)
@@ -414,13 +420,13 @@ class FixedWorkflowOrchestrator:
                 response = client.ask("health check")
                 if response:
                     config["available"] = True
-                    logger.info(f"✅ {config['name']} A2A服务可用: {config['url']}")
+                    logger.info(" " + config['name'] + " A2A服务可用: " + config['url'])
                 else:
                     config["available"] = False
-                    logger.warning(f"⚠️ {config['name']} A2A服务无响应: {config['url']}")
+                    logger.warning(" " + config['name'] + " A2A服务无响应: " + config['url'])
             except Exception as e:
                 config["available"] = False
-                logger.warning(f"⚠️ {config['name']} A2A服务不可用: {e}")
+                logger.warning(" " + config['name'] + " A2A服务不可用: " + str(e))
         
         # 并发检查所有A2A服务
         threads = []
@@ -439,23 +445,23 @@ class FixedWorkflowOrchestrator:
         try:
             agent_config = self.a2a_agents.get(agent_type)
             if not agent_config:
-                error_msg = f"未知的Agent类型: {agent_type}"
+                error_msg = "未知的Agent类型: " + agent_type
                 logger.error(error_msg)
-                return f"错误: {error_msg}"
+                return "错误: " + error_msg
             
             if not agent_config.get("available", False):
-                error_msg = f"{agent_config['name']}服务不可用，请检查服务器状态"
+                error_msg = agent_config['name'] + "服务不可用，请检查服务器状态"
                 logger.error(error_msg)
-                return f"错误: {error_msg}"
+                return "错误: " + error_msg
             
             # 构建包含上下文的完整消息
             if context:
-                full_message = f"""工作流上下文：
-当前状态: {context.get('workflow_state', 'unknown')}
-历史记录: {context.get('conversation_history', [])}
-会话数据: {context.get('session_data', {})}
+                full_message = """工作流上下文：
+当前状态: """ + str(context.get('workflow_state', 'unknown')) + """
+历史记录: """ + str(context.get('conversation_history', [])) + """
+会话数据: """ + str(context.get('session_data', {})) + """
 
-用户消息: {message}"""
+用户消息: """ + message + """"""
             else:
                 full_message = message
             
@@ -464,17 +470,17 @@ class FixedWorkflowOrchestrator:
             response = client.ask(full_message)
             
             if response:
-                logger.info(f"✅ {agent_config['name']} A2A调用成功")
+                logger.info(" " + agent_config['name'] + " A2A调用成功")
                 return response
             else:
-                error_msg = f"{agent_config['name']}返回空响应"
+                error_msg = agent_config['name'] + "返回空响应"
                 logger.error(error_msg)
-                return f"错误: {error_msg}"
+                return "错误: " + error_msg
                 
         except Exception as e:
-            error_msg = f"调用{agent_type}失败: {str(e)}"
+            error_msg = "调用" + agent_type + "失败: " + str(e)
             logger.error(error_msg)
-            return f"错误: {error_msg}"
+            return "错误: " + error_msg
     
     def _analyze_agent_response_for_state_transition(self, response: str, current_state: str) -> str:
         """分析Agent回复，判断是否需要状态转换（简单的关键词匹配）"""
@@ -546,16 +552,16 @@ class FixedWorkflowOrchestrator:
     
     def handle_product_selection(self, user_input: str, session_state: Dict[str, Any], user_id: str, session_id: str) -> Dict[str, Any]:
         """处理商品选择状态 - 让Agent自主决定是调用Payment Agent还是继续商品相关对话"""
-        logger.info("🔄 商品选择状态 - 调用User Agent分析用户意图")
+        logger.info(" 商品选择状态 - 调用User Agent分析用户意图")
         
         # 构建包含工作流状态的上下文消息
-        context_message = f"""用户在商品选择阶段的输入: {user_input}
+        context_message = """用户在商品选择阶段的输入: """ + user_input + """
 
 工作流状态: 用户正在选择商品，可能需要：
 1. 如果用户确认购买某个商品，请调用Payment Agent创建支付订单
 2. 如果用户还在浏览或询问商品信息，继续提供商品相关服务
 
-历史对话: {session_state.get('conversation_history', [])}"""
+历史对话: """ + str(session_state.get('conversation_history', [])) + """"""
         
         # 先调用User Agent分析意图
         context = {
@@ -568,19 +574,19 @@ class FixedWorkflowOrchestrator:
         
         # 检查是否需要调用Payment Agent
         if any(keyword in user_response.lower() for keyword in ["确认购买", "支付", "订单", "payment"]):
-            logger.info("🔄 检测到购买确认，调用Payment Agent")
+            logger.info(" 检测到购买确认，调用Payment Agent")
             
             # 准备给Payment Agent的消息
-            payment_message = f"""用户确认购买决定: {user_input}
+            payment_message = """用户确认购买决定: """ + user_input + """
 
-User Agent分析结果: {user_response}
+User Agent分析结果: """ + user_response + """
 
 请为用户创建支付宝支付订单。"""
             
             payment_response = self._call_agent_pure_a2a("payment_agent", payment_message, context)
             
             # 合并两个Agent的回复
-            combined_response = f"{user_response}\n\n{payment_response}"
+            combined_response = user_response + "\n\n" + payment_response
             new_state = WorkflowState.PAYMENT_CONFIRMATION.value
             
             return {
@@ -600,7 +606,7 @@ User Agent分析结果: {user_response}
     
     def handle_payment_confirmation(self, user_input: str, session_state: Dict[str, Any], user_id: str, session_id: str) -> Dict[str, Any]:
         """处理支付确认状态 - 让Payment Agent自主处理"""
-        logger.info("🔄 支付确认状态 - 调用Payment Agent处理")
+        logger.info(" 支付确认状态 - 调用Payment Agent处理")
         
         context = {
             'workflow_state': session_state['workflow_state'],
@@ -608,7 +614,7 @@ User Agent分析结果: {user_response}
             'session_data': session_state.get('session_data', {})
         }
         
-        payment_message = f"""用户在支付确认阶段的输入: {user_input}
+        payment_message = """用户在支付确认阶段的输入: """ + user_input + """
 
 工作流状态: 用户正在确认支付，可能需要：
 1. 如果用户确认支付，请查询支付状态
@@ -621,19 +627,19 @@ User Agent分析结果: {user_response}
         
         # 检查是否支付成功，需要转到地址收集
         if any(keyword in response.lower() for keyword in ["成功", "完成", "success", "completed"]):
-            logger.info("🔄 检测到支付成功，准备调用Amazon Agent收集地址")
+            logger.info(" 检测到支付成功，准备调用Amazon Agent收集地址")
             
             # 调用Amazon Agent开始地址收集
-            amazon_message = f"""支付已完成，请开始收集用户地址信息：
+            amazon_message = """支付已完成，请开始收集用户地址信息：
 
-支付结果: {response}
-用户输入: {user_input}
+支付结果: """ + response + """
+用户输入: """ + user_input + """
 
 请向用户收集完整的收货地址信息以便处理Amazon订单。"""
             
             amazon_response = self._call_agent_pure_a2a("amazon_agent", amazon_message, context)
             
-            combined_response = f"{response}\n\n{amazon_response}"
+            combined_response = response + "\n\n" + amazon_response
             new_state = WorkflowState.ADDRESS_COLLECTION.value
             
             return {
@@ -660,7 +666,7 @@ User Agent分析结果: {user_response}
             'session_data': session_state.get('session_data', {})
         }
         
-        amazon_message = f"""用户提供的地址信息: {user_input}
+        amazon_message = """用户提供的地址信息: """ + user_input + """
 
 工作流状态: 用户正在提供地址信息，请：
 1. 验证地址信息是否完整
@@ -692,9 +698,9 @@ User Agent分析结果: {user_response}
             'session_data': session_state.get('session_data', {})
         }
         
-        amazon_message = f"""请完成最终的Amazon订单处理:
+        amazon_message = """请完成最终的Amazon订单处理:
 
-用户输入: {user_input}
+用户输入: """ + user_input + """
 工作流状态: 准备完成订单
 
 请使用MCP工具完成Amazon订单的最终处理并返回订单确认信息。"""
@@ -728,11 +734,11 @@ User Agent分析结果: {user_response}
             session_state['workflow_state'] = WorkflowState.INITIAL.value
             session_state['session_data'] = {}
             
-            message = f"""用户要求开始新的购物流程: {user_input}
+            message = """用户要求开始新的购物流程: """ + user_input + """
 
 之前的购物已完成，现在开始新的购物流程。请为用户提供购物服务。"""
         else:
-            message = f"""工作流已完成，用户输入: {user_input}
+            message = """工作流已完成，用户输入: """ + user_input + """
 
 可以提供订单查询、购物建议或其他服务。"""
         
@@ -804,18 +810,18 @@ User Agent分析结果: {user_response}
             })
             
             if result["success"]:
-                logger.info(f"✅ [{datetime.now().strftime('%H:%M:%S')}] 工作流处理成功 - 状态: {result.get('workflow_state')}")
+                logger.info(" [" + datetime.now().strftime('%H:%M:%S') + "] 工作流处理成功 - 状态: " + result.get('workflow_state'))
             else:
-                logger.warning(f"⚠️ [{datetime.now().strftime('%H:%M:%S')}] 工作流处理失败")
+                logger.warning("⚠ [" + datetime.now().strftime('%H:%M:%S') + "] 工作流处理失败")
             
             return result
             
         except Exception as e:
-            logger.error(f"❌ 工作流处理失败: {e}")
+            logger.error(" 工作流处理失败: " + str(e))
             logger.error(traceback.format_exc())
             return {
                 "success": False,
-                "response": f"工作流协调器遇到错误：{str(e)}",
+                "response": "工作流协调器遇到错误：" + str(e),
                 "workflow_state": WorkflowState.INITIAL.value,
                 "error": str(e),
                 "timestamp": datetime.now().isoformat(),
@@ -874,7 +880,7 @@ def chat():
         # 验证请求格式
         data = request.get_json()
         if not data or 'message' not in data:
-            logger.warning("❌ 请求格式错误，缺少message字段")
+            logger.warning(" 请求格式错误，缺少message字段")
             return jsonify({
                 'success': False,
                 'error': '请求格式错误，缺少message字段',
@@ -883,7 +889,7 @@ def chat():
 
         user_message = data['message'].strip()
         if not user_message:
-            logger.warning("❌ 消息内容为空")
+            logger.warning(" 消息内容为空")
             return jsonify({
                 'success': False,
                 'error': '消息内容不能为空',
@@ -894,8 +900,8 @@ def chat():
         user_id = data.get('user_id', 'default_user')
         session_id = data.get('session_id', None)
 
-        logger.info(f"🔍 [{datetime.now().strftime('%H:%M:%S')}] 固定工作流处理请求")
-        logger.info(f"📝 用户: {user_id}, 会话: {session_id}, 消息: {user_message}")
+        logger.info(" [" + datetime.now().strftime('%H:%M:%S') + "] 固定工作流处理请求")
+        logger.info(" 用户: " + user_id + ", 会话: " + str(session_id) + ", 消息: " + user_message)
 
         # 使用固定工作流编排器处理请求
         result = workflow_orchestrator.process_workflow(user_message, user_id, session_id)
@@ -903,12 +909,12 @@ def chat():
         return jsonify(result)
 
     except Exception as e:
-        logger.error(f"❌ [{datetime.now().strftime('%H:%M:%S')}] API错误: {e}")
-        logger.error(f"🔍 详细错误信息: {traceback.format_exc()}")
+        logger.error(" [" + datetime.now().strftime('%H:%M:%S') + "] API错误: " + str(e))
+        logger.error(" 详细错误信息: " + traceback.format_exc())
         
         return jsonify({
             'success': False,
-            'error': '固定工作流系统暂时不可用，请稍后重试',
+            'error': '固定工作流系统暂时不可用，请稍后再试',
             'error_type': 'server_error',
             'timestamp': datetime.now().isoformat()
         }), 500
@@ -953,7 +959,7 @@ def health_check():
         return jsonify(health_status)
         
     except Exception as e:
-        logger.error(f"❌ 健康检查失败: {e}")
+        logger.error(" 健康检查失败: " + str(e))
         return jsonify({
             'status': 'unhealthy',
             'error': str(e),
@@ -962,7 +968,7 @@ def health_check():
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
-    """获取详细的服务状态"""
+    """获取详细的服状态"""
     try:
         status = {
             'timestamp': datetime.now().isoformat(),
@@ -990,7 +996,7 @@ def get_status():
         })
         
     except Exception as e:
-        logger.error(f"❌ 获取状态失败: {e}")
+        logger.error(" 获取状态失败: " + str(e))
         return jsonify({
             'success': False,
             'error': str(e),
@@ -1012,7 +1018,7 @@ def start_agents():
             'timestamp': datetime.now().isoformat()
         })
     except Exception as e:
-        logger.error(f"❌ 启动Agent服务器失败: {e}")
+        logger.error(" 启动Agent服务器失败: " + str(e))
         return jsonify({
             'success': False,
             'error': str(e),
@@ -1031,7 +1037,7 @@ def stop_agents():
             'timestamp': datetime.now().isoformat()
         })
     except Exception as e:
-        logger.error(f"❌ 停止Agent服务器失败: {e}")
+        logger.error(" 停止Agent服务器失败: " + str(e))
         return jsonify({
             'success': False,
             'error': str(e),
@@ -1050,7 +1056,7 @@ def get_agents_status():
             'timestamp': datetime.now().isoformat()
         })
     except Exception as e:
-        logger.error(f"❌ 获取Agent状态失败: {e}")
+        logger.error(" 获取Agent状态失败: " + str(e))
         return jsonify({
             'success': False,
             'error': str(e),
@@ -1070,14 +1076,14 @@ def not_found(error):
 def internal_error(error):
     return jsonify({
         'success': False,
-        'error': '服务器内部错误，请稍后重试',
+        'error': '服务器内部错误，请稍后再试',
         'timestamp': datetime.now().isoformat()
     }), 500
 
 def startup_sequence():
     """启动序列 - 自动启动Agent服务器"""
     print("\n" + "="*80)
-    print("🚀 固定工作流购物助手服务启动序列 (纯A2A架构)")
+    print(" 固定工作流购物助手服务启动序列 (纯A2A架构)")
     print("="*80)
     
     # 1. 启动所有Agent服务器
@@ -1086,49 +1092,49 @@ def startup_sequence():
     
     # 显示启动结果
     for agent_name, success in start_results.items():
-        status = "✅ 成功" if success else "❌ 失败"
-        print(f"   {agent_name}: {status}")
+        status = " 成功" if success else " 失败"
+        print("   " + agent_name + ": " + status)
     
     # 2. 等待所有服务器就绪
-    print("\n⏳ 第二步：等待Agent服务器就绪...")
+    print("\n 第二步：等待Agent服务器就绪...")
     ready_status = agent_manager.wait_for_agents_ready()
     
     # 显示就绪状态
     all_ready = all(ready_status.values())
     if all_ready:
-        print("🎉 所有Agent服务器已就绪！")
+        print(" 所有Agent服务器已就绪！")
     else:
-        print("⚠️ 部分Agent服务器未就绪")
+        print(" 部分Agent服务器未就绪")
         for agent_name, ready in ready_status.items():
-            status = "✅ 就绪" if ready else "❌ 未就绪"
-            print(f"   {agent_name}: {status}")
+            status = " 就绪" if ready else " 未就绪"
+            print("   " + agent_name + ": " + status)
     
     # 3. 更新工作流编排器的A2A配置
-    print("\n🔄 第三步：更新A2A配置...")
+    print("\n 第三步：更新A2A配置...")
     workflow_orchestrator._check_a2a_services()
     
     # 显示最终状态
-    print("\n📊 系统状态总览:")
-    print("🏗️ 架构特点:")
+    print("\n 系统状态总览:")
+    print(" 架构特点:")
     print("   • 纯A2A协议通信 - 无本地降级")
     print("   • 真实AI Agent回复 - 无预设回复")
     print("   • 工作流纯协调逻辑 - 不包含业务逻辑")
     print("   • Agent间直接通信 - 支持协作")
     print()
-    print("🔄 工作流程:")
-    print("   1️⃣ 用户购买意图输入 → User Agent自主分析搜索")
-    print("   2️⃣ 用户选择商品 → User Agent判断 → Payment Agent创建订单")
-    print("   3️⃣ 用户确认支付 → Payment Agent自主验证支付状态")
-    print("   4️⃣ 支付成功 → Amazon Agent自主收集地址信息")
-    print("   5️⃣ Amazon Agent自主执行一键支付完成订单")
+    print(" 工作流程:")
+    print("   1 用户购买意图输入 → User Agent自主分析搜索")
+    print("   2️ 用户选择商品 → User Agent判断 → Payment Agent创建订单")
+    print("   3️ 用户确认支付 → Payment Agent自主验证支付状态")
+    print("   4️ 支付成功 → Amazon Agent自主收集地址信息")
+    print("   5️ Amazon Agent自主执行一键支付完成订单")
     print()
-    print("🤖 Agent协作:")
+    print(" Agent协作:")
     print("   • User Agent: 意图理解、商品搜索、购买决策")
     print("   • Payment Agent: 订单创建、支付验证、状态查询")
     print("   • Amazon Agent: 地址收集、一键支付、订单处理")
     print("   • 所有回复由真实AI自主生成")
     print()
-    print("🔧 系统特性:")
+    print(" 系统特性:")
     print("   • 自动启动Agent服务器")
     print("   • 固定工作流状态管理")
     print("   • 纯A2A协议架构")
@@ -1136,20 +1142,20 @@ def startup_sequence():
     print("   • Agent间协作通信")
     print("   • 多用户多会话支持")
     print()
-    print("🌐 访问地址: http://localhost:5000")
-    print("📡 主要API:")
+    print(" 访问地址: http://localhost:5000")
+    print(" 主要API:")
     print("   • POST /api/chat - 聊天接口（纯A2A模式）")
     print("   • GET /api/health - A2A服务健康检查")
     print("   • GET /api/status - 详细状态（含A2A状态）")
     print("   • POST /api/agents/start - 启动Agent服务器")
     print("   • POST /api/agents/stop - 停止Agent服务器")
     print()
-    print("💡 使用示例:")
+    print(" 使用示例:")
     print("   curl -X POST http://localhost:5000/api/chat \\")
     print("        -H 'Content-Type: application/json' \\")
     print("        -d '{\"message\":\"我想买iPhone 15\",\"user_id\":\"user123\"}'")
     print()
-    print("🎯 关键特点:")
+    print(" 关键特点:")
     print("   • 所有回复由真实AI Agent生成")
     print("   • 工作流仅做状态管理和Agent调度")
     print("   • 支持Agent间直接通信协作")
@@ -1164,7 +1170,7 @@ if __name__ == '__main__':
         startup_success = startup_sequence()
         
         # 启动Flask应用
-        logger.info("🚀 启动Flask Web服务器...")
+        logger.info(" 启动Flask Web服务器...")
         app.run(
             host='0.0.0.0',
             port=5000,
@@ -1173,11 +1179,11 @@ if __name__ == '__main__':
         )
         
     except KeyboardInterrupt:
-        print("\n🛑 收到中断信号，正在关闭...")
+        print("\n 收到中断信号，正在关闭...")
         agent_manager.shutdown_all_agents()
-        print("✅ 服务已安全关闭")
+        print(" 服务已安全关闭")
     except Exception as e:
-        print(f"❌ 启动失败: {e}")
-        logger.error(f"启动失败: {e}")
+        print(" 启动失败: " + str(e))
+        logger.error("启动失败: " + str(e))
         agent_manager.shutdown_all_agents()
         sys.exit(1) 

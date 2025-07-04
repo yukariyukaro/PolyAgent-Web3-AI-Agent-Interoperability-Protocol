@@ -54,7 +54,7 @@ class AmazonServiceManager:
     """
     def __init__(self):
         """初始化模型和配置"""
-        print("🧠 [AmazonServer] Initializing the core AI model...")
+        print("[AmazonServer] Initializing the core AI model...")
         # 使用Qwen2.5模型替代GPT
         self.model = ModelFactory.create(
             model_platform=ModelPlatformType.MODELSCOPE,
@@ -62,7 +62,7 @@ class AmazonServiceManager:
             model_config_dict={'temperature': 0.2},
             api_key='9d3aed4d-eca1-4e0c-9805-cb923ccbbf21',
         )
-        print("✅ [AmazonServer] AI model is ready.")
+        print("[AmazonServer] AI model is ready.")
 
         # 不在初始化时创建session，而是在每次需要时创建
         self.session = None
@@ -109,11 +109,11 @@ class AmazonServiceManager:
                 raise ValueError("LLM did not return a valid JSON object.")
             
             parsed_json = json.loads(content[start:end])
-            logger.info(f"✅ Intent parsed successfully: {parsed_json}")
+            logger.info(f"Intent parsed successfully: {parsed_json}")
             return parsed_json
 
         except Exception as e:
-            logger.error(f"❌ Intent understanding failed: {str(e)}. Falling back to default.")
+            logger.error(f"Intent understanding failed: {str(e)}. Falling back to default.")
             return {
                 "product_description": user_input,
                 "quantity": 1,
@@ -134,7 +134,7 @@ class AmazonServiceManager:
             strategy = PurchaseStrategy.CHEAPEST
         else:
             strategy = PurchaseStrategy.PRIME
-        logger.info(f"⚙️ Purchase strategy set to: {strategy.value}")
+        logger.info(f"Purchase strategy set to: {strategy.value}")
         return strategy
 
     async def search_amazon_products(self, intent: Dict, strategy: PurchaseStrategy) -> List[AmazonProduct]:
@@ -153,7 +153,7 @@ class AmazonServiceManager:
                     products = []
                     
                     # 添加调试信息
-                    logger.info(f"✅ API 返回数据: {len(data)} 条记录")
+                    logger.info(f"API 返回数据: {len(data)} 条记录")
                     
                     for item in data[:10]:  # 只处理前10个结果
                         try:
@@ -195,7 +195,7 @@ class AmazonServiceManager:
                     else:  # PRIME
                         products.sort(key=lambda x: (not x.prime_eligible, -x.rating))
                     
-                    logger.info(f"✅ Found {len(products)} suitable products.")
+                    logger.info(f"Found {len(products)} suitable products.")
                     return products
                     
         except Exception as e:
@@ -252,7 +252,7 @@ class AmazonServiceManager:
                 # 第一步：调用支付宝Agent创建支付
                 ALIPAY_AGENT_URL = "http://0.0.0.0:5005"
                 logger.info(f"🔗 Connecting to Alipay A2A Agent at {ALIPAY_AGENT_URL}")
-                print(f"🔗 正在连接支付宝 A2A Agent: {ALIPAY_AGENT_URL}")
+                print(f"正在连接支付宝 A2A Agent: {ALIPAY_AGENT_URL}")
 
                 # 构造支付请求
                 payment_request_text = f"""请为以下商品创建支付：
@@ -265,20 +265,20 @@ class AmazonServiceManager:
                                     请创建支付宝支付订单。"""
 
                 logger.info(f"📤 Sending payment request to Alipay...")
-                print(f"📤 发送支付请求到支付宝...")
+                print(f"发送支付请求到支付宝...")
 
                 # 使用A2AClient发送请求
                 alipay_client = A2AClient(ALIPAY_AGENT_URL)
                 payment_response = alipay_client.ask(payment_request_text)
 
-                print(f"📥 收到支付宝 Agent 响应: {payment_response[:200]}...")
-                logger.info("✅ Successfully received payment info from Alipay Agent.")
+                print(f"收到支付宝 Agent 响应: {payment_response[:200]}...")
+                logger.info("Successfully received payment info from Alipay Agent.")
 
                 # 第二步：支付成功后调用Amazon Agent确认订单
                 logger.info("📞 Step 2: Calling Amazon A2A Agent to confirm order...")
                 AMAZON_AGENT_URL = "http://0.0.0.0:5012"  # Amazon Agent端口
                 logger.info(f"🔗 Connecting to Amazon A2A Agent at {AMAZON_AGENT_URL}")
-                print(f"🔗 正在连接Amazon A2A Agent: {AMAZON_AGENT_URL}")
+                print(f"正在连接Amazon A2A Agent: {AMAZON_AGENT_URL}")
 
                 # 构造Amazon订单确认请求，包含支付信息
                 amazon_request_text = f"""请为以下商品确认订单（支付已完成）：
@@ -293,14 +293,14 @@ class AmazonServiceManager:
                                     请处理此订单确认并返回订单信息。"""
 
                 logger.info(f"📤 Sending Amazon order confirmation request...")
-                print(f"📤 发送Amazon订单确认请求...")
+                print(f"发送Amazon订单确认请求...")
 
                 # 使用A2AClient调用Amazon Agent
                 amazon_client = A2AClient(AMAZON_AGENT_URL)
                 amazon_response = amazon_client.ask(amazon_request_text)
 
-                print(f"📥 收到Amazon Agent响应: {amazon_response[:200]}...")
-                logger.info("✅ Successfully received response from Amazon Agent.")
+                print(f"收到Amazon Agent响应: {amazon_response[:200]}...")
+                logger.info("Successfully received response from Amazon Agent.")
 
                 # 将支付和Amazon订单信息附加到最终结果中
                 solution['payment_info'] = payment_response
@@ -328,7 +328,7 @@ class AmazonServiceManager:
                 import traceback
                 error_details = traceback.format_exc()
                 logger.error(f"详细错误: {error_details}")
-                print(f"❌ 连接支付宝或Amazon Agent 失败: {e}")
+                print(f"连接支付宝或Amazon Agent 失败: {e}")
                 print(f"详细错误: {error_details}")
 
                 solution['payment_info'] = f"Error: Could not complete payment process. {str(e)}"
@@ -483,7 +483,7 @@ class AmazonServiceManager:
                 alipay_client = A2AClient(ALIPAY_AGENT_URL)
                 payment_response = alipay_client.ask(payment_request_text)
                 
-                logger.info("✅ Successfully received payment info from Alipay Agent")
+                logger.info("Successfully received payment info from Alipay Agent")
                 
                 # 构建最终响应
                 solution.update({
@@ -539,16 +539,16 @@ class AmazonA2AServer(A2AServer, AmazonServiceManager):
     def __init__(self, agent_card: AgentCard):
         A2AServer.__init__(self, agent_card=agent_card)
         AmazonServiceManager.__init__(self)
-        print("✅ [AmazonA2AServer] Server fully initialized and ready.")
+        print("[AmazonA2AServer] Server fully initialized and ready.")
 
     def handle_task(self, task):
         """A2A服务器的核心处理函数。"""
         text = task.message.get("content", {}).get("text", "")
-        print(f"📩 [AmazonA2AServer] Received task: '{text}'")
+        print(f"[AmazonA2AServer] Received task: '{text}'")
 
         # 处理健康检查请求，避免触发业务逻辑
         if text.lower().strip() in ["health check", "health", "ping", ""]:
-            print("✅ [AmazonA2AServer] Health check request - returning healthy status")
+            print("[AmazonA2AServer] Health check request - returning healthy status")
             task.artifacts = [{"parts": [{"type": "text", "text": "healthy - User Agent (Amazon Shopping Coordinator) is operational"}]}]
             task.status = TaskStatus(state=TaskState.COMPLETED)
             return task
@@ -571,15 +571,15 @@ class AmazonA2AServer(A2AServer, AmazonServiceManager):
                 
                 # 根据意图类型选择处理方式
                 if intent_type == "purchase_confirmation":
-                    print("🛒 [AmazonA2AServer] Processing purchase confirmation...")
+                    print("[AmazonA2AServer] Processing purchase confirmation...")
                     result = asyncio.run(self.handle_purchase_confirmation(text))
                 else:
-                    print("🔍 [AmazonA2AServer] Processing product search...")
+                    print("[AmazonA2AServer] Processing product search...")
                     result = asyncio.run(self.autonomous_purchase(text))
                 
                 # 安全地处理result，确保不是None
                 if result is None:
-                    print("⚠️ [AmazonA2AServer] Warning: Method returned None")
+                    print("[AmazonA2AServer] Warning: Method returned None")
                     response_text = "❌ **处理失败**\n\n原因: 内部处理异常，未返回有效结果"
                 elif "response" in result:
                     response_text = result["response"]
@@ -604,7 +604,7 @@ class AmazonA2AServer(A2AServer, AmazonServiceManager):
                         response_text = f"❌ **操作失败**\n\n原因: {error_msg}"
 
                 task.status = TaskStatus(state=TaskState.COMPLETED)
-                print("💬 [AmazonA2AServer] Processing complete.")
+                print("[AmazonA2AServer] Processing complete.")
 
             except Exception as e:
                 import traceback
@@ -648,8 +648,8 @@ def main():
     server = AmazonA2AServer(agent_card)
     
     print("\n" + "="*60)
-    print("🚀 Starting Amazon Autonomous Purchase A2A Server...")
-    print(f"👂 Listening on http://localhost:{port}")
+    print("Starting Amazon Autonomous Purchase A2A Server...")
+    print(f"Listening on http://localhost:{port}")
     print("="*60 + "\n")
     
     run_server(server, host="0.0.0.0", port=port)
