@@ -66,7 +66,12 @@ class AmazonServiceManager:
 
         # 不在初始化时创建session，而是在每次需要时创建
         self.session = None
-        self.amazon_search_api = "https://amazon-backend.replit.app/api/v1/search"
+        # 使用RapidAPI Amazon Data API
+        self.amazon_search_api = "https://real-time-amazon-data.p.rapidapi.com/search"
+        self.amazon_api_headers = {
+            "x-rapidapi-key": "ebb6c2067fmsh65b9895255d18c4p1c51ebjsn57b5f4144e85",
+            "x-rapidapi-host": "real-time-amazon-data.p.rapidapi.com"
+        }
 
     async def _get_session(self):
         """获取或创建aiohttp会话，确保在当前事件循环中创建"""
@@ -145,34 +150,87 @@ class AmazonServiceManager:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
                     self.amazon_search_api,
-                    params={"q": intent["product_description"], "domain": "amazon.com"},
+                    params={"query": intent["product_description"], "country": "US"},
+                    headers=self.amazon_api_headers,
                     timeout=15
                 ) as resp:
                     resp.raise_for_status()
-                    data = await resp.json()
+                    response_data = await resp.json()
                     products = []
-                    
-                    # 添加调试信息
-                    logger.info(f"✅ API 返回数据: {len(data)} 条记录")
-                    
-                    for item in data[:10]:  # 只处理前10个结果
+
+                    # 处理RapidAPI响应格式
+                    if response_data.get('status') == 'OK' and 'data' in response_data:
+                        data = response_data['data']
+                        logger.info(f"✅ API 返回状态: OK, 数据类型: {type(data)}")
+
+                        # 如果data是列表，直接使用
+                        if isinstance(data, list):
+                            items_to_process = data[:10]
+                        # 如果data是字典，查找商品列表
+                        elif isinstance(data, dict):
+                            items_to_process = []
+                            for key in ['products', 'results', 'items']:
+                                if key in data and isinstance(data[key], list):
+                                    items_to_process = data[key][:10]
+                                    logger.info(f"✅ 找到商品列表在字段: {key}, 数量: {len(items_to_process)}")
+                                    break
+                        else:
+                            logger.error(f"❌ 未知的data格式: {type(data)}")
+                            items_to_process = []
+                    else:
+                        logger.error(f"❌ API返回错误: {response_data.get('status', 'unknown')}")
+                        if 'error' in response_data:
+                            logger.error(f"错误详情: {response_data['error']}")
+                        items_to_process = []
+
+                    logger.info(f"📦 准备处理 {len(items_to_process)} 个商品")
+
+                    for item in items_to_process:
                         try:
-                            # 添加更多调试信息
-                            logger.info(f"处理商品: {item.get('title', '无标题')[:30]}...")
-                            
-                            # 安全地获取价格和评分
-                            price_str = str(item.get("price", "0")).replace("$", "").replace(",", "").strip()
+                            # 调试：显示商品的所有字段
+                            logger.info(f"商品字段: {list(item.keys())}")
+
+                            # 尝试多种可能的标题字段名
+                            title = (item.get('title') or
+                                   item.get('name') or
+                                   item.get('product_title') or
+                                   item.get('product_name') or
+                                   '无标题')
+
+                            logger.info(f"处理商品: {title[:50]}...")
+
+                            # 尝试多种可能的价格字段名
+                            price_raw = (item.get("price") or
+                                       item.get("current_price") or
+                                       item.get("price_current") or
+                                       item.get("price_value") or
+                                       "0")
+
+                            price_str = str(price_raw).replace("$", "").replace(",", "").strip()
                             price = float(price_str) if price_str and price_str != "None" else 0.0
-                            rating = float(item.get("rating", 4.0)) if item.get("rating") else 4.0
-                            
+
+                            # 尝试多种可能的评分字段名
+                            rating_raw = (item.get("rating") or
+                                        item.get("stars") or
+                                        item.get("review_rating") or
+                                        item.get("average_rating") or
+                                        4.0)
+                            rating = float(rating_raw) if rating_raw else 4.0
+
+                            # 尝试多种可能的ASIN字段名
+                            asin = (item.get("asin") or
+                                  item.get("product_id") or
+                                  item.get("id") or
+                                  "UNKNOWN")
+
                             if intent.get("max_price") and price > intent["max_price"]:
                                 continue
                             if rating < intent.get("min_rating", 4.0):
                                 continue
-                            
+
                             products.append(AmazonProduct(
-                                asin=item.get("asin", "UNKNOWN"),
-                                title=item.get("title", "No Title"),
+                                asin=asin,
+                                title=title,
                                 price=price,
                                 currency="USD",
                                 merchant_id="Amazon",
