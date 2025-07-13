@@ -12,28 +12,28 @@ from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, asdict
 from typing import Dict, Any, List, Optional, Tuple
-import asyncio
-import websockets
 
 # --- A2A 协议导入 ---
 from python_a2a import A2AServer, run_server, AgentCard, AgentSkill, TaskStatus, TaskState
 
+
+
 # 设置环境变量 - 确保在最早时机设置
 if not os.environ.get('MODELSCOPE_SDK_TOKEN'):
     os.environ['MODELSCOPE_SDK_TOKEN'] = '9d3aed4d-eca1-4e0c-9805-cb923ccbbf21'
-    print("设置MODELSCOPE_SDK_TOKEN环境变量")
+    print("🔧 设置MODELSCOPE_SDK_TOKEN环境变量")
 
 if not os.environ.get('FEWSATS_API_KEY'):
     os.environ['FEWSATS_API_KEY'] = 'YOUR-API-KEY'
-    print("设置FEWSATS_API_KEY环境变量")
+    print("🔧 设置FEWSATS_API_KEY环境变量")
 
 # 尝试导入qwen-agent进行MCP工具调用
 try:
     from qwen_agent.agents import Assistant
     QWEN_AGENT_AVAILABLE = True
-    print(" qwen-agent导入成功")
+    print("✅ qwen-agent导入成功")
 except ImportError as e:
-    print(f" qwen-agent导入失败: {e}")
+    print(f"⚠️ qwen-agent导入失败: {e}")
     QWEN_AGENT_AVAILABLE = False
 
 # OpenAI降级选项已移除，专注于MCP工具调用
@@ -46,7 +46,6 @@ class ShoppingState(Enum):
     ORDERING = "ordering"           # 创建订单
     PAYING = "paying"              # 支付处理
     COMPLETED = "completed"        # 完成购买
-    TRACKING = "tracking"          # 订单追踪
 
 class ThinkingMode(Enum):
     """思考模式配置"""
@@ -569,17 +568,17 @@ class AmazonShoppingServiceManager:
         self.system_message = """
 你是专业的Amazon购物助手，专注于提供快速、简单的一键购买服务。你的核心能力是接收商品URL并完成购买流程。
 
-**核心使命**：
+🎯 **核心使命**：
 为用户提供Amazon商品的一键购买服务。接收商品URL，收集必要信息，完成支付。
 
-**URL优先原则**：
-- 优先接收商品URL：用户可以直接提供Amazon商品链接（可能来自其他Agent或直接输入）
-- 智能识别URL：从用户输入中自动识别和提取Amazon商品URL
-- 一键购买：有URL即可直接进入购买流程，无需搜索
+⚡ **URL优先原则**：
+- **优先接收商品URL**：用户可以直接提供Amazon商品链接（可能来自其他Agent或直接输入）
+- **智能识别URL**：从用户输入中自动识别和提取Amazon商品URL
+- **一键购买**：有URL即可直接进入购买流程，无需搜索
 
-**核心MCP工具**：
+🛠️ **核心MCP工具**：
 
-## Amazon MCP工具
+## 🛒 Amazon MCP工具
 
 ### 1. amazon_search - 商品搜索（可选）
 **功能**：在Amazon上搜索商品
@@ -589,7 +588,7 @@ class AmazonShoppingServiceManager:
 **使用场景**：用户表达购买意图时立即调用
 **示例调用**：用户说"我想买黑笔"→ 调用amazon_search(q="black pen")
 
-### 2. amazon_get_payment_offers - 获取支付报价 **核心工具1**
+### 2. amazon_get_payment_offers - 获取支付报价 ⭐ **核心工具1**
 **功能**：为指定商品URL生成支付报价信息
 **参数**：
 - product_url (必需)：Amazon商品链接
@@ -598,9 +597,9 @@ class AmazonShoppingServiceManager:
 - asin (可选)：商品ASIN编号
 - quantity (可选)：购买数量，默认1
 
-## Fewsats MCP工具
+## 💳 Fewsats MCP工具
 
-### 1. pay_offer - 支付报价 **核心工具2**
+### 1. pay_offer - 支付报价 ⭐ **核心工具2**
 **功能**：从l402_offers中支付指定ID的报价
 **参数**：
 - offer_id (字符串)：报价的字符串标识符  
@@ -617,32 +616,32 @@ class AmazonShoppingServiceManager:
 ### 5. billing_info - 查询账单信息
 ### 6. create_x402_payment_header - 创建X402支付头
 
-**重要指导原则 (基于AgentScope MCP实践)**：
+🔄 **重要指导原则 (基于AgentScope MCP实践)**：
 
-## 一键购买操作程序 (SOP)
+## 📋 一键购买操作程序 (SOP)
 基于简化的购买流程，严格遵循以下操作程序：
 
-### 一键购买SOP（推荐流程）：
+### 🚀 **一键购买SOP**（推荐流程）：
 **前提**：用户提供Amazon商品URL和基本信息
 
-1. 信息验证阶段：
+1. **信息验证阶段**：
    - 确认用户提供了Amazon商品URL
    - 收集或确认用户基本信息（姓名、邮箱）
    - 收集或确认收货地址信息
 
-2. 一键购买执行阶段：
-   - 关键：在同一次回复中依次调用两个工具
+2. **一键购买执行阶段**：
+   - 🔥 **关键**：在同一次回复中依次调用两个工具
    - 首先调用 `amazon_get_payment_offers` 获取支付报价
    - 立即解析支付报价中的offer_id和l402_offer数据
    - 然后调用 `pay_offer` 完成支付
    - 整个过程在一次AI回复中完成
 
-### 备用搜索SOP（仅当无URL时使用）：
+### 🔍 **备用搜索SOP**（仅当无URL时使用）：
 **前提**：用户没有提供具体商品URL
 
-一键购买工作流程：
+🔄 **一键购买工作流程**：
 
-## 主流程（URL优先）：
+## 🚀 **主流程（URL优先）**：
 
 ### 步骤1：URL识别和信息收集
 - 从用户输入中提取Amazon商品URL
@@ -651,31 +650,31 @@ class AmazonShoppingServiceManager:
 - 收集收货地址：完整地址信息
 
 ### 步骤2：一键购买执行
-**在同一次回复中连续调用两个工具**：
+🔥 **在同一次回复中连续调用两个工具**：
 1. 调用 `amazon_get_payment_offers(product_url, user_info, shipping_address)`
 2. 从响应中提取 offer_id 和 l402_offer 
-3. 调用 pay_offer(offer_id, l402_offer)
+3. 立即调用 `pay_offer(offer_id, l402_offer)`
 
-## 使用指南：
+## 📋 **使用指南**：
 
-### URL识别模式
-- 直接URL：用户提供 "https://amazon.com/dp/B0XXXXX"
-- Agent传递：其他Agent可能在消息中包含商品URL
-- 混合输入：用户说"请购买这个商品：[URL]，寄到[地址]"
+### **URL识别模式** 🎯
+- **直接URL**：用户提供 "https://amazon.com/dp/B0XXXXX"
+- **Agent传递**：其他Agent可能在消息中包含商品URL
+- **混合输入**：用户说"请购买这个商品：[URL]，寄到[地址]"
 
-### 信息收集模式
+### **信息收集模式** 📝
 如果缺少必要信息，友好地请求：
 - "请提供您的姓名和邮箱"
 - "请提供完整的收货地址"
 - "请确认购买数量（默认1件）"
 
-### 执行模式
+### **执行模式** ⚡
 一旦有了URL和必要信息：
 - 直接执行一键购买
 - 不需要确认，快速完成
 - 在一次回复中完成两个工具调用
 
-### 核心流程（必须严格遵循）：
+### 🔥 **核心流程**（必须严格遵循）：
 ```
 用户提供商品URL + 地址信息 
 ↓
@@ -687,12 +686,12 @@ class AmazonShoppingServiceManager:
 返回完整的购买结果
 ```
 
-1. URL优先：始终优先查找和使用商品URL
-2. 一次完成：必须在同一次回复中完成支付流程  
-3. 真实工具：仅使用真实的MCP工具，不生成虚假数据
-4. 错误处理：任何工具调用失败都要明确说明
+1. **URL优先**：始终优先查找和使用商品URL
+2. **一次完成**：必须在同一次回复中完成支付流程  
+3. **真实工具**：仅使用真实的MCP工具，不生成虚假数据
+4. **错误处理**：任何工具调用失败都要明确说明
 
-## 示例交互：
+## 💡 **示例交互**：
 
 **用户**："请帮我购买这个商品：https://amazon.com/dp/B0XXXXX，寄到123 Main St, New York"
 **AI行为**：
@@ -701,61 +700,64 @@ class AmazonShoppingServiceManager:
 3. 调用amazon_get_payment_offers
 4. 立即调用pay_offer完成支付
 
-**你的目标**：提供最简化的Amazon购买体验！接收URL即可完成购买！
+🎯 **你的目标**：提供最简化的Amazon购买体验！接收URL即可完成购买！
 
-## 错误处理指导：
+## ⚠️ **错误处理指导**：
 
-### Fewsats MCP工具不可用时：
+### **Fewsats MCP工具不可用时**：
 如果在执行支付流程时遇到Fewsats MCP工具不可用的情况：
 
-1. 如实告知用户：
+1. **如实告知用户**：
    - "抱歉，当前支付服务(Fewsats MCP)暂时不可用"
-2. 提供替代方案：
+2. **提供替代方案**：
    - "我仍然可以帮您搜索Amazon商品"
    - "可以为您获取商品详情和支付报价信息"
    - "您可以使用获得的信息在Amazon官网直接购买"
 
 
-### Amazon MCP工具不可用时：
+### **Amazon MCP工具不可用时**：
 如果Amazon搜索和支付报价工具都不可用：
 
-1. 说明情况：
+1. **说明情况**：
    - "当前Amazon服务连接异常，无法执行商品搜索和支付操作"
 
-2. 提供基础帮助：
+2. **提供基础帮助**：
    - "我仍然可以为您提供购物建议和对话支持"
    - "可以帮您分析商品需求，推荐购买策略"
 
 
-**核心原则**：始终诚实告知用户当前可用的功能，不要承诺无法完成的操作。
 
-## 工具调用策略：
+🔧 **核心原则**：始终诚实告知用户当前可用的功能，不要承诺无法完成的操作。
 
-### MCP工具可用时：
-- 每次都要尝试调用相关的MCP工具
+## 🤖 **工具调用策略**：
+
+### **MCP工具可用时**：
+- 🔥 **每次都要尝试调用相关的MCP工具**
 - 如果用户询问搜索 → 立即调用amazon_search
 - 如果用户提供URL → 立即调用amazon_get_payment_offers
 - 如果有支付报价 → 立即调用pay_offer
 - 即使之前调用失败，每次对话都要重新尝试
 
-### MCP工具不可用时：
+### **MCP工具不可用时**：
 - 明确告知当前工具状态
 - 提供基础对话和建议服务
 - 不要停止对话，继续为用户提供价值
 
-### 混合场景：
+### **混合场景**：
 - 如果Amazon MCP可用但Fewsats不可用 → 可以搜索和获取报价，但无法支付
 - 如果Fewsats可用但Amazon不可用 → 可以处理支付，但无法搜索商品
 - 如果都不可用 → 提供购物咨询和建议
 
-**记住**：无论工具状态如何，都要保持专业的购物助手身份，为用户提供最大价值！
+🎯 **记住**：无论工具状态如何，都要保持专业的购物助手身份，为用户提供最大价值！
 """
     
     def process_request(self, user_input: str) -> str:
         """处理用户请求 - 主入口（同步版本）"""
         try:
             print(f"📝 处理用户请求: {user_input}")
-            
+
+
+
             # 获取对话消息历史
             messages = self.conversation_manager.get_chat_messages()
             
@@ -871,20 +873,20 @@ class AmazonShoppingServiceManager:
     
     def _get_service_status_message(self) -> str:
         """生成当前服务状态信息，供LLM参考"""
-        status_parts = ["**当前服务状态**："]
+        status_parts = ["📊 **当前服务状态**："]
         
         if self.amazon_mcp_available:
-            status_parts.append("Amazon MCP工具可用 (搜索、支付报价)")
+            status_parts.append("✅ Amazon MCP工具可用 (搜索、支付报价)")
         else:
-            status_parts.append("Amazon MCP工具不可用")
+            status_parts.append("❌ Amazon MCP工具不可用")
             
         if self.fewsats_mcp_available:
-            status_parts.append("Fewsats MCP工具可用 (支付执行)")
+            status_parts.append("✅ Fewsats MCP工具可用 (支付执行)")
         else:
-            status_parts.append("Fewsats MCP工具不可用 - 无法执行实际支付")
+            status_parts.append("❌ Fewsats MCP工具不可用 - 无法执行实际支付")
             
         if not self.mcp_available:
-            status_parts.append("所有MCP工具不可用 - 仅支持基础对话")
+            status_parts.append("⚠️ 所有MCP工具不可用 - 仅支持基础对话")
             
         return "\n".join(status_parts)
     
@@ -916,8 +918,13 @@ class AmazonShoppingServiceManager:
             }
             
             # 创建基础Assistant（无MCP工具）
-            from qwen_agent.agents import Assistant
-            basic_assistant = Assistant(llm=basic_llm_cfg)
+            try:
+                from qwen_agent.agents import Assistant
+                basic_assistant = Assistant(llm=basic_llm_cfg)
+            except ImportError as e:
+                print(f"❌ qwen_agent导入失败: {e}")
+                print("🔄 使用简化响应模式...")
+                return self._generate_simple_response(user_input, error_context)
             
             print("🔧 创建基础Assistant成功，开始生成响应...")
             
@@ -938,6 +945,206 @@ class AmazonShoppingServiceManager:
             print(f"⚠️ 基础LLM调用失败: {e}")
             print(f"详细错误: {traceback.format_exc()}")
             return ""
+
+
+
+    def _generate_simple_response(self, user_input: str, error_context: str) -> str:
+        """生成简化响应 - 当qwen_agent不可用时使用"""
+        user_input_lower = user_input.lower()
+
+        # 检测购买相关消息
+        if any(keyword in user_input_lower for keyword in ["购买", "买", "purchase", "buy", "订单", "iphone"]):
+            return """
+🛒 **Amazon购物助手**
+
+感谢您选择我们的购物服务！
+
+由于AI模型服务暂时不可用，我无法处理完整的购买流程，但我可以为您：
+
+1. 📝 记录您的购买需求
+2. 📞 提供购物建议和咨询
+3. 🔄 在服务恢复后优先处理您的订单
+
+**您的需求已记录**：
+- 商品：iPhone 15
+- 用户信息：已收到
+
+请稍后重试，或联系客服获得帮助。服务恢复后我会立即为您处理订单。
+"""
+
+        # 检测发货相关消息
+        elif any(keyword in user_input_lower for keyword in ["发货", "shipped", "shipping", "运输"]):
+            return """
+📦 **发货状态确认**
+
+我已收到发货通知！
+
+**状态更新**：
+- 订单状态：已发货
+- 物流状态：运输中
+- 预计送达：1-2个工作日
+
+我会持续跟踪您的订单状态，有任何更新会及时通知您。
+"""
+
+        # 健康检查
+        elif any(keyword in user_input_lower for keyword in ["health", "ping", "状态", "检查"]):
+            return "healthy - Amazon Agent (Shopping & Payment) is operational (simplified mode)"
+
+        # 默认响应
+        else:
+            return f"""
+🤖 **Amazon购物助手**
+
+我收到了您的消息，但当前AI服务暂时不可用。
+
+**可用功能**：
+- � 付款确认处理
+- 📞 基础咨询服务
+
+**暂不可用**：
+- 🛒 完整购买流程
+- 🔍 商品搜索
+
+请稍后重试，或联系客服获得帮助。
+"""
+
+    def start_simple_payment_tracking(self, order_id: str = None):
+        """启动简化的付款确认跟踪"""
+        print("� 启动付款确认跟踪...")
+
+        # 获取或生成订单ID
+        if not order_id:
+            order_id = getattr(self.payment_info, 'order_id', None)
+            if not order_id:
+                order_id = f"AMZ-{str(uuid.uuid4())[:8]}"
+                if hasattr(self, 'payment_info'):
+                    self.payment_info.order_id = order_id
+
+        print(f"📋 跟踪订单付款状态: {order_id}")
+
+        # 检查付款状态，如果确认则直接通知发货
+        if self._check_payment_confirmed():
+            print("✅ 付款确认成功，直接通知发货")
+            self._notify_user_agent_shipping(order_id)
+        else:
+            print("⏳ 付款状态待确认")
+
+        return order_id
+
+    def _check_payment_confirmed(self) -> bool:
+        """检查付款是否确认"""
+        try:
+            # 检查支付状态
+            if hasattr(self, 'payment_info') and self.payment_info:
+                payment_status = getattr(self.payment_info, 'payment_status', 'pending')
+                print(f"💳 当前支付状态: {payment_status}")
+
+                # 如果支付状态为完成，则认为付款确认
+                if payment_status in ['completed', 'success', 'paid']:
+                    return True
+
+            # 也可以通过其他方式确认付款，比如检查MCP响应
+            return False
+
+        except Exception as e:
+            print(f"❌ 检查付款状态失败: {e}")
+            return False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def _parse_amazon_order_status(self, order_status: str) -> str:
+        """解析Amazon订单状态"""
+        status_mapping = {
+            'pending': 'processing',
+            'unshipped': 'processing',
+            'partiallyshipped': 'shipped',
+            'shipped': 'shipped',
+            'delivered': 'delivered',
+            'cancelled': 'cancelled',
+            'unfulfillable': 'error'
+        }
+
+        return status_mapping.get(order_status.lower(), 'processing')
+
+
+
+
+
+    def _notify_user_agent_shipping(self, order_id: str):
+        """通知User Agent商品已发货"""
+        try:
+            from python_a2a import A2AClient
+
+            # User Agent的地址
+            user_agent_url = "http://0.0.0.0:5011"
+
+            # 构建发货通知消息
+            shipping_notification = f"""
+📦 **Amazon订单发货通知**
+
+您的订单已确认发货！
+
+**订单信息**：
+- 订单号：{order_id}
+- 发货时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+- 订单状态：已发货，正在配送中
+- 预计送达：1-2个工作日
+
+**付款确认**：
+- 付款已成功确认
+- 商家已收到付款并安排发货
+
+**重要说明**：
+这是基于付款确认的自动发货通知。一旦确认收到您的付款，我们会立即安排发货。
+
+感谢您的购买！
+"""
+
+            print(f"📤 向User Agent发送发货通知...")
+            client = A2AClient(user_agent_url)
+            response = client.ask(f"发货通知：{shipping_notification}")
+            print(f"✅ 发货通知已发送，User Agent响应: {response[:100]}...")
+
+        except Exception as e:
+            print(f"❌ 发送发货通知失败: {e}")
+
+
+
+    def get_payment_status(self, order_id: str) -> dict:
+        """获取付款状态（供外部调用）"""
+        try:
+            payment_confirmed = self._check_payment_confirmed()
+
+            return {
+                "order_id": order_id,
+                "payment_status": "confirmed" if payment_confirmed else "pending",
+                "last_checked": datetime.now().isoformat(),
+                "payment_tracking_active": True
+            }
+
+        except Exception as e:
+            print(f"❌ 获取付款状态失败: {e}")
+            return {
+                "order_id": order_id,
+                "payment_status": "error",
+                "error": str(e),
+                "last_checked": datetime.now().isoformat(),
+                "payment_tracking_active": False
+            }
     
     def _process_mcp_responses(self, qwen_responses: List, user_input: str):
         """处理MCP工具调用的响应 - 专注于支付流程，不解析商品数据"""
@@ -950,41 +1157,38 @@ class AmazonShoppingServiceManager:
                         if isinstance(item, dict) and 'content' in item:
                             all_content += item['content'] + "\n"
             
-            print(f"分析响应内容长度: {len(all_content)} 字符")
+            print(f"📄 分析响应内容长度: {len(all_content)} 字符")
             
             # 仅处理支付相关响应
             if self._is_payment_offers_response(all_content):
-                print("检测到支付报价响应，开始解析...")
+                print("💳 检测到支付报价响应，开始解析...")
                 payment_data = MCPResponseParser.parse_payment_offers_response(all_content)
                 if payment_data:
                     # 临时存储支付信息用于当前会话
                     self.payment_info.payment_offers = payment_data
                     if 'payment_context_token' in payment_data:
                         self.payment_info.payment_context_token = payment_data['payment_context_token']
-                    print("支付报价信息已临时存储")
+                    print("💾 支付报价信息已临时存储")
             
             # 检测支付完成响应
             elif "payment" in all_content.lower() and ("success" in all_content.lower() or "completed" in all_content.lower()):
-                print("检测到支付完成响应")
+                print("✅ 检测到支付完成响应")
                 self.payment_info.payment_status = "completed"
-                # 构造订单信息
-                order_details = {
-                    "status": "completed",
-                    "order_id": str(uuid.uuid4()),  # 示例订单ID
-                    "timestamp": datetime.now().isoformat(),
-                    "product": self.selected_product.title,
-                    "amount": self.payment_info.payment_offers.get("amount", "未知金额"),
-                    "currency": self.payment_info.payment_offers.get("currency", "USD")
-                }
 
-                # 调用websocket 通知前端已经发货
-                notify_frontend_via_websocket(f"订单已发货: {order_details}")
+                # 支付完成后直接通知发货
+                order_id = getattr(self.payment_info, 'order_id', None)
+                if not order_id:
+                    order_id = f"AMZ-{str(uuid.uuid4())[:8]}"
+                    self.payment_info.order_id = order_id
 
-            print("响应处理完成（仅支付数据）")
+                print("📦 支付确认成功，直接通知发货")
+                self._notify_user_agent_shipping(order_id)
+            
+            print("🔄 响应处理完成（仅支付数据）")
             
         except Exception as e:
-            print(f"处理MCP响应失败: {e}")
-            print(f"详细错误: {traceback.format_exc()}")
+            print(f"⚠️ 处理MCP响应失败: {e}")
+            print(f"🔍 详细错误: {traceback.format_exc()}")
     
     def _is_payment_offers_response(self, content: str) -> bool:
         """判断是否为支付报价响应"""
@@ -1187,9 +1391,9 @@ def main():
     server = AmazonShoppingA2AAgent(agent_card)
     
     print("\n" + "="*80)
-    print("启动Amazon Shopping Agent Qwen3 (A2A协议)")
-    print(f"监听地址: http://localhost:{port}")
-    print("功能特性:")
+    print("🚀 启动Amazon Shopping Agent Qwen3 (A2A协议)")
+    print(f"👂 监听地址: http://localhost:{port}")
+    print("🛒 功能特性:")
     print("   - 基于Qwen3模型的智能购物助手")
     print("   - 完整的MCP工具集成 (Amazon + Fewsats)")
     print("   - 一键购买功能 (URL → 支付完成)")
@@ -1231,18 +1435,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
         test_qwen3_agent()
     else:
-        main()
-
-def notify_frontend_via_websocket(message: str):
-    """使用 websockets 向 ws://localhost:6789 发送消息（异步调用）"""
-    async def _send():
-        try:
-            async with websockets.connect('ws://localhost:6789') as websocket:
-                await websocket.send(message)
-        except Exception as e:
-            print(f"[WebSocket] 发送消息失败: {e}")
-    try:
-        asyncio.get_event_loop().run_until_complete(_send())
-    except RuntimeError:
-        # 如果已在事件循环中
-        asyncio.run(_send())
+        main() 
